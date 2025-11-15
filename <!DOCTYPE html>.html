@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplement Humain : Une Réflexion Paradisiaque</title>
+    <!-- Chargement de Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configuration de la police Inter et ajout d'effets visuels pour les "feuilles" --><style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Nouveau fond paradisiaque */
+            background: linear-gradient(135deg, #e0f2fe 0%, #e8dafb 50%, #fce7f3 100%);
+            background-attachment: fixed;
+            /* AJOUT : Barre bleue en haut de la page */
+            border-top: 6px solid #3B82F6; /* Un bleu vif (style indigo) */
+        }
+        /* MISE À JOUR : Dégradé plus centré sur les couleurs paradisiaques (Vert, Bleu, Aqua) */
+        .text-gradient-paradise {
+            background-image: linear-gradient(to right, #10B981, #06B6D4, #3B82F6); /* Vert émeraude, Cyan, Bleu ciel */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .card-bg {
+            background-color: rgba(255, 255, 255, 0.9); /* Fond blanc semi-transparent */
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative; /* Important pour les éléments de décoration */
+            overflow: hidden; /* Masque les effets qui dépassent */
+        }
+        
+        /* Classe de base pour la forme de feuille */
+        .decorative-leaf {
+            position: absolute;
+            width: 120px;
+            height: 180px; /* Allongé pour l'effet feuille/pétale */
+            border-radius: 0% 100% 0% 100% / 0% 70% 30% 100%; 
+            filter: blur(5px);
+            opacity: 0.7;
+            z-index: -1; /* Placé sous le contenu */
+            transition: all 0.3s ease-in-out; /* Pour un effet plus doux */
+        }
+
+        /* Couleurs des formes */
+        .leaf-green {
+            background: linear-gradient(45deg, rgba(110, 231, 183, 1) 0%, rgba(52, 211, 153, 0.7) 70%); 
+        }
+        
+        .section-border {
+            border-left: 4px solid #818CF8; /* Lavande doux */
+        }
+        .quote-bg {
+            background-color: rgba(240, 248, 255, 0.7); /* Bleu Alice semi-transparent */
+            border-left: 4px solid #6366F1; /* Bleu plus prononcé */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Conteneur Principal de la Réflexion. AJOUT de z-10 pour l'affichage. --><div class="max-w-4xl w-full card-bg rounded-xl p-6 md:p-12 text-gray-800 relative z-10"> 
+        
+        <!-- Décorations de Feuilles dans les Quatre Coins (Toutes Vertes) -->
+        <!-- Feuille Haut-Gauche (Verte) -->
+        <div class="decorative-leaf leaf-green top-[-30px] left-[-30px] transform rotate-[-30deg]"></div>
+        <!-- Feuille Bas-Droit (Verte) -->
+        <div class="decorative-leaf leaf-green bottom-[-30px] right-[-30px] transform rotate-[150deg]"></div>
+        <!-- Feuille Haut-Droit (Verte - Nouvelle) -->
+        <div class="decorative-leaf leaf-green top-[-50px] right-[-50px] transform rotate-[60deg] w-[150px] h-[150px]"></div>
+        <!-- Feuille Bas-Gauche (Verte - Nouvelle) -->
+        <div class="decorative-leaf leaf-green bottom-[-50px] left-[-50px] transform rotate-[240deg] w-[150px] h-[150px]"></div>
+
+        
+        <!-- Bloc Photo de profil et Nom (CLICQUABLE) --><div class="absolute top-6 left-6 flex flex-col items-center space-y-1 z-20 cursor-pointer profile-image-container" onclick="openModal()"> 
+            <!-- Image de Remplacement Temporaire qui fonctionne immédiatement. -->
+            <img id="profileImage" src="jeuneA.jpg" alt="Photo de profil Jeune Africain" class="w-20 h-20 rounded-full border-4 border-blue-400 object-cover shadow-md">
+            <span class="font-semibold text-lg text-gray-700">Jeune Africain</span>
+        </div>
+
+        <!-- Titre de la Réflexion --><header class="text-center mb-10 pt-28 md:pt-0 z-10"> <!-- Augmentation de la marge supérieure pour les mobiles -->
+            <h1 class="text-3xl md:text-5xl font-extrabold text-gradient-paradise mb-3">
+                Simplement Humain
+            </h1>
+            <p class="text-lg text-gray-600">Une méditation sur l'essentiel.</p>
+        </header>
+
+        <!-- Section 1: Un Don Précieux --><section class="mb-8 section-border pl-4 py-2">
+            <h2 class="text-2xl font-semibold mb-4 text-emerald-700">Un Don Précieux</h2>
+            <p class="mb-4 text-gray-700">
+                Quelle est cette unique chose que nous possédons sans qu'elle nous appartienne vraiment ? Cette seule chose que, si nous la perdions, nous ferait tout perdre ?
+            </p>
+            <!-- CORRECTION : Changement de la couleur de la phrase en vert émeraude -->
+            <p class="mb-6 text-xl font-bold text-emerald-700">
+                La plus grande richesse, le plus beau trésor, le don le plus précieux, c'est bien sûr : la vie.
+            </p>
+            <p class="mb-4 text-gray-700">
+                À travers elle, nous connaissons tout et son contraire : les bonheurs et les malheurs, la paix et la guerre, l'amour et la haine. Tout ce que nous pouvons faire, dire ou penser, nous le devons à ce simple fait : nous sommes vivants.
+            </p>
+            <!-- Question renforcée --><p class="text-xl italic font-bold text-center mt-6 text-emerald-700">
+                La question qui se pose alors est la suivante : notre manière de vivre reflète-t-elle réellement la valeur de ce précieux don ?
+            </p>
+        </section>
+
+        <div class="h-px bg-gray-300 my-10"></div>
+
+        <!-- Section 2: Être simplement vivant --><section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-emerald-700">Être simplement vivant</h2>
+            <p class="mb-4 text-gray-700">
+                Nous ne vivons que pour un temps limité. Nous sommes des êtres éphémères, et cette réalité nous pousse souvent à vouloir "profiter" de la vie du mieux que nous pouvons.
+            </p>
+            <p class="mb-4 text-gray-700">
+                Mais c'est là que le piège se referme. Combien de fois, en cherchant 'le mieux', avons-nous oublié de vivre 'bien' ? Combien de fois avons-nous oublié de vivre simplement ?
+            </p>
+            <p class="mb-6 text-gray-700">
+                Dans notre quête effrénée du 'mieux', nous avons sombré dans l'excès. Nous nous sommes perdus dans nos désirs d'avoir plus, de prouver plus, d'être plus, jusqu'à perdre l'essentiel.
+            </p>
+            <blockquote class="my-8 p-4 quote-bg rounded-lg border-l-4 italic text-lg shadow-md">
+                <p class="text-emerald-700">
+                    Et si la véritable valeur se trouvait là ? Si le simple fait de vivre – peu importe l'endroit, le moment ou ce que nous possédons – était en soi la raison fondamentale de sourire ? Être en vie, maintenant, est la seule véritable richesse.
+                </p>
+            </blockquote>
+        </section>
+
+        <div class="h-px bg-gray-300 my-10"></div>
+        
+        <!-- Section 3: Au-Delà des Tempêtes --><section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-emerald-700">Au-Delà des Tempêtes</h2>
+            <p class="mb-4 text-gray-700">
+                Les conditions de notre existence ne nous sont pas toujours favorables. Bien souvent, nous faisons face à des vents et tempêtes, nous subissons des revers, nous connaissons des pertes.
+            </p>
+            <p class="mb-6 text-gray-700">
+                Mais au-dessus de toutes ces souffrances, une vérité demeure : le bonheur restera toujours à notre portée, la beauté toujours à notre vue. Nos lèvres sont toujours disposées à sourire, nos cœurs, disposés à aimer.
+            </p>
+            <p class="mb-6 text-gray-700">
+                Nous nous sommes relevés autant de fois que nous sommes tombés. Et c'est au sol que nous avons appris l'humilité. Nous avons appris que le bonheur n'est pas une quête lointaine, mais un mode de vie.
+            </p>
+        </section>
+
+        <div class="h-px bg-gray-300 my-10"></div>
+
+        <!-- Section 4: L'Invitation à Soi --><section class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-emerald-700">L'Invitation à Soi</h2>
+            <p class="mb-6 text-gray-700">
+                Tout cela nous ramène à une pause, pour se demander :
+            </p>
+            <div class="space-y-4 p-4 quote-bg rounded-lg">
+                <ul class="list-disc list-inside ml-4 space-y-2 text-emerald-700">
+                    <li>Comment est-ce que je vis mon présent ?</li>
+                    <li>Comment est-ce que je vivrai chaque instant, intérieurement avec moi-même ?</li>
+                    <li>Comment est-ce que je vivrai chaque instant, extérieurement avec les autres ?</li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="h-px bg-gray-300 my-10"></div>
+
+        <!-- Section 5: Pistes de Réflexion --><section>
+            <h2 class="text-2xl font-semibold mb-4 text-emerald-700">Qui Sommes-Nous Réellement ?</h2>
+            <p class="mb-4 text-gray-700">
+                Ces questions ouvrent la porte sur le "comment". C'est le début du véritable chemin.
+            </p>
+            
+            <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-2">Vivre intérieurement (Avec soi-même)</h3>
+            <p class="mb-4 text-gray-700">
+                C'est le royaume de nos pensées, de nos peurs, mais aussi de notre paix. Vivre "bien" intérieurement, c'est apprendre à être son propre allié. C'est transformer le chaos en calme, observer nos pensées sans jugement, et cultiver un jardin secret de gratitude, même lorsque le monde extérieur est en tempête.
+            </p>
+            
+            <h3 class="text-xl font-semibold text-emerald-700 mt-6 mb-2">Vivre extérieurement (Avec les autres)</h3>
+            <p class="mb-4 text-gray-700">
+                Nous sommes des êtres de lien. Notre humanité se reflète dans notre empathie, notre patience et notre capacité à voir le précieux dans l'autre. Comment nos actions, nos paroles, et même nos silences impactent-ils ceux qui nous entourent ? Vivre "bien" avec les autres, c'est reconnaître qu'ils mènent, eux aussi, leur propre combat.
+            </p>
+            
+            <blockquote class="my-8 p-4 quote-bg rounded-lg border-l-4 italic text-lg shadow-md">
+                <p class="text-emerald-700">
+                    Au-delà des rôles que nous jouons – l'ami, le professionnel, l'enfant – se trouve notre essence. C'est peut-être cela, être simplement humain : un être de passage, conscient, capable d'apprendre de ses chutes et de choisir, encore et toujours, d'aimer.
+                </p>
+            </blockquote>
+        </section>
+        
+        <!-- Pied de page --><footer class="text-center mt-10 pt-6 border-t border-gray-300">
+            <p class="text-sm text-gray-500">
+                Ceci est la base d'une longue série de réflexions basées sur la vie humaine en général.
+            </p>
+            <p class="text-xs text-gray-600 mt-2">
+                Être simplement Humain.
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- Modal pour la photo agrandie (Lightbox) -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-80 hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300" onclick="closeModal()">
+        <!-- J'ai réduit le max-w-4xl à max-w-lg pour qu'elle n'occupe pas tout l'écran -->
+        <div class="relative max-w-lg max-h-full" onclick="event.stopPropagation()"> 
+            <!-- L'image agrandie sera chargée ici -->
+            <img id="enlargedImage" src="" alt="Photo de profil Jeune Africain" class="w-full h-auto max-h-full rounded-xl shadow-2xl transform transition-transform duration-300">
+            
+            <!-- Bouton de fermeture -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-white text-4xl font-light opacity-80 hover:opacity-100 transition-opacity">
+                &times;
+            </button>
+        </div>
+    </div>
+
+    <!-- Logique JavaScript pour la modale --><script>
+        // Référence à l'élément de l'image de profil
+        const profileImage = document.getElementById('profileImage');
+        // Référence à l'élément de la modale
+        const imageModal = document.getElementById('imageModal');
+        // Référence à l'élément de l'image dans la modale
+        const enlargedImage = document.getElementById('enlargedImage');
+
+        function openModal() {
+            // S'assurer que la source de l'image agrandie est celle de l'image de profil
+            enlargedImage.src = profileImage.src;
+            imageModal.classList.remove('hidden');
+            // Optionnel: Ajouter une classe pour l'animation d'ouverture
+            setTimeout(() => {
+                imageModal.style.opacity = '1';
+                enlargedImage.style.transform = 'scale(1)';
+            }, 10);
+        }
+
+        function closeModal() {
+            // Optionnel: Ajouter une classe pour l'animation de fermeture
+            imageModal.style.opacity = '0';
+            enlargedImage.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                imageModal.classList.add('hidden');
+            }, 300); // Doit correspondre à la durée de la transition CSS
+        }
+    </script>
+
+</body>
+</html>
