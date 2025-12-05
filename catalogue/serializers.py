@@ -134,3 +134,34 @@ class PaymentSerializer(serializers.ModelSerializer):
             'payment_date', 'created_at'
         ]
         read_only_fields = ['id', 'reference_number', 'created_at']
+
+
+# ============================================================================
+# SERIALIZERS D'ACHAT DE LIVRES
+# ============================================================================
+
+class PurchaseBookSerializer(serializers.Serializer):
+    """Serializer pour l'achat de livres"""
+    book_id = serializers.CharField(required=True, help_text="ID du livre à acheter")
+    
+    def validate_book_id(self, value):
+        """Valide que le livre existe"""
+        try:
+            Book.objects.get(id=value)
+        except Book.DoesNotExist:
+            raise serializers.ValidationError(f"Le livre avec l'ID {value} n'existe pas.")
+        return value
+
+
+class PaymentDetailSerializer(serializers.ModelSerializer):
+    """Serializer détaillé pour afficher les paiements avec le livre"""
+    book = BookListSerializer(read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = Payment
+        fields = [
+            'id', 'user_email', 'book', 'amount', 'currency', 
+            'transaction_id', 'status', 'payment_method', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']

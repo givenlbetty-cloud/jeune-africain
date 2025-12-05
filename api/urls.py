@@ -18,7 +18,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from catalogue.views import (
     BookViewSet, AuthorViewSet, LibraryViewSet,
-    PaymentViewSet, SearchViewSet
+    PaymentViewSet, SearchViewSet, PurchaseBookView,
+    PaymentHistoryView, PaymentStatusView
 )
 
 # Créer le routeur et enregistrer les ViewSets
@@ -33,4 +34,8 @@ app_name = 'api'
 
 urlpatterns = [
     path('', include(router.urls)),
+    # Endpoints d'achat et paiement
+    path('purchase/', PurchaseBookView.as_view(), name='purchase-book'),
+    path('payment-history/', PaymentHistoryView.as_view(), name='payment-history'),
+    path('payment/<str:payment_id>/status/', PaymentStatusView.as_view(), name='payment-status'),
 ]

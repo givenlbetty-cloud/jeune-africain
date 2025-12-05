@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     
     # REST Framework
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
     
     # Third-party

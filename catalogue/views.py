@@ -5,13 +5,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.views import APIView
+from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q
 
 from .models import Book, Author, Library, ReadingSession, Payment
 from .serializers import (
     BookListSerializer, BookDetailSerializer, AuthorSerializer,
-    LibrarySerializer, PaymentSerializer
+    LibrarySerializer, PaymentSerializer, PurchaseBookSerializer, PaymentDetailSerializer
 )
 
 
@@ -166,3 +168,179 @@ class SearchViewSet(viewsets.ViewSet):
             'results': results,
             'total_results': total
         })
+
+
+# ============================================================================
+# API D'ACHAT DE LIVRES
+# ============================================================================
+
+class PurchaseBookView(APIView):
+    """
+    Endpoint pour l'achat de livres
+    POST /api/purchase/
+    
+    Règles de sécurité:
+    - Authentification requise (READER)
+    - Un utilisateur peut acheter n'importe quel livre
+    - Crée un enregistrement Payment avec le statut "pending"
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """
+        Acheter un livre
+        
+        Body:
+        {
+            "book_id": "uuid-du-livre"
+        }
+        
+        Response:
+        {
+            "id": "uuid-du-paiement",
+            "book": {...},
+            "amount": 15000.00,
+            "currency": "XOF",
+            "status": "pending",
+            "transaction_id": "TXN_12345",
+            "message": "Paiement en attente. Veuillez procéder au paiement."
+        }
+        """
+        serializer = PurchaseBookSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(
+                {"errors": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # Récupérer le livre
+            book = Book.objects.get(id=serializer.validated_data['book_id'])
+            
+            # Vérifier que l'utilisateur n'a pas déjà acheté ce livre
+            existing_payment = Payment.objects.filter(
+                user=request.user,
+                book=book,
+                status__in=['completed', 'processing']
+            ).exists()
+            
+            if existing_payment:
+                return Response(
+                    {"error": "Vous avez déjà acheté ce livre."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Calculer le prix final (avec réduction si applicable)
+            final_price = book.get_final_price() if hasattr(book, 'get_final_price') else float(book.price)
+            
+            # Générer un ID de transaction unique
+            import uuid
+            transaction_id = f"TXN_{uuid.uuid4().hex[:12].upper()}"
+            
+            # Créer le paiement avec statut "pending"
+            payment = Payment.objects.create(
+                user=request.user,
+                book=book,
+                amount=final_price,
+                currency="XOF",
+                transaction_id=transaction_id,
+                status="pending",
+                payment_method="pending"  # Sera défini lors de la confirmation du paiement
+            )
+            
+            # Sérialiser et retourner
+            payment_serializer = PaymentDetailSerializer(payment)
+            
+            return Response(
+                {
+                    **payment_serializer.data,
+                    "message": "Paiement en attente. Veuillez procéder au paiement."
+                },
+                status=status.HTTP_201_CREATED
+            )
+            
+        except Book.DoesNotExist:
+            return Response(
+                {"error": "Le livre n'existe pas."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Erreur lors de la création du paiement: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PaymentHistoryView(APIView):
+    """
+    Endpoint pour voir l'historique des paiements
+    GET /api/payment-history/
+    
+    Retourne uniquement les paiements de l'utilisateur authentifié
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """
+        Récupérer l'historique des paiements de l'utilisateur
+        
+        Query params (optionnel):
+        - status: pending, completed, failed, refunded
+        - page: numéro de page (défaut: 1)
+        
+        Response:
+        {
+            "count": 5,
+            "next": null,
+            "previous": null,
+            "results": [...]
+        }
+        """
+        # Récupérer les paiements de l'utilisateur
+        payments = Payment.objects.filter(user=request.user).order_by('-created_at')
+        
+        # Filtrer par statut si fourni
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            payments = payments.filter(status=status_filter)
+        
+        # Pagination
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginated_payments = paginator.paginate_queryset(payments, request)
+        
+        serializer = PaymentDetailSerializer(paginated_payments, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
+class PaymentStatusView(APIView):
+    """
+    Endpoint pour vérifier le statut d'un paiement
+    GET /api/payment/{payment_id}/status/
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, payment_id):
+        """
+        Récupérer le statut d'un paiement
+        
+        Response:
+        {
+            "id": "uuid",
+            "status": "pending|completed|failed|refunded",
+            "amount": 15000.00,
+            "book": {...},
+            "created_at": "2025-12-05T10:30:00Z"
+        }
+        """
+        try:
+            # Vérifier que le paiement appartient à l'utilisateur
+            payment = Payment.objects.get(id=payment_id, user=request.user)
+            serializer = PaymentDetailSerializer(payment)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Payment.DoesNotExist:
+            return Response(
+                {"error": "Paiement non trouvé ou accès refusé."},
+                status=status.HTTP_404_NOT_FOUND
+            )
