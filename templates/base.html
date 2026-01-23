@@ -508,12 +508,13 @@
             <!-- Logo/Brand -->
             <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
                 {% if site_config.logo %}
-                <img src="{{ site_config.logo.url }}" alt="{{ site_config.site_name }}" style="height: 40px; margin-right: 10px;">
+                <img src="{{ site_config.logo.url }}" alt="Logo" style="height: 40px; margin-right: 10px;">
                 {% else %}
                 <i class="fas fa-book me-2"></i>
                 {% endif %}
-                <span class="d-none d-sm-inline">{{ site_config.site_name|default:"Bibliothèque Numérique Calures" }}</span>
-                <span class="d-inline d-sm-none">BNC</span>
+                <!-- Nom du site : affiché uniquement si pas de logo, ou à côté du logo si souhaité -->
+                <span class="d-none d-md-inline ms-1">{{ site_config.site_name|default:"BNC" }}</span>
+                <span class="d-inline d-md-none ms-1">BNC</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav">

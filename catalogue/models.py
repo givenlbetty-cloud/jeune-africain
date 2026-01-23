@@ -344,16 +344,30 @@ class Book(models.Model):
         if self.pdf_file and not self.pages_count:
             try:
                 import fitz  # PyMuPDF
+                # S'assurer que le fichier est ouvert au début
                 if hasattr(self.pdf_file, 'open'):
-                    self.pdf_file.open()
-                    doc = fitz.open(stream=self.pdf_file.read(), filetype="pdf")
-                    self.pages_count = len(doc)
-                    # CRITICAL: Reset file pointer after reading, otherwise upload will fails with "Empty file"
-                    if hasattr(self.pdf_file, 'seek'):
-                        self.pdf_file.seek(0)
+                    self.pdf_file.open('rb')
+                if hasattr(self.pdf_file, 'seek'):
+                    self.pdf_file.seek(0)
+                
+                # Lire le contenu pour fitz
+                pdf_content = self.pdf_file.read()
+                
+                # Calculer les pages
+                doc = fitz.open(stream=pdf_content, filetype="pdf")
+                self.pages_count = len(doc)
+                doc.close()
+                
             except Exception as e:
                 # Log error silently or to console, do not block save
                 print(f"Error calculating page count: {e}")
+            finally:
+                # CRITIQUE : Remettre le curseur au début pour que Cloudinary puisse lire le fichier
+                try:
+                    if hasattr(self.pdf_file, 'seek'):
+                        self.pdf_file.seek(0)
+                except Exception:
+                    pass
         
         super().save(*args, **kwargs)
     
