@@ -5,6 +5,7 @@ Modern security practices and custom user model.
 
 from pathlib import Path
 import os
+import dj_database_url
 
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -98,6 +99,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", # Whitenoise for static files
     "corsheaders.middleware.CorsMiddleware",  # CORS middleware
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",  # Language middleware (MUST be after SessionMiddleware)
@@ -139,6 +141,10 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# Render PostgreSQL Database (Production)
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES['default'].update(db_from_env)
 
 # Auth & Custom User Model
 AUTH_USER_MODEL = "users.CustomUser"
@@ -185,6 +191,9 @@ LANGUAGE_COOKIE_SAMESITE = 'Lax'
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Whitenoise storage for compressed static files
+if not DEBUG:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files (Cloudinary)
 CLOUDINARY_STORAGE = {
