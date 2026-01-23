@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gérer mes comptes connectés - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+  .account-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .account-card:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .provider-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .provider-google {
+    background: rgba(66, 133, 244, 0.1);
+    color: #4285F4;
+  }
+
+  .provider-apple {
+    background: rgba(0, 0, 0, 0.05);
+    color: #000000;
+  }
+
+  .provider-microsoft {
+    background: rgba(0, 164, 239, 0.1);
+    color: #00A4EF;
+  }
+
+  .account-info {
+    margin: 1rem 0;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .account-info:last-child {
+    border-bottom: none;
+  }
+
+  .account-info-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .account-info-value {
+    color: #212529;
+    font-size: 1rem;
+  }
+
+  .provider-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .provider-item {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .provider-item:hover {
+    border-color: #dee2e6;
+  }
+
+  .provider-item.connected {
+    background: #f0f7ff;
+    border-color: #4285F4;
+  }
+
+  .provider-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .provider-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .provider-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .status-connected {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status-disconnected {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  .btn-disconnect {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-disconnect:hover {
+    background: #c82333;
+  }
+
+  .btn-link {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-link:hover {
+    background: #218838;
+  }
+
+  .btn-link:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .connected-accounts {
+    margin-bottom: 3rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+  }
+
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Header -->
+  <div class="mb-5">
+    <h1 class="h2 mb-2">Gérer mes comptes connectés</h1>
+    <p class="text-muted">Connectez plusieurs services pour un accès plus facile à votre compte</p>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Comptes connectés -->
+  <div class="connected-accounts">
+    <h3 class="mb-4">
+      <i class="fas fa-link"></i> Comptes connectés
+      {% if accounts %}
+        <span class="badge bg-primary">{{ connected_count }}</span>
+      {% endif %}
+    </h3>
+
+    {% if accounts %}
+      {% for account in accounts %}
+        <div class="account-card">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-grow-1">
+              <span class="provider-badge provider-{{ account.provider }}">
+                <i class="fas fa-{{ account.provider|lower }}"></i> {{ account.provider_name }}
+              </span>
+
+              <div class="account-info">
+                <div class="account-info-label">Email</div>
+                <div class="account-info-value">{{ account.email }}</div>
+              </div>
+
+              <div class="account-info">
+                <div class="account-info-label">Nom</div>
+                <div class="account-info-value">{{ account.name }}</div>
+              </div>
+
+              <div class="account-info">
+                <div class="account-info-label">Connecté depuis</div>
+                <div class="account-info-value">
+                  <time datetime="{{ account.date_joined|date:'c' }}">
+                    {{ account.date_joined|date:'d F Y H:i' }}
+                  </time>
+                </div>
+              </div>
+            </div>
+
+            <div class="ms-3">
+              <form method="post" action="{% url 'fr:socialaccount_disconnect_account' account.id %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-disconnect" onclick="return confirm('Êtes-vous sûr?')">
+                  <i class="fas fa-unlink"></i> Délier
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <i class="fas fa-link"></i>
+        </div>
+        <p>Aucun compte connecté pour le moment</p>
+        <small class="text-muted">Connectez un compte ci-dessous pour commencer</small>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Providers disponibles -->
+  <div>
+    <h3 class="mb-4">
+      <i class="fas fa-plus-circle"></i> Ajouter un compte
+    </h3>
+
+    <div class="provider-list">
+      {% for provider_key, provider_info in providers.items %}
+        <div class="provider-item {% if provider_info.connected %}connected{% endif %}">
+          <div class="provider-icon" style="color: {{ provider_info.color }}">
+            <i class="{{ provider_info.icon }}"></i>
+          </div>
+
+          <div class="provider-name">{{ provider_info.name }}</div>
+          <div class="provider-description">{{ provider_info.description }}</div>
+
+          {% if provider_info.connected %}
+            <span class="status-badge status-connected">
+              <i class="fas fa-check-circle"></i> Connecté
+            </span>
+            <br>
+            <form method="get" action="{% url 'fr:socialaccount_link_account' provider_key %}" style="display: inline;">
+              <button type="submit" class="btn-link" disabled>
+                <i class="fas fa-link"></i> Déjà connecté
+              </button>
+            </form>
+          {% else %}
+            <span class="status-badge status-disconnected">
+              <i class="fas fa-times-circle"></i> Non connecté
+            </span>
+            <br>
+            <form method="get" action="{% url 'fr:socialaccount_link_account' provider_key %}" style="display: inline;">
+              <button type="submit" class="btn-link">
+                <i class="fas fa-link"></i> Connecter
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Info section -->
+  <div class="mt-5 p-4 bg-light rounded">
+    <h5 class="mb-3">
+      <i class="fas fa-info-circle"></i> Comment ça fonctionne?
+    </h5>
+    <ul class="mb-0">
+      <li>Connectez plusieurs services pour plus de flexibilité</li>
+      <li>Vous pouvez vous connecter avec n'importe quel compte lié</li>
+      <li>Vos données de profil sont fusionnées automatiquement</li>
+      <li>Vous pouvez délier un compte à tout moment (mais gardez-en au moins un)</li>
+      <li>Votre compte BNC reste le même peu importe le service utilisé</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Optionnel: Sync du status des comptes en temps réel avec l'API
+  document.addEventListener('DOMContentLoaded', function() {
+    const statusUrl = '{% url "fr:socialaccount_account_linking_status" %}';
+    
+    // Fetch le status tous les 30 secondes
+    // setInterval(function() {
+    //   fetch(statusUrl)
+    //     .then(r => r.json())
+    //     .then(data => {
+    //       console.log('Connected providers:', data.connected_providers);
+    //       // Mettre à jour l'UI si nécessaire
+    //     });
+    // }, 30000);
+  });
+</script>
+{% endblock %}

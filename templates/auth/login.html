@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Connexion - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        background: linear-gradient(rgba(75, 44, 146, 0.4), rgba(75, 44, 146, 0.6)),
+                    url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 450px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    
+    .login-card-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 30px;
+        border-radius: 0;
+        text-align: center;
+    }
+    
+    .login-card-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    .login-card-body {
+        padding: 40px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+    
+    .form-control {
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s;
+        width: 100%;
+        cursor: pointer;
+    }
+    
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 30px 0;
+    }
+    
+    .divider-line {
+        flex: 1;
+        height: 1px;
+        background: #e5e7eb;
+    }
+    
+    .divider-text {
+        padding: 0 15px;
+        color: #9ca3af;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .social-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: white;
+        color: #1f2937;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+    }
+    
+    .social-btn:hover {
+        border-color: #667eea;
+        background: #f9fafb;
+        transform: translateY(-2px);
+        color: #667eea;
+    }
+    
+    .social-btn i {
+        font-size: 1.2rem;
+    }
+    
+    .google-btn {
+        border-color: #dadce0;
+    }
+    
+    .google-btn:hover {
+        background: #f8f9fa;
+    }
+    
+    .apple-btn {
+        border-color: #dadce0;
+    }
+    
+    .apple-btn:hover {
+        background: #f8f9fa;
+    }
+    
+    .error-message {
+        background: #fee;
+        border: 1px solid #fcc;
+        color: #c33;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .footer-text {
+        text-align: center;
+        margin-top: 25px;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+    
+    .footer-text a {
+        color: #667eea;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .footer-text a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-card-header">
+            <h2>Connexion</h2>
+        </div>
+        
+        <div class="login-card-body">
+            <!-- Form Traditionnelle -->
+            <form method="post" novalidate autocomplete="off">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="error-message">
+                        <strong>Erreur:</strong>
+                        {{ form.non_field_errors.0 }}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="id_email" class="form-label">📧 Email</label>
+                    <input type="email" 
+                           class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                           id="id_email" 
+                           name="email" 
+                           value="" 
+                           placeholder="votre@email.com"
+                           required
+                           autocomplete="off"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');">
+                    {% if form.email.errors %}
+                        <div class="error-message" style="margin-top: 8px;">
+                            {{ form.email.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password" class="form-label">🔑 Mot de passe</label>
+                    <input type="password" 
+                           class="form-control {% if form.password.errors %}is-invalid{% endif %}" 
+                           id="id_password" 
+                           name="password"
+                           placeholder="Entrez votre mot de passe"
+                           required
+                           autocomplete="new-password"
+                           readonly
+                           onfocus="this.removeAttribute('readonly');">
+                    {% if form.password.errors %}
+                        <div class="error-message" style="margin-top: 8px;">
+                            {{ form.password.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <button type="submit" class="btn-login">Se Connecter</button>
+            </form>
+            
+            <!-- OAuth Buttons (Google, Apple, Microsoft) -->
+            {% include "auth/oauth_buttons.html" %}
+            
+            <!-- Footer -->
+            <div class="footer-text">
+                Pas encore inscrit ? <a href="{% url 'users:signup' %}">Créer un compte</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Placeholder for future OAuth integration
+    console.log('Login form ready');
+</script>
+{% endblock %}

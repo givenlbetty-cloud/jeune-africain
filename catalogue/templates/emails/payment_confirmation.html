@@ -1,0 +1,156 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Notification de Paiement" %}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px 20px;
+            color: #333;
+        }
+        .payment-receipt {
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .receipt-header {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .receipt-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 16px;
+            padding-top: 15px;
+            color: #667eea;
+        }
+        .receipt-label {
+            color: #666;
+        }
+        .success-badge {
+            display: inline-block;
+            background-color: #4caf50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>{% trans "Paiement Confirmé" %}</h1>
+        </div>
+        
+        <div class="content">
+            <p>{% blocktrans with name=user.first_name %}Bonjour {{ name }},{% endblocktrans %}</p>
+            
+            <p>{% trans "Nous avons reçu votre paiement avec succès!" %}</p>
+            
+            <span class="success-badge">✓ {% trans "Paiement Réussi" %}</span>
+            
+            <div class="payment-receipt">
+                <div class="receipt-header">{% trans "Reçu de Transaction" %}</div>
+                
+                <div class="receipt-row">
+                    <span class="receipt-label">{% trans "Numéro de Transaction:" %}</span>
+                    <span>{{ transaction_id }}</span>
+                </div>
+                
+                <div class="receipt-row">
+                    <span class="receipt-label">{% trans "Date:" %}</span>
+                    <span>{{ payment_date }}</span>
+                </div>
+                
+                <div class="receipt-row">
+                    <span class="receipt-label">{% trans "Méthode de Paiement:" %}</span>
+                    <span>{{ payment_method }}</span>
+                </div>
+                
+                {% if book_title %}
+                <div class="receipt-row">
+                    <span class="receipt-label">{% trans "Livre:" %}</span>
+                    <span>{{ book_title }}</span>
+                </div>
+                {% endif %}
+                
+                <div class="receipt-row">
+                    <span class="receipt-label">{% trans "Montant:" %}</span>
+                    <span>{{ amount }} {{ currency }}</span>
+                </div>
+                
+                <div class="receipt-row">
+                    <span class="receipt-label">{% trans "Taxes:" %}</span>
+                    <span>{{ taxes }} {{ currency }}</span>
+                </div>
+                
+                <div class="receipt-row">
+                    <span>{% trans "Total:" %}</span>
+                    <span>{{ total }} {{ currency }}</span>
+                </div>
+            </div>
+            
+            <p>{% trans "Votre livre a été ajouté à votre bibliothèque personnelle et est maintenant disponible pour la lecture." %}</p>
+            
+            <p>{% trans "Facture:" %} 
+                <a href="{{ invoice_url }}" style="color: #667eea;">{% trans "Télécharger en PDF" %}</a>
+            </p>
+            
+            <p style="font-size: 13px; color: #666;">
+                {% trans "Si vous avez des questions concernant ce paiement, veuillez contacter notre support à support@bnc-library.com" %}
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} BNC Digital Library</p>
+            <p>
+                <a href="{{ account_url }}" style="color: #667eea; text-decoration: none;">
+                    {% trans "Voir mes Transactions" %}
+                </a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -190,7 +190,7 @@ curl "http://localhost:8000/api/search/?q=test"
 - **Authentification**: L'endpoint `/api/books/{id}/read/` vérifie les paiements automatiquement
 - **CORS**: Configuré pour Ionic, React Native, etc.
 - **Pagination**: 20 résultats par page par défaut
-- **Devise**: XOF (Francs CFA) - 1 XOF ≈ 0.00153 EUR
+- **Devise**: CDF (Francs Congolais) - 1 CDF ≈ 0.00036 EUR
 
 ---
 

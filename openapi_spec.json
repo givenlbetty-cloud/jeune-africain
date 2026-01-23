@@ -1,0 +1,479 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BNC Digital Library - Advanced API",
+    "description": "API pour les fonctionnalités avancées du système BNC",
+    "version": "1.0.0",
+    "contact": {
+      "name": "BNC Support",
+      "email": "support@bnc-library.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://api.bnc-library.com/api",
+      "description": "Production Server"
+    }
+  ],
+  "paths": {
+    "/advanced/recommendations/personalized/": {
+      "get": {
+        "summary": "Obtenir les recommandations personnalisées",
+        "description": "Récupère une liste personnalisée de recommandations basée sur le ML",
+        "operationId": "get_personalized_recommendations",
+        "tags": ["Recommendations"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Nombre de recommandations à retourner",
+            "schema": {"type": "integer", "default": 10, "maximum": 100}
+          },
+          {
+            "name": "include_trending",
+            "in": "query",
+            "description": "Inclure les livres en tendance",
+            "schema": {"type": "boolean", "default": true}
+          },
+          {
+            "name": "recommendation_type",
+            "in": "query",
+            "description": "Type de recommandation",
+            "schema": {
+              "type": "string",
+              "enum": ["collaborative", "content_based", "hybrid", "trending"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des recommandations personnalisées",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {"type": "integer"},
+                    "results": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/Recommendation"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {"$ref": "#/components/responses/Unauthorized"},
+          "403": {"$ref": "#/components/responses/Forbidden"}
+        }
+      }
+    },
+    "/advanced/recommendations/feedback/": {
+      "post": {
+        "summary": "Enregistrer un feedback sur une recommandation",
+        "description": "Permet à l'utilisateur de voter sur une recommandation",
+        "operationId": "create_recommendation_feedback",
+        "tags": ["Recommendations"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/RecommendationFeedback"}
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Feedback enregistré avec succès",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/RecommendationFeedback"}
+              }
+            }
+          },
+          "400": {"$ref": "#/components/responses/BadRequest"},
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      }
+    },
+    "/advanced/sync-queue/pending/": {
+      "get": {
+        "summary": "Obtenir les actions en attente de sync",
+        "description": "Récupère les actions offline en attente de synchronisation",
+        "operationId": "get_pending_sync_queue",
+        "tags": ["Sync"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {"type": "integer", "default": 20}
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {"type": "integer", "default": 0}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste des items en attente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {"type": "integer"},
+                    "results": {
+                      "type": "array",
+                      "items": {"$ref": "#/components/schemas/SyncQueueItem"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      }
+    },
+    "/advanced/sync-queue/sync_all/": {
+      "post": {
+        "summary": "Synchroniser tous les items en attente",
+        "description": "Lance la synchronisation de tous les actions offline pour l'utilisateur",
+        "operationId": "sync_all_queue",
+        "tags": ["Sync"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "content": {"application/json": {"schema": {"type": "object"}}}
+        },
+        "responses": {
+          "200": {
+            "description": "Synchronisation complétée",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SyncResult"}
+              }
+            }
+          },
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      }
+    },
+    "/advanced/recommendations/statistics/": {
+      "get": {
+        "summary": "Obtenir les statistiques de recommandations",
+        "description": "Récupère les statistiques agrégées des recommandations",
+        "operationId": "get_recommendation_statistics",
+        "tags": ["Recommendations", "Statistics"],
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["week", "month", "year", "all"],
+              "default": "month"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiques de recommandations",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/RecommendationStatistics"}
+              }
+            }
+          },
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      }
+    },
+    "/advanced/offline-state/": {
+      "get": {
+        "summary": "Obtenir l'état offline de l'utilisateur",
+        "description": "Récupère les informations sur l'état offline et sync",
+        "operationId": "get_offline_state",
+        "tags": ["Offline", "Status"],
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "État offline",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/OfflineState"}
+              }
+            }
+          },
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      }
+    },
+    "/advanced/preferences/": {
+      "get": {
+        "summary": "Obtenir les préférences utilisateur",
+        "description": "Récupère les préférences de l'utilisateur",
+        "operationId": "get_user_preferences",
+        "tags": ["Preferences"],
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Préférences utilisateur",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/UserPreferences"}
+              }
+            }
+          },
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      },
+      "post": {
+        "summary": "Mettre à jour les préférences utilisateur",
+        "description": "Met à jour les préférences de l'utilisateur",
+        "operationId": "update_user_preferences",
+        "tags": ["Preferences"],
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/UserPreferences"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Préférences mises à jour",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/UserPreferences"}
+              }
+            }
+          },
+          "400": {"$ref": "#/components/responses/BadRequest"},
+          "401": {"$ref": "#/components/responses/Unauthorized"}
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Recommendation": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "book": {"$ref": "#/components/schemas/Book"},
+          "recommendation_type": {
+            "type": "string",
+            "enum": ["collaborative", "content_based", "hybrid", "trending"]
+          },
+          "score": {"type": "number", "minimum": 0, "maximum": 100},
+          "is_viewed": {"type": "boolean"},
+          "is_liked": {"type": "boolean"},
+          "is_purchased": {"type": "boolean"},
+          "is_read": {"type": "boolean"},
+          "created_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "book", "recommendation_type", "score"]
+      },
+      "Book": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "title": {"type": "string"},
+          "isbn": {"type": "string"},
+          "authors": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "cover_url": {"type": "string", "format": "uri"},
+          "language": {"type": "string"},
+          "description": {"type": "string"}
+        },
+        "required": ["id", "title", "isbn"]
+      },
+      "RecommendationFeedback": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "recommendation_id": {"type": "string", "format": "uuid"},
+          "feedback": {
+            "type": "string",
+            "enum": ["useful", "not_useful", "already_read", "not_interested"]
+          },
+          "rating": {"type": "integer", "minimum": 1, "maximum": 5},
+          "comment": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["recommendation_id", "feedback"]
+      },
+      "SyncQueueItem": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string", "format": "uuid"},
+          "action": {
+            "type": "string",
+            "enum": ["bookmark", "note", "highlight", "rating", "reading_position"]
+          },
+          "data": {"type": "object"},
+          "synced": {"type": "boolean"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "synced_at": {"type": "string", "format": "date-time", "nullable": true}
+        },
+        "required": ["id", "action", "data", "synced"]
+      },
+      "SyncResult": {
+        "type": "object",
+        "properties": {
+          "synced_count": {"type": "integer"},
+          "failed_count": {"type": "integer"},
+          "total": {"type": "integer"},
+          "synced_items": {
+            "type": "array",
+            "items": {"type": "object"}
+          },
+          "failed_items": {
+            "type": "array",
+            "items": {"type": "object"}
+          }
+        }
+      },
+      "RecommendationStatistics": {
+        "type": "object",
+        "properties": {
+          "total_recommendations": {"type": "integer"},
+          "viewed_count": {"type": "integer"},
+          "liked_count": {"type": "integer"},
+          "purchased_count": {"type": "integer"},
+          "read_count": {"type": "integer"},
+          "average_rating": {"type": "number"},
+          "by_type": {"type": "object"},
+          "period": {"type": "string"},
+          "generated_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "OfflineState": {
+        "type": "object",
+        "properties": {
+          "is_online": {"type": "boolean"},
+          "pending_items": {"type": "integer"},
+          "last_sync": {"type": "string", "format": "date-time"},
+          "cached_books": {"type": "integer"},
+          "storage_used_mb": {"type": "number"},
+          "sync_queue": {"type": "object"},
+          "last_sync_status": {"type": "string"},
+          "next_sync_scheduled": {"type": "string", "format": "date-time"}
+        }
+      },
+      "UserPreferences": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer"},
+          "user": {"type": "integer"},
+          "preferred_genres": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "preferred_languages": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "preferred_authors": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "reading_pace": {
+            "type": "string",
+            "enum": ["slow", "medium", "fast"]
+          },
+          "notification_preferences": {"type": "object"},
+          "dark_mode": {"type": "boolean"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "detail": {"type": "string"}
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Requête invalide",
+        "content": {
+          "application/json": {
+            "schema": {"$ref": "#/components/schemas/Error"}
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Non authentifié",
+        "content": {
+          "application/json": {
+            "schema": {"$ref": "#/components/schemas/Error"}
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Accès refusé",
+        "content": {
+          "application/json": {
+            "schema": {"$ref": "#/components/schemas/Error"}
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Ressource non trouvée",
+        "content": {
+          "application/json": {
+            "schema": {"$ref": "#/components/schemas/Error"}
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Recommendations",
+      "description": "Endpoints pour les recommandations ML"
+    },
+    {
+      "name": "Sync",
+      "description": "Endpoints pour la synchronisation offline"
+    },
+    {
+      "name": "Preferences",
+      "description": "Endpoints pour les préférences utilisateur"
+    },
+    {
+      "name": "Offline",
+      "description": "Endpoints pour la gestion du mode offline"
+    },
+    {
+      "name": "Statistics",
+      "description": "Endpoints pour les statistiques"
+    }
+  ]
+}

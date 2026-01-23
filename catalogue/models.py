@@ -7,7 +7,9 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
+from django.core.exceptions import ValidationError
 import uuid
+import os
 
 
 class Author(models.Model):
@@ -269,6 +271,13 @@ class Book(models.Model):
     )
     is_paid = models.BooleanField(_("Payant"), default=False)
     
+    # Preview gratuit pour livres payants
+    free_pages_count = models.PositiveIntegerField(
+        _("Nombre de pages libres"),
+        default=0,
+        help_text=_("Nombre de pages accessibles gratuitement (0 = aucune preview)")
+    )
+    
     # Statistiques
     downloads_count = models.PositiveIntegerField(_("Nombre de téléchargements"), default=0)
     reads_count = models.PositiveIntegerField(_("Nombre de lectures"), default=0)
@@ -309,6 +318,45 @@ class Book(models.Model):
         if self.discount_percentage:
             return self.price * (1 - self.discount_percentage / 100)
         return self.price
+    
+    @property
+    def is_free(self):
+        """Vérifie si le livre est gratuit."""
+        return not self.is_paid or self.price == 0
+
+    def get_file_url(self):
+        """Retourner l'URL du fichier PDF ou EPUB."""
+        if self.pdf_file:
+            return self.pdf_file.url
+        elif self.epub_file:
+            return self.epub_file.url
+        return None
+    
+    def clean(self):
+        """Valider la longueur des noms de fichiers."""
+        super().clean()
+        errors = {}
+        
+        # Vérifier la longueur du nom de fichier PDF
+        if self.pdf_file:
+            filename = os.path.basename(self.pdf_file.name)
+            if len(filename) > 100:
+                errors['pdf_file'] = _(
+                    f"Assurez-vous que ce nom de fichier comporte "
+                    f"au plus 100 caractères (actuellement {len(filename)})."
+                )
+        
+        # Vérifier la longueur du nom de fichier EPUB
+        if self.epub_file:
+            filename = os.path.basename(self.epub_file.name)
+            if len(filename) > 100:
+                errors['epub_file'] = _(
+                    f"Assurez-vous que ce nom de fichier comporte "
+                    f"au plus 100 caractères (actuellement {len(filename)})."
+                )
+        
+        if errors:
+            raise ValidationError(errors)
 
 
 class AuthorBook(models.Model):
@@ -376,6 +424,7 @@ class ReadingSession(models.Model):
     duration_minutes = models.PositiveIntegerField(_("Durée (minutes)"), default=0)
     pages_read = models.PositiveIntegerField(_("Pages lues"), default=0)
     current_page = models.PositiveIntegerField(_("Page actuelle"), default=0)
+    progress_percent = models.IntegerField(_("Progression (%)"), default=0)  # ✨ NOUVEAU
     is_completed = models.BooleanField(_("Complété"), default=False)
     created_at = models.DateTimeField(_("Créé"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Modifié"), auto_now=True)
@@ -387,6 +436,7 @@ class ReadingSession(models.Model):
         indexes = [
             models.Index(fields=["user", "book"]),
             models.Index(fields=["is_completed"]),
+            models.Index(fields=["progress_percent"]),  # ✨ Index pour requêtes rapides
         ]
     
     def __str__(self):
@@ -406,9 +456,17 @@ class Payment(models.Model):
     METHOD_CHOICES = [
         ("credit_card", _("Carte de crédit")),
         ("paypal", _("PayPal")),
-        ("mobile_money", _("Mobile Money")),
+        ("airtel_money", _("Airtel Money")),
+        ("mpesa", _("M-Pesa")),
+        ("orange_money", _("Orange Money RDC")),
         ("bank_transfer", _("Virement bancaire")),
         ("other", _("Autre")),
+    ]
+    
+    PROVIDER_CHOICES = [
+        ("airtel", _("Airtel Money")),
+        ("mpesa", _("M-Pesa")),
+        ("orange", _("Orange Money")),
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -424,8 +482,14 @@ class Payment(models.Model):
         decimal_places=2,
         validators=[MinValueValidator(0)]
     )
-    currency = models.CharField(_("Devise"), max_length=3, default="XOF")
+    currency = models.CharField(_("Devise"), max_length=3, default="CDF")
     transaction_id = models.CharField(_("ID de transaction"), max_length=255, unique=True)
+    external_transaction_id = models.CharField(
+        _("ID de transaction externe"),
+        max_length=255,
+        blank=True,
+        help_text="ID de transaction du fournisseur de paiement (Stripe, PayPal, etc.)"
+    )
     status = models.CharField(
         _("Statut"),
         max_length=20,
@@ -448,6 +512,43 @@ class Payment(models.Model):
     updated_at = models.DateTimeField(_("Modifié"), auto_now=True)
     paid_at = models.DateTimeField(_("Payé"), null=True, blank=True)
     
+    # ===== Champs Mobile Money =====
+    mobile_money_provider = models.CharField(
+        _("Fournisseur Mobile Money"),
+        max_length=20,
+        choices=PROVIDER_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Airtel, M-Pesa, ou Orange Money"
+    )
+    phone_number = models.CharField(
+        _("Numéro de téléphone"),
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text="Format: +256xxxxxxxxx (Airtel), +254xxxxxxxxx (M-Pesa), +243xxxxxxxxx (Orange RDC)"
+    )
+    merchant_request_id = models.CharField(
+        _("ID requête marchand"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="ID interne pour suivi"
+    )
+    checkout_request_id = models.CharField(
+        _("ID requête checkout"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="ID fourni par le provider pour polling du statut"
+    )
+    webhook_data = models.JSONField(
+        _("Données webhook"),
+        null=True,
+        blank=True,
+        help_text="Réponse brute du webhook du provider"
+    )
+    
     class Meta:
         verbose_name = _("Paiement")
         verbose_name_plural = _("Paiements")
@@ -460,3 +561,1773 @@ class Payment(models.Model):
     
     def __str__(self):
         return f"{self.user.email} - {self.book.title} ({self.get_status_display()})"
+
+
+# ============================
+# NOUVEAUX MODÈLES - FONCTIONNALITÉS ADMIN
+# ============================
+
+class Category(models.Model):
+    """Modèle pour les catégories/genres et thématiques."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(_("Nom"), max_length=200, unique=True)
+    description = models.TextField(_("Description"), blank=True)
+    slug = models.SlugField(_("Slug"), unique=True)
+    
+    # Hiérarchie des catégories
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='children',
+        verbose_name=_("Catégorie parent")
+    )
+    
+    # Métadonnées
+    icon = models.CharField(
+        _("Icône"),
+        max_length=50,
+        blank=True,
+        help_text=_("Nom d'icône FontAwesome (ex: fas fa-book)")
+    )
+    color = models.CharField(
+        _("Couleur"),
+        max_length=7,
+        blank=True,
+        help_text=_("Code couleur hex (ex: #FF5733)")
+    )
+    
+    order = models.PositiveIntegerField(_("Ordre"), default=0)
+    is_active = models.BooleanField(_("Actif"), default=True)
+    
+    # Horodatage
+    created_at = models.DateTimeField(_("Créé"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Modifié"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Catégorie")
+        verbose_name_plural = _("Catégories")
+        ordering = ['parent', 'order', 'name']
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_active']),
+        ]
+    
+    def __str__(self):
+        if self.parent:
+            return f"{self.parent.name} → {self.name}"
+        return self.name
+    
+    @property
+    def level(self):
+        """Retourner le niveau de profondeur dans la hiérarchie."""
+        level = 0
+        parent = self.parent
+        while parent:
+            level += 1
+            parent = parent.parent
+        return level
+
+
+class BookCategory(models.Model):
+    """Relation ManyToMany entre Book et Category."""
+    
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='categories'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE,
+        related_name='books'
+    )
+    is_primary = models.BooleanField(
+        _("Catégorie principale"),
+        default=False,
+        help_text=_("Cocher si c'est la catégorie principale du livre")
+    )
+    
+    class Meta:
+        verbose_name = _("Catégorie du livre")
+        verbose_name_plural = _("Catégories du livre")
+        unique_together = [['book', 'category']]
+    
+    def __str__(self):
+        return f"{self.book.title} - {self.category.name}"
+
+
+class AuditLog(models.Model):
+    """Modèle pour enregistrer les actions administratives (audit trail)."""
+    
+    ACTION_CHOICES = [
+        ('create', _('Création')),
+        ('update', _('Modification')),
+        ('delete', _('Suppression')),
+        ('login', _('Connexion')),
+        ('logout', _('Déconnexion')),
+        ('publish', _('Publication')),
+        ('unpublish', _('Dépublication')),
+        ('import', _('Import')),
+        ('export', _('Export')),
+        ('verify', _('Vérification')),
+        ('other', _('Autre')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Acteur
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='audit_logs',
+        verbose_name=_("Utilisateur")
+    )
+    
+    # Action
+    action = models.CharField(
+        _("Action"),
+        max_length=20,
+        choices=ACTION_CHOICES
+    )
+    
+    # Objet modifié
+    content_type = models.CharField(
+        _("Type de contenu"),
+        max_length=100,
+        help_text=_("Exemple: users.CustomUser, catalogue.Book")
+    )
+    object_id = models.CharField(
+        _("ID de l'objet"),
+        max_length=255
+    )
+    object_str = models.CharField(
+        _("Représentation de l'objet"),
+        max_length=500,
+        help_text=_("Représentation textuelle de l'objet modifié")
+    )
+    
+    # Détails
+    details = models.JSONField(
+        _("Détails"),
+        default=dict,
+        blank=True,
+        help_text=_("Détails supplémentaires au format JSON")
+    )
+    
+    # Métadonnées de la requête
+    ip_address = models.GenericIPAddressField(
+        _("Adresse IP"),
+        null=True,
+        blank=True
+    )
+    user_agent = models.TextField(
+        _("User Agent"),
+        blank=True
+    )
+    
+    # Horodatage
+    timestamp = models.DateTimeField(
+        _("Horodatage"),
+        auto_now_add=True
+    )
+    
+    class Meta:
+        verbose_name = _("Journal d'audit")
+        verbose_name_plural = _("Journaux d'audit")
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['user', 'timestamp']),
+            models.Index(fields=['action', 'timestamp']),
+            models.Index(fields=['content_type']),
+            models.Index(fields=['timestamp']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_action_display()} - {self.object_str} ({self.timestamp})"
+
+
+class ReaderActivity(models.Model):
+    """Modèle pour suivre l'activité des lecteurs."""
+    
+    ACTIVITY_TYPE_CHOICES = [
+        ('read', _('Lecture')),
+        ('download', _('Téléchargement')),
+        ('rate', _('Évaluation')),
+        ('comment', _('Commentaire')),
+        ('share', _('Partage')),
+        ('bookmark', _('Signet')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='reader_activities',
+        verbose_name=_("Lecteur")
+    )
+    
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name='reader_activities',
+        verbose_name=_("Livre")
+    )
+    
+    activity_type = models.CharField(
+        _("Type d'activité"),
+        max_length=20,
+        choices=ACTIVITY_TYPE_CHOICES
+    )
+    
+    details = models.JSONField(
+        _("Détails"),
+        default=dict,
+        blank=True
+    )
+    
+    timestamp = models.DateTimeField(
+        _("Horodatage"),
+        auto_now_add=True
+    )
+    
+    class Meta:
+        verbose_name = _("Activité de lecteur")
+        verbose_name_plural = _("Activités de lecteur")
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['user', 'timestamp']),
+            models.Index(fields=['book', 'timestamp']),
+            models.Index(fields=['activity_type']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.get_activity_type_display()} - {self.book.title}"
+
+
+class Review(models.Model):
+    """
+    Modèle pour les critiques et évaluations des livres.
+    """
+    RATING_CHOICES = [
+        (1, '1 - Très mauvais'),
+        (2, '2 - Mauvais'),
+        (3, '3 - Moyen'),
+        (4, '4 - Bon'),
+        (5, '5 - Excellent'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Critique"
+        verbose_name_plural = "Critiques"
+        unique_together = ('user', 'book')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Critique de {self.user.email} sur {self.book.title} ({self.rating} étoiles)"
+
+
+class Highlight(models.Model):
+    """
+    Modèle pour les surlignages de texte dans un livre.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='highlights')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='highlights')
+    text = models.TextField()
+    page_number = models.IntegerField(null=True, blank=True)
+    # Coordonnées pour stocker la position du surlignage (JSON format)
+    coordinates = models.JSONField(default=dict, blank=True)  # {"x": 100, "y": 50, "width": 200, "height": 20}
+    color = models.CharField(max_length=7, default='#FFEB3B')  # Couleur du surlignage (hex)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Surlignage"
+        verbose_name_plural = "Surlignages"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Surlignage de {self.user.email} dans {self.book.title}"
+
+
+class Note(models.Model):
+    """
+    Modèle pour les notes personnelles sur un livre ou un surlignage.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notes')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='notes')
+    highlight = models.OneToOneField(Highlight, on_delete=models.CASCADE, null=True, blank=True, related_name='note')
+    text = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Note"
+        verbose_name_plural = "Notes"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Note de {self.user.email} sur {self.book.title}"
+
+
+class Favorite(models.Model):
+    """
+    Modèle pour les livres favoris des utilisateurs.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Favori"
+        verbose_name_plural = "Favoris"
+        unique_together = ('user', 'book')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.email} a ajouté {self.book.title} en favori"
+
+
+class Event(models.Model):
+    """
+    Modèle pour les événements, annonces et ateliers.
+    """
+    EVENT_TYPE_CHOICES = [
+        ('NEW_BOOK', 'Nouveau livre'),
+        ('WORKSHOP', 'Atelier'),
+        ('CONFERENCE', 'Conférence'),
+        ('ANNOUNCEMENT', 'Annonce'),
+        ('LOCAL_EVENT', 'Événement local'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(_("Titre"), max_length=255)
+    description = models.TextField(_("Description"))
+    event_type = models.CharField(
+        _("Type d'événement"),
+        max_length=20,
+        choices=EVENT_TYPE_CHOICES,
+        default='ANNOUNCEMENT'
+    )
+    image = models.ImageField(
+        _("Image"),
+        upload_to="events/%Y/%m/",
+        null=True,
+        blank=True
+    )
+    date_start = models.DateTimeField(_("Date de début"))
+    date_end = models.DateTimeField(_("Date de fin"), null=True, blank=True)
+    location = models.CharField(_("Lieu"), max_length=255, null=True, blank=True)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='events'
+    )
+    url = models.URLField(_("URL"), null=True, blank=True, help_text="Lien externe pour plus d'infos")
+    is_published = models.BooleanField(_("Publié"), default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Événement"
+        verbose_name_plural = "Événements"
+        ordering = ['-date_start']
+        indexes = [
+            models.Index(fields=['event_type']),
+            models.Index(fields=['is_published', '-date_start']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_event_type_display()} - {self.title}"
+
+    def is_upcoming(self):
+        """Vérifie si l'événement est à venir"""
+        from django.utils import timezone
+        return self.date_start > timezone.now()
+
+    def is_happening_now(self):
+        """Vérifie si l'événement est en cours"""
+        from django.utils import timezone
+        now = timezone.now()
+        return self.date_start <= now and (self.date_end is None or self.date_end >= now)
+
+    def is_past(self):
+        """Vérifie si l'événement est passé"""
+        from django.utils import timezone
+        return self.date_start < timezone.now() and (self.date_end is None or self.date_end < timezone.now())
+
+
+class EventRegistration(models.Model):
+    """
+    Modèle pour les inscriptions aux événements.
+    Permet de tracker qui s'est inscrit à quel événement.
+    """
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='event_registrations'
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name='registrations'
+    )
+    
+    # Métadonnées
+    registered_at = models.DateTimeField(_("Date d'inscription"), auto_now_add=True)
+    attended = models.BooleanField(_("Présent"), default=False)
+    feedback = models.TextField(_("Retours"), blank=True, null=True)
+    
+    class Meta:
+        unique_together = ['user', 'event']
+        verbose_name = _("Inscription événement")
+        verbose_name_plural = _("Inscriptions événements")
+        ordering = ['-registered_at']
+        indexes = [
+            models.Index(fields=['user', '-registered_at']),
+            models.Index(fields=['event', '-registered_at']),
+            models.Index(fields=['attended']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.email} inscrit à {self.event.title}"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# MODELS DE RECOMMENDATION ENGINE (Phase 3: 85% → 90%)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class BookRating(models.Model):
+    """
+    Modèle pour les évaluations de livres par les utilisateurs.
+    Support pour le collaborative filtering.
+    """
+    
+    RATING_CHOICES = [
+        (1, '⭐ Mauvais'),
+        (2, '⭐⭐ Faible'),
+        (3, '⭐⭐⭐ Moyen'),
+        (4, '⭐⭐⭐⭐ Bon'),
+        (5, '⭐⭐⭐⭐⭐ Excellent'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='book_ratings'
+    )
+    book = models.ForeignKey(
+        'Book',
+        on_delete=models.CASCADE,
+        related_name='user_ratings'
+    )
+    rating = models.IntegerField(
+        _('Évaluation'),
+        choices=RATING_CHOICES,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    review = models.TextField(_('Avis'), blank=True, null=True)
+    is_helpful = models.BooleanField(_('Utile'), default=True)
+    created_at = models.DateTimeField(_('Date créée'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Date mise à jour'), auto_now=True)
+    
+    class Meta:
+        unique_together = ['user', 'book']
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'rating']),
+            models.Index(fields=['book', 'rating']),
+            models.Index(fields=['-created_at']),
+        ]
+        verbose_name = _('Évaluation de livre')
+        verbose_name_plural = _('Évaluations de livres')
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.book.title}: {self.rating}★"
+
+
+class UserPreference(models.Model):
+    """
+    Modèle pour les préférences utilisateur.
+    Utilisé pour le content-based filtering.
+    """
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='preferences'
+    )
+    
+    # Catégories préférées
+    preferred_categories = models.ManyToManyField(
+        'Category',
+        blank=True,
+        related_name='preference_users'
+    )
+    
+    # Auteurs préférés
+    preferred_authors = models.ManyToManyField(
+        'Author',
+        blank=True,
+        related_name='preference_users'
+    )
+    
+    # Scores de préférence par langue
+    french_preference = models.FloatField(
+        _('Préférence Français'),
+        default=0.5,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    english_preference = models.FloatField(
+        _('Préférence Anglais'),
+        default=0.5,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    arabic_preference = models.FloatField(
+        _('Préférence Arabe'),
+        default=0.5,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    
+    # Statistiques
+    total_ratings = models.IntegerField(_('Total évaluations'), default=0)
+    avg_rating = models.FloatField(_('Note moyenne'), default=0.0)
+    books_read = models.IntegerField(_('Livres lus'), default=0)
+    
+    # Métadonnées
+    created_at = models.DateTimeField(_('Date créée'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Date mise à jour'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Préférence utilisateur')
+        verbose_name_plural = _('Préférences utilisateur')
+    
+    def __str__(self):
+        return f"Préférences - {self.user.email}"
+
+
+class BookSimilarity(models.Model):
+    """
+    Modèle pour stocker la similarité entre les livres.
+    Utilisé pour accélérer les recommandations content-based.
+    """
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book1 = models.ForeignKey(
+        'Book',
+        on_delete=models.CASCADE,
+        related_name='similarities_as_book1'
+    )
+    book2 = models.ForeignKey(
+        'Book',
+        on_delete=models.CASCADE,
+        related_name='similarities_as_book2'
+    )
+    
+    # Scores de similarité
+    category_similarity = models.FloatField(
+        _('Similarité catégorie'),
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    author_similarity = models.FloatField(
+        _('Similarité auteur'),
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    tag_similarity = models.FloatField(
+        _('Similarité tags'),
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    
+    # Score composite (moyenne pondérée)
+    overall_similarity = models.FloatField(
+        _('Similarité globale'),
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(1)]
+    )
+    
+    # Métadonnées
+    calculated_at = models.DateTimeField(_('Calculé le'), auto_now=True)
+    
+    class Meta:
+        unique_together = ['book1', 'book2']
+        ordering = ['-overall_similarity']
+        indexes = [
+            models.Index(fields=['book1', '-overall_similarity']),
+            models.Index(fields=['book2', '-overall_similarity']),
+        ]
+        verbose_name = _('Similarité de livres')
+        verbose_name_plural = _('Similarités de livres')
+    
+    def __str__(self):
+        return f"{self.book1.title} ↔ {self.book2.title}: {self.overall_similarity:.2f}"
+
+
+class TrendingBook(models.Model):
+    """
+    Modèle pour stocker les livres en tendance.
+    Calculé quotidiennement en fonction des lectures, évaluations et achats.
+    """
+    
+    TREND_PERIOD_CHOICES = [
+        ('1d', _('24 heures')),
+        ('7d', _('7 jours')),
+        ('30d', _('30 jours')),
+        ('90d', _('90 jours')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book = models.ForeignKey(
+        'Book',
+        on_delete=models.CASCADE,
+        related_name='trending_entries'
+    )
+    period = models.CharField(
+        _('Période'),
+        max_length=3,
+        choices=TREND_PERIOD_CHOICES
+    )
+    rank = models.IntegerField(
+        _('Classement'),
+        validators=[MinValueValidator(1)],
+        default=1
+    )
+    
+    # Métadonnées de tendance
+    reads_count = models.IntegerField(_('Nombre de lectures'), default=0)
+    ratings_count = models.IntegerField(_('Nombre d\'évaluations'), default=0)
+    avg_rating = models.FloatField(_('Note moyenne'), default=0.0)
+    purchases_count = models.IntegerField(_('Nombre d\'achats'), default=0)
+    
+    # Score de tendance (0-100)
+    trend_score = models.FloatField(
+        _('Score de tendance'),
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)]
+    )
+    
+    # Métadonnées
+    calculated_at = models.DateTimeField(_('Calculé le'), auto_now=True)
+    
+    class Meta:
+        unique_together = ['book', 'period']
+        ordering = ['period', 'rank']
+        indexes = [
+            models.Index(fields=['period', 'rank']),
+            models.Index(fields=['period', '-trend_score']),
+            models.Index(fields=['-calculated_at']),
+        ]
+        verbose_name = _('Livre en tendance')
+        verbose_name_plural = _('Livres en tendance')
+    
+    def __str__(self):
+        return f"#{self.rank} - {self.book.title} ({self.get_period_display()})"
+
+
+class UserRecommendation(models.Model):
+    """
+    Modèle pour stocker les recommandations générées pour les utilisateurs.
+    Permet de tracker les recommandations et leur pertinence.
+    """
+    
+    RECOMMENDATION_TYPE_CHOICES = [
+        ('collaborative', _('Collaborative Filtering')),
+        ('content_based', _('Content-Based')),
+        ('hybrid', _('Hybride')),
+        ('trending', _('En Tendance')),
+        ('similar', _('Livres Similaires')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='recommendations'
+    )
+    book = models.ForeignKey(
+        'Book',
+        on_delete=models.CASCADE,
+        related_name='recommendations'
+    )
+    
+    # Type et score
+    recommendation_type = models.CharField(
+        _('Type'),
+        max_length=20,
+        choices=RECOMMENDATION_TYPE_CHOICES
+    )
+    score = models.FloatField(
+        _('Score'),
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text=_('Score de pertinence 0-100')
+    )
+    
+    # Interaction
+    is_viewed = models.BooleanField(_('Consulté'), default=False)
+    is_liked = models.BooleanField(_('Aimé'), default=False)
+    is_purchased = models.BooleanField(_('Acheté'), default=False)
+    is_read = models.BooleanField(_('Lu'), default=False)
+    
+    # Métadonnées
+    created_at = models.DateTimeField(_('Date créée'), auto_now_add=True)
+    expires_at = models.DateTimeField(_('Expire le'), null=True, blank=True)
+    
+    class Meta:
+        unique_together = ['user', 'book', 'recommendation_type']
+        ordering = ['-score', '-created_at']
+        indexes = [
+            models.Index(fields=['user', '-score']),
+            models.Index(fields=['user', 'is_viewed']),
+            models.Index(fields=['-created_at']),
+        ]
+        verbose_name = _('Recommandation utilisateur')
+        verbose_name_plural = _('Recommandations utilisateur')
+    
+    def __str__(self):
+        return f"{self.user.email} → {self.book.title} ({self.recommendation_type}): {self.score:.1f}"
+
+
+# =============================================================================
+# COMPTES DE PAIEMENT - Comptes de réception du vendeur
+# =============================================================================
+
+class MerchantPaymentAccount(models.Model):
+    """Comptes de réception du vendeur (percevoir l'argent)."""
+    
+    PAYMENT_METHOD_CHOICES = [
+        ("credit_card", _("Carte de crédit")),
+        ("paypal", _("PayPal")),
+        ("airtel_money", _("Airtel Money")),
+        ("mpesa", _("M-Pesa")),
+        ("orange_money", _("Orange Money RDC")),
+        ("bank_transfer", _("Virement bancaire")),
+        ("other", _("Autre")),
+    ]
+    
+    payment_method = models.CharField(
+        _("Méthode de paiement"),
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES,
+        unique=True,
+        help_text="Chaque méthode ne peut avoir qu'un seul compte"
+    )
+    
+    account_number = models.CharField(
+        _("Numéro de compte/téléphone"),
+        max_length=255,
+        help_text="Numéro Orange Money, M-Pesa, IBAN, etc."
+    )
+    
+    account_holder_name = models.CharField(
+        _("Nom du titulaire"),
+        max_length=255,
+        blank=True,
+        help_text="Nom sous lequel le compte est enregistré"
+    )
+    
+    bank_name = models.CharField(
+        _("Nom de la banque/Provider"),
+        max_length=255,
+        blank=True,
+        help_text="Ex: Banque du Congo, Orange, Airtel, etc."
+    )
+    
+    is_active = models.BooleanField(
+        _("Actif"),
+        default=True,
+        help_text="Désactiver si ce compte ne reçoit plus de paiements"
+    )
+    
+    notes = models.TextField(
+        _("Notes"),
+        blank=True,
+        help_text="Instructions spéciales ou remarques (non visible aux clients)"
+    )
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Compte de perception")
+        verbose_name_plural = _("Comptes de perception")
+        ordering = ['payment_method']
+    
+    def __str__(self):
+        return f"{self.get_payment_method_display()} - {self.account_number}"
+
+
+# ==================== PHASE 8: FORUM COMMUNAUTAIRE ====================
+
+class ForumCategory(models.Model):
+    """Catégories du forum communautaire."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(_("Nom"), max_length=100, unique=True)
+    slug = models.SlugField(_("Slug"), unique=True)
+    description = models.TextField(_("Description"), blank=True)
+    icon = models.CharField(_("Icône"), max_length=50, blank=True, default="💬")
+    order = models.IntegerField(_("Ordre"), default=0)
+    is_active = models.BooleanField(_("Actif"), default=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Catégorie Forum")
+        verbose_name_plural = _("Catégories Forum")
+        ordering = ["order", "name"]
+    
+    def __str__(self):
+        return self.name
+    
+    @property
+    def discussion_count(self):
+        """Nombre de discussions dans cette catégorie."""
+        return self.discussions.count()
+    
+    @property
+    def comment_count(self):
+        """Nombre total de commentaires dans cette catégorie."""
+        # Utiliser un lazy import pour éviter les problèmes de forward reference
+        from django.apps import apps
+        Comment = apps.get_model('catalogue', 'Comment')
+        return Comment.objects.filter(discussion__category=self).count()
+
+
+class Discussion(models.Model):
+    """Discussions du forum."""
+    
+    STATUS_CHOICES = [
+        ("open", _("Ouvert")),
+        ("closed", _("Fermé")),
+        ("pinned", _("Épinglé")),
+        ("archived", _("Archivé")),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category = models.ForeignKey(
+        ForumCategory,
+        on_delete=models.CASCADE,
+        related_name="discussions",
+        verbose_name=_("Catégorie")
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="forum_discussions",
+        verbose_name=_("Auteur")
+    )
+    title = models.CharField(_("Titre"), max_length=200)
+    content = models.TextField(_("Contenu"))
+    status = models.CharField(
+        _("Statut"),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="open"
+    )
+    views_count = models.IntegerField(_("Vues"), default=0)
+    comments_count = models.IntegerField(_("Commentaires"), default=0)
+    upvotes_count = models.IntegerField(_("Upvotes"), default=0)
+    is_edited = models.BooleanField(_("Modifié"), default=False)
+    last_comment_at = models.DateTimeField(_("Dernier commentaire"), null=True, blank=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Discussion")
+        verbose_name_plural = _("Discussions")
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["category", "-created_at"]),
+            models.Index(fields=["author", "-created_at"]),
+            models.Index(fields=["status", "-created_at"]),
+        ]
+    
+    def __str__(self):
+        return self.title
+    
+    @property
+    def is_closed(self):
+        """Vérifier si la discussion est fermée."""
+        return self.status == "closed"
+    
+    @property
+    def is_pinned(self):
+        """Vérifier si la discussion est épinglée."""
+        return self.status == "pinned"
+    
+    def increment_views(self):
+        """Incrémenter le compteur de vues."""
+        self.views_count += 1
+        self.save(update_fields=['views_count'])
+    
+    def increment_comments(self):
+        """Incrémenter le compteur de commentaires."""
+        self.comments_count += 1
+        self.save(update_fields=['comments_count'])
+    
+    def decrement_comments(self):
+        """Décrémenter le compteur de commentaires."""
+        if self.comments_count > 0:
+            self.comments_count -= 1
+            self.save(update_fields=['comments_count'])
+
+
+class Comment(models.Model):
+    """Commentaires du forum."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    discussion = models.ForeignKey(
+        Discussion,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name=_("Discussion")
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="forum_comments",
+        verbose_name=_("Auteur")
+    )
+    parent = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        related_name="replies",
+        null=True,
+        blank=True,
+        verbose_name=_("Réponse à")
+    )
+    content = models.TextField(_("Contenu"))
+    upvotes_count = models.IntegerField(_("Upvotes"), default=0)
+    is_edited = models.BooleanField(_("Modifié"), default=False)
+    is_answer = models.BooleanField(
+        _("Réponse acceptée"),
+        default=False,
+        help_text=_("Marquer comme réponse acceptée au problème")
+    )
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Commentaire")
+        verbose_name_plural = _("Commentaires")
+        ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["discussion", "created_at"]),
+            models.Index(fields=["author", "created_at"]),
+            models.Index(fields=["parent"]),
+        ]
+    
+    def __str__(self):
+        return f"Commentaire de {self.author} sur {self.discussion.title}"
+    
+    @property
+    def reply_count(self):
+        """Nombre de réponses à ce commentaire."""
+        return self.replies.count()
+
+
+class Vote(models.Model):
+    """Votes (upvotes/downvotes) sur les discussions et commentaires."""
+    
+    VALUE_CHOICES = [
+        (1, _("Upvote")),
+        (-1, _("Downvote")),
+        (0, _("Annuler")),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="forum_votes",
+        verbose_name=_("Utilisateur")
+    )
+    discussion = models.ForeignKey(
+        Discussion,
+        on_delete=models.CASCADE,
+        related_name="votes",
+        null=True,
+        blank=True,
+        verbose_name=_("Discussion")
+    )
+    comment = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,
+        related_name="votes",
+        null=True,
+        blank=True,
+        verbose_name=_("Commentaire")
+    )
+    value = models.SmallIntegerField(
+        _("Valeur"),
+        choices=VALUE_CHOICES,
+        default=1
+    )
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Vote Forum")
+        verbose_name_plural = _("Votes Forum")
+        indexes = [
+            models.Index(fields=["user", "discussion"]),
+            models.Index(fields=["user", "comment"]),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    (models.Q(comment__isnull=True) & models.Q(discussion__isnull=False)) |
+                    (models.Q(comment__isnull=False) & models.Q(discussion__isnull=True))
+                ),
+                name="vote_has_target"
+            ),
+        ]
+    
+    def __str__(self):
+        target = self.discussion or self.comment
+        return f"{self.get_value_display()} de {self.user} sur {target}"
+
+
+class ForumNotification(models.Model):
+    """Notifications du forum."""
+    
+    NOTIFICATION_TYPES = [
+        ("new_comment", _("Nouveau commentaire")),
+        ("new_reply", _("Nouvelle réponse")),
+        ("discussion_closed", _("Discussion fermée")),
+        ("comment_upvoted", _("Commentaire upvoté")),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="forum_notifications",
+        verbose_name=_("Utilisateur")
+    )
+    notification_type = models.CharField(
+        _("Type"),
+        max_length=50,
+        choices=NOTIFICATION_TYPES
+    )
+    discussion = models.ForeignKey(
+        Discussion,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("Discussion")
+    )
+    comment = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name=_("Commentaire")
+    )
+    message = models.CharField(_("Message"), max_length=255)
+    is_read = models.BooleanField(_("Lu"), default=False)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _("Notification Forum")
+        verbose_name_plural = _("Notifications Forum")
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "is_read"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.notification_type} - {self.user}"
+
+# ==================== PHASE 9: INTÉGRATION MÉDIA ====================
+
+class PDFAnnotation(models.Model):
+    """Annotations sur les fichiers PDF."""
+    
+    ANNOTATION_TYPES = [
+        ("highlight", _("Surlignage")),
+        ("note", _("Note")),
+        ("bookmark", _("Marque-page")),
+        ("underline", _("Souligné")),
+        ("strikethrough", _("Barré")),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="pdf_annotations",
+        verbose_name=_("Utilisateur")
+    )
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="pdf_annotations",
+        verbose_name=_("Livre")
+    )
+    annotation_type = models.CharField(
+        _("Type"),
+        max_length=20,
+        choices=ANNOTATION_TYPES,
+        default="highlight"
+    )
+    page_number = models.IntegerField(_("Numéro de page"))
+    x_start = models.FloatField(_("Position X départ"), default=0.0)
+    y_start = models.FloatField(_("Position Y départ"), default=0.0)
+    x_end = models.FloatField(_("Position X fin"), default=0.0)
+    y_end = models.FloatField(_("Position Y fin"), default=0.0)
+    text = models.TextField(_("Texte annoté"), blank=True)
+    color = models.CharField(_("Couleur"), max_length=7, default="#FFFF00")
+    note_content = models.TextField(_("Contenu de la note"), blank=True)
+    is_synced = models.BooleanField(_("Synchronisé"), default=False)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Annotation PDF")
+        verbose_name_plural = _("Annotations PDF")
+        ordering = ["page_number", "created_at"]
+        indexes = [
+            models.Index(fields=["user", "book"]),
+            models.Index(fields=["book", "page_number"]),
+            models.Index(fields=["is_synced"]),
+        ]
+        unique_together = [["user", "book", "page_number", "x_start", "y_start"]]
+    
+    def __str__(self):
+        return f"{self.get_annotation_type_display()} - {self.book.title}"
+
+
+class AudiobookMetadata(models.Model):
+    """Métadonnées des audiobooks."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book = models.OneToOneField(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="audiobook",
+        verbose_name=_("Livre")
+    )
+    narrator = models.CharField(_("Narrateur"), max_length=200, blank=True)
+    duration_hours = models.FloatField(_("Durée (heures)"), default=0.0)
+    bitrate = models.CharField(_("Débit binaire"), max_length=50, default="128 kbps")
+    file_format = models.CharField(_("Format"), max_length=20, default="mp3")
+    audio_file = models.FileField(
+        _("Fichier audio"),
+        upload_to="audiobooks/%Y/%m/",
+        null=True,
+        blank=True
+    )
+    cover_image = models.ImageField(
+        _("Image de couverture"),
+        upload_to="audiobook_covers/%Y/%m/",
+        null=True,
+        blank=True
+    )
+    is_published = models.BooleanField(_("Publié"), default=False)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Audiobook")
+        verbose_name_plural = _("Audiobooks")
+    
+    def __str__(self):
+        return f"Audiobook - {self.book.title}"
+    
+    @property
+    def total_duration_seconds(self):
+        """Durée totale en secondes."""
+        return int(self.duration_hours * 3600)
+
+
+class AudiobookChapter(models.Model):
+    """Chapitres des audiobooks."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    audiobook = models.ForeignKey(
+        AudiobookMetadata,
+        on_delete=models.CASCADE,
+        related_name="chapters",
+        verbose_name=_("Audiobook")
+    )
+    chapter_number = models.IntegerField(_("Numéro du chapitre"))
+    title = models.CharField(_("Titre"), max_length=255)
+    duration_seconds = models.IntegerField(_("Durée (secondes)"))
+    start_time = models.IntegerField(_("Temps de départ (secondes)"))
+    end_time = models.IntegerField(_("Temps de fin (secondes)"))
+    is_available = models.BooleanField(_("Disponible"), default=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _("Chapitre Audiobook")
+        verbose_name_plural = _("Chapitres Audiobook")
+        ordering = ["chapter_number"]
+        indexes = [
+            models.Index(fields=["audiobook", "chapter_number"]),
+        ]
+    
+    def __str__(self):
+        return f"Ch. {self.chapter_number}: {self.title}"
+
+
+class ListeningProgress(models.Model):
+    """Progression de lecture des audiobooks."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="listening_progress",
+        verbose_name=_("Utilisateur")
+    )
+    audiobook = models.ForeignKey(
+        AudiobookMetadata,
+        on_delete=models.CASCADE,
+        related_name="listening_sessions",
+        verbose_name=_("Audiobook")
+    )
+    current_chapter = models.IntegerField(_("Chapitre actuel"), default=0)
+    current_time = models.IntegerField(_("Temps actuel (secondes)"), default=0)
+    total_time_listened = models.IntegerField(_("Temps écouté total (secondes)"), default=0)
+    completion_percentage = models.FloatField(_("Pourcentage complété"), default=0.0)
+    is_completed = models.BooleanField(_("Complété"), default=False)
+    last_listened_at = models.DateTimeField(_("Dernière écoute"), null=True, blank=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Progression Écoute")
+        verbose_name_plural = _("Progressions Écoute")
+        unique_together = [["user", "audiobook"]]
+        indexes = [
+            models.Index(fields=["user", "audiobook"]),
+            models.Index(fields=["is_completed"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.audiobook.book.title}"
+
+
+class VideoMaterial(models.Model):
+    """Matériaux vidéo associés aux livres."""
+    
+    VIDEO_TYPES = [
+        ("adaptation", _("Adaptation filmique")),
+        ("review", _("Critique")),
+        ("interview", _("Entrevue")),
+        ("reading", _("Lecture")),
+        ("tutorial", _("Tutoriel")),
+        ("other", _("Autre")),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="video_materials",
+        verbose_name=_("Livre")
+    )
+    title = models.CharField(_("Titre"), max_length=255)
+    description = models.TextField(_("Description"), blank=True)
+    video_type = models.CharField(
+        _("Type de vidéo"),
+        max_length=20,
+        choices=VIDEO_TYPES,
+        default="adaptation"
+    )
+    video_file = models.FileField(
+        _("Fichier vidéo"),
+        upload_to="videos/%Y/%m/",
+        null=True,
+        blank=True
+    )
+    external_url = models.URLField(_("URL externe"), blank=True)
+    duration_seconds = models.IntegerField(_("Durée (secondes)"), default=0)
+    thumbnail = models.ImageField(
+        _("Miniature"),
+        upload_to="video_thumbnails/%Y/%m/",
+        null=True,
+        blank=True
+    )
+    uploader = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="uploaded_videos",
+        verbose_name=_("Téléchargé par")
+    )
+    view_count = models.IntegerField(_("Nombre de vues"), default=0)
+    is_published = models.BooleanField(_("Publié"), default=False)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Matériau Vidéo")
+        verbose_name_plural = _("Matériaux Vidéo")
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["book", "video_type"]),
+            models.Index(fields=["is_published"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.title} ({self.get_video_type_display()})"
+    
+    @property
+    def embed_url(self):
+        """Retourne l'URL embed pour YouTube/Vimeo."""
+        if not self.external_url:
+            return ""
+        
+        url = self.external_url
+        
+        # YouTube Long URL
+        if "youtube.com/watch" in url:
+            import re
+            match = re.search(r'v=([^&]+)', url)
+            if match:
+                return f"https://www.youtube.com/embed/{match.group(1)}"
+        
+        # YouTube Short URL
+        if "youtu.be/" in url:
+             video_id = url.split('/')[-1].split('?')[0]
+             return f"https://www.youtube.com/embed/{video_id}"
+             
+        # Vimeo
+        if "vimeo.com/" in url and "player" not in url:
+             video_id = url.split('/')[-1]
+             return f"https://player.vimeo.com/video/{video_id}"
+             
+        return url
+
+
+class VideoPlayback(models.Model):
+    """Historique de lecture des vidéos."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="video_playbacks",
+        verbose_name=_("Utilisateur")
+    )
+    video = models.ForeignKey(
+        VideoMaterial,
+        on_delete=models.CASCADE,
+        related_name="playback_history",
+        verbose_name=_("Vidéo")
+    )
+    current_time = models.IntegerField(_("Temps actuel (secondes)"), default=0)
+    completion_percentage = models.FloatField(_("Pourcentage complété"), default=0.0)
+    is_completed = models.BooleanField(_("Complété"), default=False)
+    playback_count = models.IntegerField(_("Nombre de lectures"), default=0)
+    last_played_at = models.DateTimeField(_("Dernière lecture"), null=True, blank=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Lecture Vidéo")
+        verbose_name_plural = _("Lectures Vidéo")
+        unique_together = [["user", "video"]]
+        indexes = [
+            models.Index(fields=["user", "video"]),
+            models.Index(fields=["is_completed"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.video.title}"
+
+
+class Podcast(models.Model):
+    """Podcasts liés aux livres."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book = models.ForeignKey(
+        Book,
+        on_delete=models.CASCADE,
+        related_name="podcasts",
+        verbose_name=_("Livre"),
+        null=True,
+        blank=True
+    )
+    title = models.CharField(_("Titre"), max_length=255)
+    description = models.TextField(_("Description"), blank=True)
+    author = models.CharField(_("Créateur"), max_length=200, blank=True)
+    rss_feed_url = models.URLField(_("URL du flux RSS"), blank=True)
+    image_url = models.URLField(_("URL de l'image"), blank=True)
+    website_url = models.URLField(_("Site web"), blank=True)
+    language = models.CharField(_("Langue"), max_length=10, default="fr")
+    episode_count = models.IntegerField(_("Nombre d'épisodes"), default=0)
+    is_active = models.BooleanField(_("Actif"), default=True)
+    last_synced_at = models.DateTimeField(_("Dernière synchronisation"), null=True, blank=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Podcast")
+        verbose_name_plural = _("Podcasts")
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["is_active"]),
+            models.Index(fields=["book"]),
+        ]
+    
+    def __str__(self):
+        return self.title
+
+
+class PodcastEpisode(models.Model):
+    """Épisodes des podcasts."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    podcast = models.ForeignKey(
+        Podcast,
+        on_delete=models.CASCADE,
+        related_name="episodes",
+        verbose_name=_("Podcast")
+    )
+    episode_number = models.IntegerField(_("Numéro d'épisode"))
+    title = models.CharField(_("Titre"), max_length=255)
+    description = models.TextField(_("Description"), blank=True)
+    duration_seconds = models.IntegerField(_("Durée (secondes)"), default=0)
+    audio_url = models.URLField(_("URL audio"))
+    pubdate = models.DateTimeField(_("Date de publication"), null=True, blank=True)
+    guid = models.CharField(_("GUID"), max_length=255, unique=True, null=True, blank=True)
+    is_explicit = models.BooleanField(_("Contenu explicite"), default=False)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _("Épisode Podcast")
+        verbose_name_plural = _("Épisodes Podcast")
+        ordering = ["-episode_number"]
+        indexes = [
+            models.Index(fields=["podcast", "episode_number"]),
+            models.Index(fields=["guid"]),
+        ]
+    
+    def __str__(self):
+        return f"Ep. {self.episode_number}: {self.title}"
+
+
+class PodcastSubscription(models.Model):
+    """Abonnements aux podcasts."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="podcast_subscriptions",
+        verbose_name=_("Utilisateur")
+    )
+    podcast = models.ForeignKey(
+        Podcast,
+        on_delete=models.CASCADE,
+        related_name="subscriptions",
+        verbose_name=_("Podcast")
+    )
+    is_active = models.BooleanField(_("Actif"), default=True)
+    notification_enabled = models.BooleanField(_("Notifications activées"), default=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Abonnement Podcast")
+        verbose_name_plural = _("Abonnements Podcast")
+        unique_together = [["user", "podcast"]]
+        indexes = [
+            models.Index(fields=["user", "is_active"]),
+            models.Index(fields=["podcast"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} → {self.podcast.title}"
+
+
+class PodcastProgress(models.Model):
+    """Progression d'écoute des épisodes de podcasts."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="podcast_progress",
+        verbose_name=_("Utilisateur")
+    )
+    episode = models.ForeignKey(
+        PodcastEpisode,
+        on_delete=models.CASCADE,
+        related_name="user_progress",
+        verbose_name=_("Épisode")
+    )
+    current_time = models.IntegerField(_("Temps actuel (secondes)"), default=0)
+    completion_percentage = models.FloatField(_("Pourcentage complété"), default=0.0)
+    is_completed = models.BooleanField(_("Complété"), default=False)
+    playback_count = models.IntegerField(_("Nombre de lectures"), default=0)
+    is_bookmarked = models.BooleanField(_("Marqué"), default=False)
+    last_played_at = models.DateTimeField(_("Dernière lecture"), null=True, blank=True)
+    created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
+    
+    class Meta:
+        verbose_name = _("Progression Podcast")
+        verbose_name_plural = _("Progressions Podcast")
+        unique_together = [["user", "episode"]]
+        indexes = [
+            models.Index(fields=["user", "episode"]),
+            models.Index(fields=["is_completed"]),
+            models.Index(fields=["is_bookmarked"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.episode.title}"
+
+
+# ==================== PHASE 10: RECOMMANDATIONS INTELLIGENTES ====================
+
+class RecommendationStatistic(models.Model):
+    """
+    Modèle pour tracker les statistiques des recommandations.
+    Permet d'analyser l'efficacité et d'améliorer l'algorithm.
+    """
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    recommendation = models.OneToOneField(
+        'UserRecommendation',
+        on_delete=models.CASCADE,
+        related_name='statistic'
+    )
+    
+    # Interactions
+    views_count = models.IntegerField(_('Nombre de vues'), default=0)
+    clicked_count = models.IntegerField(_('Nombre de clics'), default=0)
+    purchased_count = models.IntegerField(_('Nombre d\'achats'), default=0)
+    read_count = models.IntegerField(_('Nombre de lectures'), default=0)
+    feedback_rating = models.FloatField(
+        _('Note de feedback'),
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    # Métadonnées
+    created_at = models.DateTimeField(_('Date créée'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('Date mise à jour'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('Statistique de recommandation')
+        verbose_name_plural = _('Statistiques de recommandation')
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['recommendation']),
+        ]
+    
+    def __str__(self):
+        return f"Stats - {self.recommendation.book.title}"
+    
+    @property
+    def click_through_rate(self):
+        """Calcul du CTR (Click-Through Rate)"""
+        if self.views_count == 0:
+            return 0
+        return (self.clicked_count / self.views_count) * 100
+    
+    @property
+    def conversion_rate(self):
+        """Calcul du taux de conversion (achat/vue)"""
+        if self.views_count == 0:
+            return 0
+        return (self.purchased_count / self.views_count) * 100
+
+
+class SyncQueue(models.Model):
+    """
+    Modèle pour la queue de synchronisation offline.
+    Stocke les actions effectuées offline pour sync au retour online.
+    """
+    
+    ACTION_CHOICES = [
+        ('bookmark_add', _('Ajouter un signet')),
+        ('bookmark_remove', _('Supprimer un signet')),
+        ('note_add', _('Ajouter une note')),
+        ('note_update', _('Mettre à jour une note')),
+        ('note_delete', _('Supprimer une note')),
+        ('highlight_add', _('Ajouter un surlignage')),
+        ('highlight_delete', _('Supprimer un surlignage')),
+        ('rating_add', _('Ajouter une note/évaluation')),
+        ('reading_position_update', _('Mise à jour position de lecture')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='sync_queue'
+    )
+    
+    action = models.CharField(
+        _('Action'),
+        max_length=30,
+        choices=ACTION_CHOICES
+    )
+    
+    # Données de l'action
+    data = models.JSONField(_('Données'), help_text=_('Données sérialisées JSON'))
+    
+    # Status de sync
+    synced = models.BooleanField(_('Synchronisé'), default=False)
+    sync_attempts = models.IntegerField(_('Tentatives de sync'), default=0)
+    last_sync_attempt = models.DateTimeField(_('Dernier essai de sync'), null=True, blank=True)
+    sync_error = models.TextField(_('Erreur de sync'), blank=True)
+    
+    # Métadonnées
+    created_at = models.DateTimeField(_('Date créée'), auto_now_add=True)
+    synced_at = models.DateTimeField(_('Date synchronisée'), null=True, blank=True)
+    
+    class Meta:
+        verbose_name = _('Queue de synchronisation')
+        verbose_name_plural = _('Queues de synchronisation')
+        ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['user', 'synced']),
+            models.Index(fields=['-created_at']),
+        ]
+    
+    def __str__(self):
+        status = _('Synced') if self.synced else _('Pending')
+        return f"{self.user.email} - {self.get_action_display()} ({status})"
+    
+    def mark_as_synced(self):
+        """Marquer comme synchronisé"""
+        from django.utils import timezone
+        self.synced = True
+        self.synced_at = timezone.now()
+        self.save()
+    
+    def record_sync_attempt(self, error_message=None):
+        """Enregistrer une tentative de sync"""
+        from django.utils import timezone
+        self.sync_attempts += 1
+        self.last_sync_attempt = timezone.now()
+        if error_message:
+            self.sync_error = error_message
+        self.save()
+
+
+class UserRecommendationFeedback(models.Model):
+    """
+    Modèle pour le feedback utilisateur sur les recommandations.
+    Aide à améliorer l'algorithm de recommandation.
+    """
+    
+    FEEDBACK_CHOICES = [
+        ('like', _('J\'aime')),
+        ('dislike', _('Je n\'aime pas')),
+        ('useful', _('Utile')),
+        ('not_useful', _('Pas utile')),
+        ('already_read', _('Déjà lu')),
+        ('not_interested', _('Pas intéressé')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='recommendation_feedbacks'
+    )
+    recommendation = models.ForeignKey(
+        'UserRecommendation',
+        on_delete=models.CASCADE,
+        related_name='feedbacks'
+    )
+    
+    feedback = models.CharField(
+        _('Type de feedback'),
+        max_length=20,
+        choices=FEEDBACK_CHOICES
+    )
+    
+    comment = models.TextField(_('Commentaire'), blank=True)
+    rating = models.IntegerField(
+        _('Note (1-5)'),
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
+    
+    created_at = models.DateTimeField(_('Date créée'), auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _('Feedback de recommandation')
+        verbose_name_plural = _('Feedbacks de recommandation')
+        unique_together = ['user', 'recommendation']
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.email} - {self.recommendation.book.title}: {self.get_feedback_display()}"
+
+
+class SiteConfiguration(models.Model):
+    """Configuration globale du site (Logo, Nom)."""
+    site_name = models.CharField(max_length=255, default="Bibliothèque Numérique Calures")
+    logo = models.ImageField(upload_to='site_branding/', blank=True, null=True, help_text="Téléversez le logo du site ici.")
+    
+    # Textes de la page d'accueil
+    home_title = models.CharField(
+        _("Titre de l'accueil"), 
+        max_length=255, 
+        default="Apprenez sans limites avec la Bibliothèque Numérique Calures",
+        help_text="Le grand titre affiché sur la page d'accueil."
+    )
+    home_description = models.TextField(
+        _("Description de l'accueil"),
+        default="Découvrez les publications exclusives de Calures Éditions. Une bibliothèque numérique souveraine offrant des milliers de livres, formations vidéo et podcasts pour l'excellence africaine.",
+        help_text="Le texte court sous le titre."
+    )
+    
+    # Pied de page
+    footer_text = models.CharField(
+        _("Texte du pied de page"), 
+        max_length=255, 
+        default="Tous droits réservés.",
+        blank=True
+    )
+    
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "Configuration du Site"
+    
+    class Meta:
+        verbose_name = "Personnalisation du Site"
+        verbose_name_plural = "Personnalisation du Site"

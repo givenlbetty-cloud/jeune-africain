@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Catalogue - BNC{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="container">
+        <h1 class="mb-4">Catalogue des Livres</h1>
+        
+        <!-- Search and Filters -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <form method="get" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" 
+                           placeholder="Rechercher par titre, auteur..." 
+                           value="{{ request.GET.search|default:'' }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" id="sortBy" onchange="this.form.submit();">
+                    <option value="">Trier par...</option>
+                    <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Titre A-Z</option>
+                    <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Récents en premier</option>
+                    <option value="price" {% if request.GET.sort == 'price' %}selected{% endif %}>Prix: bas au haut</option>
+                    <option value="-rating" {% if request.GET.sort == '-rating' %}selected{% endif %}>Mieux notés</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Filters Sidebar -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card mb-3">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Filtres</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get">
+                            <h6 class="mb-3">Genre</h6>
+                            {% for genre, label in genres %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="genre_{{ genre }}" 
+                                           name="genre" value="{{ genre }}"
+                                           {% if genre in selected_genres %}checked{% endif %}>
+                                    <label class="form-check-label" for="genre_{{ genre }}">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            
+                            <h6 class="mb-3 mt-4">Type</h6>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="free" 
+                                       name="type" value="free" {% if 'free' in selected_types %}checked{% endif %}>
+                                <label class="form-check-label" for="free">
+                                    Gratuit
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="paid" 
+                                       name="type" value="paid" {% if 'paid' in selected_types %}checked{% endif %}>
+                                <label class="form-check-label" for="paid">
+                                    Payant
+                                </label>
+                            </div>
+                            
+                            <h6 class="mb-3 mt-4">Langue</h6>
+                            {% for lang, label in languages %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="lang_{{ lang }}" 
+                                           name="language" value="{{ lang }}"
+                                           {% if lang in selected_languages %}checked{% endif %}>
+                                    <label class="form-check-label" for="lang_{{ lang }}">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            
+                            <button type="submit" class="btn btn-primary w-100 mt-4">Appliquer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Books Grid -->
+            <div class="col-md-9">
+                {% if books %}
+                    <div class="row">
+                        {% for book in books %}
+                            <div class="col-md-4 mb-4">
+                                <div class="card book-card">
+                                    {% if book.cover %}
+                                        <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}">
+                                    {% else %}
+                                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light">
+                                            <i class="fas fa-book fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <h5 class="card-title book-title">{{ book.title }}</h5>
+                                        <p class="card-text book-author">
+                                            {% for author in book.authors.all|slice:":2" %}
+                                                {{ author.first_name }} {{ author.last_name }}{% if not forloop.last %}<br>{% endif %}
+                                            {% endfor %}
+                                        </p>
+                                        <div class="rating mb-2">
+                                            {% for i in "12345" %}
+                                                {% if i|add:0 <= book.rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <span>({{ book.number_of_ratings }})</span>
+                                        </div>
+                                        <p class="text-muted small">{{ book.genre }}</p>
+                                        {% if book.is_paid %}
+                                            <div class="book-price">{{ book.final_price }} XOF</div>
+                                            <span class="badge badge-paid">Payant</span>
+                                        {% else %}
+                                            <span class="badge badge-free">Gratuit</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-footer bg-white border-top-0">
+                                        <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-eye"></i> Détails
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if books.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">Première</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ books.previous_page_number }}">Précédente</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">Page {{ books.number }}</span>
+                            </li>
+                            
+                            {% if books.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ books.next_page_number }}">Suivante</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ books.paginator.num_pages }}">Dernière</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Aucun livre trouvé. Essayez d'autres filtres.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,328 @@
+<!-- PAYMENT FORM MODAL WITH STRIPE & MOBILE MONEY INTEGRATION -->
+{% load static %}
+
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="paymentModalLabel">
+                    <i class="fas fa-credit-card"></i> Procéder au paiement
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="paymentForm" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="modal-body">
+                    <!-- Book Summary -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1" id="paymentBookTitle">Livre</h6>
+                                <p class="mb-0 text-muted" id="paymentBookAuthor">Auteur</p>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="mb-0" id="paymentAmount">0 FC</h5>
+                                <small class="text-muted">Montant à payer</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Method Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Méthode de paiement</label>
+                        <div class="payment-methods">
+                            <!-- Credit Card -->
+                            <div class="form-check payment-method-card">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="method_card" value="CREDIT_CARD" checked>
+                                <label class="form-check-label" for="method_card">
+                                    <i class="fas fa-credit-card"></i> Carte Bancaire
+                                    <small class="d-block text-muted">Visa, Mastercard, etc.</small>
+                                </label>
+                            </div>
+                            
+                            <!-- Mobile Money Methods -->
+                            <div class="form-check payment-method-card">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="method_mpesa" value="MPESA">
+                                <label class="form-check-label" for="method_mpesa">
+                                    <i class="fas fa-mobile-alt"></i> M-Pesa (Kenya)
+                                    <small class="d-block text-muted">+254 7xx xxx xxx</small>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check payment-method-card">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="method_airtel" value="AIRTEL">
+                                <label class="form-check-label" for="method_airtel">
+                                    <i class="fas fa-mobile-alt"></i> Airtel Money
+                                    <small class="d-block text-muted">Cameroun, Africa</small>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check payment-method-card">
+                                <input class="form-check-input" type="radio" name="payment_method" 
+                                       id="method_orange" value="ORANGE">
+                                <label class="form-check-label" for="method_orange">
+                                    <i class="fas fa-mobile-alt"></i> Orange Money
+                                    <small class="d-block text-muted">Cameroun, Africa</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Payment Fields (visible when card is selected) -->
+                    <div id="cardPaymentFields" class="mb-4">
+                        <div class="mb-3">
+                            <label for="cardholderName" class="form-label">Nom du titulaire</label>
+                            <input type="text" class="form-control" id="cardholderName" 
+                                   placeholder="Jean Dupont" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Numéro de carte</label>
+                            <input type="text" class="form-control" id="cardNumber" 
+                                   placeholder="1234 5678 9012 3456" maxlength="19" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="expiryDate" class="form-label">Date d'expiration</label>
+                                <input type="text" class="form-control" id="expiryDate" 
+                                       placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="text" class="form-control" id="cvv" 
+                                       placeholder="123" maxlength="4" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Stripe Elements will be injected here -->
+                        <div id="card-element" class="form-control" style="height: 40px; padding: 10px;"></div>
+                        <div id="card-errors" class="text-danger mt-2"></div>
+                    </div>
+                    
+                    <!-- Mobile Money Fields -->
+                    <div id="mobileMoneyFields" style="display: none;" class="mb-4">
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Numéro de téléphone</label>
+                            <input type="tel" class="form-control" id="phoneNumber" 
+                                   placeholder="+237 6xx xxx xxx" required>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Instructions:</strong>
+                            <ol class="mb-0" style="font-size: 0.9rem;">
+                                <li>Un code de confirmation sera envoyé à votre numéro</li>
+                                <li>Entrez le code quand vous y êtes invité</li>
+                                <li>La transaction sera complétée automatiquement</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms & Conditions -->
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            J'accepte les <a href="/terms/" target="_blank">conditions d'utilisation</a> et la 
+                            <a href="/privacy/" target="_blank">politique de confidentialité</a>
+                        </label>
+                        <div class="invalid-feedback">Veuillez accepter les conditions</div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitPaymentBtn">
+                        <i class="fas fa-lock"></i> Payer maintenant
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+    .payment-methods {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .payment-methods {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .payment-method-card {
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .payment-method-card:hover {
+        border-color: #667eea;
+        background-color: #f8f9ff;
+    }
+    
+    .payment-method-card input[type="radio"]:checked + label {
+        color: #667eea;
+        font-weight: 600;
+    }
+    
+    .payment-method-card input[type="radio"]:checked {
+        border-color: #667eea;
+    }
+    
+    #card-element {
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+    }
+</style>
+
+<!-- Scripts -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentForm = document.getElementById('paymentForm');
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const cardPaymentFields = document.getElementById('cardPaymentFields');
+    const mobileMoneyFields = document.getElementById('mobileMoneyFields');
+    const submitBtn = document.getElementById('submitPaymentBtn');
+    
+    // Toggle payment method fields
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            if (this.value === 'CREDIT_CARD') {
+                cardPaymentFields.style.display = 'block';
+                mobileMoneyFields.style.display = 'none';
+            } else {
+                cardPaymentFields.style.display = 'none';
+                mobileMoneyFields.style.display = 'block';
+            }
+        });
+    });
+    
+    // Initialize Stripe
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const elements = stripe.elements();
+    const cardElement = elements.create('card');
+    cardElement.mount('#card-element');
+    
+    // Handle card errors
+    cardElement.addEventListener('change', function(event) {
+        const displayError = document.getElementById('card-errors');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+        } else {
+            displayError.textContent = '';
+        }
+    });
+    
+    // Handle form submission
+    paymentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!paymentForm.checkValidity()) {
+            e.stopPropagation();
+            paymentForm.classList.add('was-validated');
+            Notify.toast('Veuillez compléter le formulaire', 'warning');
+            return;
+        }
+        
+        // Show loading
+        const spinnerId = Notify.showLoading('Traitement du paiement...');
+        submitBtn.disabled = true;
+        
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        try {
+            if (paymentMethod === 'CREDIT_CARD') {
+                // Handle Stripe payment
+                await handleStripePayment(stripe, cardElement);
+            } else {
+                // Handle Mobile Money payment
+                await handleMobileMoneyPayment(paymentMethod);
+            }
+        } catch (error) {
+            Notify.hideLoading();
+            Notify.error('Erreur de paiement', error.message);
+            submitBtn.disabled = false;
+        }
+    });
+    
+    // Helper functions
+    async function handleStripePayment(stripe, cardElement) {
+        const result = await stripe.createToken(cardElement);
+        
+        if (result.error) {
+            throw new Error(result.error.message);
+        }
+        
+        // Send to backend
+        const response = await fetch('/api/payments/stripe/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+            },
+            body: JSON.stringify({
+                token: result.token.id,
+                book_id: document.getElementById('paymentForm').dataset.bookId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            Notify.hideLoading();
+            Notify.success('Succès!', 'Votre paiement a été confirmé');
+            setTimeout(() => {
+                window.location.href = data.redirect_url;
+            }, 2000);
+        } else {
+            throw new Error(data.error);
+        }
+    }
+    
+    async function handleMobileMoneyPayment(provider) {
+        const phoneNumber = document.getElementById('phoneNumber').value;
+        
+        const response = await fetch('/api/payments/mobile-money/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
+            },
+            body: JSON.stringify({
+                provider: provider,
+                phone_number: phoneNumber,
+                book_id: document.getElementById('paymentForm').dataset.bookId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            Notify.hideLoading();
+            Notify.success('Succès!', 'Veuillez entrer votre PIN pour confirmer');
+            // Redirect to confirmation page
+            setTimeout(() => {
+                window.location.href = data.confirmation_url;
+            }, 2000);
+        } else {
+            throw new Error(data.error);
+        }
+    }
+});
+</script>

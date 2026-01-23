@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #667eea; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #667eea; color: white; padding: 10px 25px; border-radius: 4px; text-decoration: none; margin: 15px 0; }
+        .book-item { background: white; padding: 15px; margin: 10px 0; border-radius: 4px; border-left: 4px solid #667eea; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💡 Your Personalized Recommendations</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.first_name|default:user.username }},</p>
+            <p>Based on your reading history, we've curated some books we think you'll love:</p>
+            
+            {% for book in recommendations %}
+            <div class="book-item">
+                <strong>{{ book.title }}</strong><br>
+                By {{ book.author }}<br>
+                <small>Genre: {{ book.genre }}</small>
+            </div>
+            {% endfor %}
+            
+            <center><a href="{{ discover_url }}" class="button">View All Recommendations</a></center>
+            
+            <p>Happy reading!<br>
+            The BNC Team</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #17a2b8; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #17a2b8; color: white; padding: 10px 25px; border-radius: 4px; text-decoration: none; margin: 15px 0; }
+        .order-details { background: white; padding: 15px; margin: 15px 0; border-radius: 4px; border-left: 4px solid #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Payment Confirmation</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.first_name|default:user.username }},</p>
+            <p>Thank you for your purchase! Here's your order confirmation:</p>
+            
+            <div class="order-details">
+                <strong>Order ID:</strong> {{ order_id }}<br>
+                <strong>Date:</strong> {{ date }}<br>
+                <strong>Amount:</strong> ${{ amount }}
+            </div>
+            
+            <p><strong>Books Purchased:</strong></p>
+            <ul>
+                {% for book in books %}
+                <li>{{ book.title }} by {{ book.author }}</li>
+                {% endfor %}
+            </ul>
+            
+            <center><a href="{{ site_url }}/fr/books/" class="button">My Library</a></center>
+            
+            <p>Your books are ready to read. Enjoy!</p>
+            <p>The BNC Team</p>
+        </div>
+    </div>
+</body>
+</html>

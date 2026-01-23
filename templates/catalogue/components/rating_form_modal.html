@@ -1,0 +1,188 @@
+{% load static %}
+
+{% comment %}
+Formulaire pour évaluer un livre
+Soumis via AJAX à /api/ratings/
+{% endcomment %}
+
+<div class="modal fade" id="ratingModal" tabindex="-1" role="dialog" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ratingModalLabel">
+                    <i class="fas fa-star"></i> Évaluer le livre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="ratingForm" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="modal-body">
+                    <!-- Sélection du livre -->
+                    <div class="mb-3">
+                        <label for="bookSelect" class="form-label">Livre</label>
+                        <select class="form-select" id="bookSelect" name="book" required>
+                            <option value="">-- Sélectionner un livre --</option>
+                            {% for book in books %}
+                            <option value="{{ book.id }}">{{ book.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Veuillez sélectionner un livre</div>
+                    </div>
+                    
+                    <!-- Note (1-5 étoiles) -->
+                    <div class="mb-3">
+                        <label for="ratingStars" class="form-label">Votre note</label>
+                        <div id="ratingStars" class="star-rating">
+                            {% for i in "12345" %}
+                            <button type="button" class="star" data-value="{{ forloop.counter }}" 
+                                    title="{% if forloop.counter == 1 %}Mauvais{% elif forloop.counter == 2 %}Faible{% elif forloop.counter == 3 %}Moyen{% elif forloop.counter == 4 %}Bon{% else %}Excellent{% endif %}">
+                                <i class="far fa-star"></i>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="rating" id="ratingValue" value="0" required>
+                        <div class="invalid-feedback" id="ratingFeedback">Veuillez donner une note</div>
+                    </div>
+                    
+                    <!-- Avis textuel -->
+                    <div class="mb-3">
+                        <label for="reviewText" class="form-label">Votre avis (optionnel)</label>
+                        <textarea class="form-control" id="reviewText" name="review" rows="4" 
+                                  placeholder="Partagez votre avis sur ce livre..."></textarea>
+                        <small class="text-muted">Minimum 10 caractères si rempli</small>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="submitRatingBtn">
+                        <i class="fas fa-check"></i> Évaluer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .star-rating {
+        display: flex;
+        gap: 10px;
+        font-size: 24px;
+    }
+    
+    .star-rating .star {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        color: #ddd;
+        transition: color 0.2s;
+    }
+    
+    .star-rating .star:hover,
+    .star-rating .star.active {
+        color: #ffc107;
+    }
+    
+    .star-rating .star i {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingForm = document.getElementById('ratingForm');
+    const ratingStars = document.querySelectorAll('#ratingStars .star');
+    const ratingValue = document.getElementById('ratingValue');
+    const submitRatingBtn = document.getElementById('submitRatingBtn');
+    
+    // Gestion des étoiles
+    ratingStars.forEach(star => {
+        star.addEventListener('click', function(e) {
+            e.preventDefault();
+            const value = this.dataset.value;
+            ratingValue.value = value;
+            
+            // Mettre à jour l'affichage
+            ratingStars.forEach(s => {
+                if (s.dataset.value <= value) {
+                    s.classList.add('active');
+                    s.querySelector('i').classList.remove('far');
+                    s.querySelector('i').classList.add('fas');
+                } else {
+                    s.classList.remove('active');
+                    s.querySelector('i').classList.add('far');
+                    s.querySelector('i').classList.remove('fas');
+                }
+            });
+        });
+    });
+    
+    // Soumission du formulaire
+    ratingForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!ratingForm.checkValidity()) {
+            e.stopPropagation();
+            ratingForm.classList.add('was-validated');
+            Notify.toast('Veuillez compléter le formulaire', 'warning');
+            return;
+        }
+        
+        // Préparer les données
+        const formData = new FormData(ratingForm);
+        const data = {
+            book: formData.get('book'),
+            rating: formData.get('rating'),
+            review: formData.get('review') || null,
+            is_helpful: true
+        };
+        
+        // Afficher le spinner
+        const spinnerId = Notify.showLoading('Enregistrement de votre évaluation...');
+        submitRatingBtn.disabled = true;
+        
+        // Envoyer à l'API
+        fetch('/api/ratings/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                Notify.hideLoading();
+                Notify.success('Succès!', 'Votre évaluation a été enregistrée');
+                ratingForm.reset();
+                ratingForm.classList.remove('was-validated');
+                
+                // Fermer le modal après 2 secondes
+                setTimeout(() => {
+                    document.getElementById('ratingModal').querySelector('.btn-close').click();
+                    // Rafraîchir la page
+                    location.reload();
+                }, 2000);
+            } else {
+                Notify.hideLoading();
+                Notify.error('Erreur', 'Impossible d\'enregistrer l\'évaluation');
+                submitRatingBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Notify.hideLoading();
+            Notify.error('Erreur réseau', 'Veuillez réessayer plus tard');
+            submitRatingBtn.disabled = false;
+        });
+    });
+});
+</script>

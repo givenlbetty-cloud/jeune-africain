@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}À propos - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 5rem 0;
+        margin-bottom: 3rem;
+    }
+    
+    .hero-icon {
+        font-size: 4rem;
+        background: rgba(255, 255, 255, 0.2);
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+
+    .feature-icon-box {
+        text-align: center;
+        padding: 2rem;
+        border-radius: 1rem;
+        background: white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        height: 100%;
+        transition: transform 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .feature-icon-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .feature-icon-circle {
+        width: 60px;
+        height: 60px;
+        background-color: var(--accent-light, #e3f2fd);
+        color: var(--primary-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    .highlight-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        border: none;
+        overflow: hidden;
+    }
+
+    .stats-item {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Header -->
+<div class="hero-section text-center">
+    <div class="container">
+        <div class="hero-icon fade-in-up">
+            <i class="fas fa-book-reader"></i>
+        </div>
+        <h1 class="display-4 fw-bold mb-3 fade-in-up">Bibliothèque Numérique Calures</h1>
+        <p class="lead mb-0 fade-in-up" style="opacity: 0.9;">L'infrastructure numérique de l'excellence éducative par Calures Éditions.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    
+    <!-- Vision Section -->
+    <div class="row align-items-center mb-5 pb-5 border-bottom">
+        <div class="col-lg-6 mb-4 mb-lg-0">
+            <h2 class="display-6 fw-bold mb-4" style="color: var(--primary-color);">Notre Vision</h2>
+            <p class="lead text-muted">Offrir un accès universel aux savoirs et à la culture africaine tout en garantissant une rémunération juste aux créateurs.</p>
+            <p>BNC est une plateforme de lecture numérique souveraine conçue pour propulser la littérature africaine à l'ère du digital. Plus qu'une simple librairie en ligne, c'est un écosystème complet qui connecte auteurs, éditeurs et lecteurs à travers une expérience sécurisée, accessible et moderne.</p>
+            <p>BNC résout le défi de la distribution du livre en Afrique grâce à une technologie adaptée aux réalités locales, intégrant nativement les paiements mobiles et la lecture hors-ligne.</p>
+        </div>
+        <div class="col-lg-6 text-center">
+            <img src="{% static 'img/about-vision.svg' %}" onerror="this.src='https://placehold.co/600x400/e3f2fd/2196f3?text=Vision+BNC'" class="img-fluid rounded-3 shadow-lg" alt="Vision BNC">
+        </div>
+    </div>
+
+    <!-- Key Features Grid -->
+    <div class="row g-4 mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold">Nos Piliers Fondamentaux</h2>
+            <p class="text-muted">Une technologie pensée pour l'Afrique, sans compromis sur la qualité.</p>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-icon-box">
+                <div class="feature-icon-circle">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Lecture Sécurisée</h4>
+                <p class="text-muted small mt-3">Fichiers protégés contre le piratage. Consultation en streaming haute définition avec outils d'étude avancés (surlignage, notes).</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-icon-box">
+                <div class="feature-icon-circle">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Paiements Locaux</h4>
+                <p class="text-muted small mt-3">Inclusion financière totale avec Mobile Money (Orange, Airtel, M-Pesa) et Cartes Bancaires. Modèle à l'acte ou gratuit.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-icon-box">
+                <div class="feature-icon-circle">
+                    <i class="fas fa-wifi-slash"></i>
+                </div>
+                <h4>Mode Hors-Ligne</h4>
+                <p class="text-muted small mt-3">Application PWA : lisez sans internet. Téléchargez vos livres légalement et synchronisez votre progression ultérieurement.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-icon-box">
+                <div class="feature-icon-circle">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h4>IA & Découverte</h4>
+                <p class="text-muted small mt-3">Moteur de recommandation intelligent analysant les goûts pour proposer des suggestions personnalisées et pertinentes.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-icon-box">
+                <div class="feature-icon-circle">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h4>Administration 360°</h4>
+                <p class="text-muted small mt-3">Outils puissants pour les éditeurs : gestion catalogue, médias associés, suivi financier précis et organisation d'événements.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-icon-box">
+                <div class="feature-icon-circle">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>Communauté</h4>
+                <p class="text-muted small mt-3">Espace d'échange et de partage autour des œuvres. Forums de discussion et avis vérifiés pour guider les lecteurs.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tech Stack / Robustness -->
+    <div class="card highlight-card p-5 mb-5">
+        <div class="row align-items-center">
+            <div class="col-lg-5 mb-4 mb-lg-0 text-center">
+                <div class="display-1 text-primary mb-2"><i class="fas fa-server"></i></div>
+            </div>
+            <div class="col-lg-7">
+                <h3 class="fw-bold mb-3">Une Infrastructure Robuste</h3>
+                <p class="lead mb-4">Architecture évolutive (Django/Python), prête pour le cloud, garantissant fiabilité, rapidité et sécurité des données.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <span class="badge bg-white text-dark border p-2"><i class="fab fa-python me-1"></i> Django</span>
+                    <span class="badge bg-white text-dark border p-2"><i class="fas fa-database me-1"></i> PostgreSQL</span>
+                    <span class="badge bg-white text-dark border p-2"><i class="fas fa-layer-group me-1"></i> PWA</span>
+                    <span class="badge bg-white text-dark border p-2"><i class="fas fa-lock me-1"></i> HTTPS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center py-5">
+        <h2 class="fw-bold mb-4">Rejoignez la révolution littéraire</h2>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'catalogue:catalogue' %}" class="btn btn-primary btn-lg px-5 pill-btn">
+                <i class="fas fa-book-open me-2"></i> Explorer le catalogue
+            </a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'account_signup' %}" class="btn btn-outline-primary btn-lg px-5 pill-btn">
+                <i class="fas fa-user-plus me-2"></i> Créer un compte
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

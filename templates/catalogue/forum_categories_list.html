@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Forum - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1><i class="fas fa-comments"></i> Forum</h1>
+            <p class="text-muted">Discutez avec la communauté et partagez vos expériences</p>
+        </div>
+        <div class="col-md-4">
+            {% if user.is_authenticated %}
+            <a href="{% url 'catalogue:create_forum_thread' %}" class="btn btn-primary w-100">
+                <i class="fas fa-plus"></i> Nouvelle discussion
+            </a>
+            {% else %}
+            <a href="{% url 'users:login' %}" class="btn btn-primary w-100">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-list"></i> Catégories
+                </div>
+                <div class="card-body">
+                    {% if categories %}
+                        {% for category in categories %}
+                        <div class="mb-3">
+                            <a href="{% url 'catalogue:forum_category_detail' category.id %}" class="text-decoration-none">
+                                <strong>{{ category.name }}</strong>
+                                <span class="badge bg-secondary">{{ category.discussion_count }}</span>
+                            </a>
+                            {% if category.description %}
+                            <p class="text-muted small mt-1">{{ category.description|truncatewords:10 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p class="text-muted">Aucune catégorie</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="mb-0"><i class="fas fa-comments"></i> Discussions récentes</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <form class="d-flex" method="get">
+                                <input class="form-control form-control-sm" type="search" name="q" placeholder="Rechercher..." value="{{ query }}">
+                                <button class="btn btn-sm btn-primary ms-2" type="submit"><i class="fas fa-search"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if discussions %}
+                        {% for discussion in discussions %}
+                        <div class="border-bottom pb-3 mb-3 {% if not forloop.last %}pb-3{% endif %}">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'catalogue:forum_thread_detail' discussion.id %}" class="text-decoration-none">
+                                            {{ discussion.title }}
+                                        </a>
+                                    </h6>
+                                    <p class="text-muted small mb-0">
+                                        Par <strong>{{ discussion.author.username }}</strong>
+                                        {% if discussion.category %}
+                                        dans <span class="badge bg-info">{{ discussion.category.name }}</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <span class="badge bg-success me-2"><i class="fas fa-comments"></i> {{ discussion.comments_count }}</span>
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-thumbs-up"></i> {{ discussion.upvotes_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle"></i> Aucune discussion trouvée.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+    .card-header {
+        border-bottom: 2px solid rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}

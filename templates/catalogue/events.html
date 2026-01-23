@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+
+{% block title %}📅 Événements - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .events-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .events-header h1 {
+        font-size: 2.5rem;
+        margin: 0 0 10px;
+        font-weight: 700;
+    }
+    
+    .events-header p {
+        font-size: 1.1rem;
+        opacity: 0.95;
+        margin: 0;
+    }
+    
+    .events-stats {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-top: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+    
+    .filters-container {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .filter-btn {
+        padding: 10px 20px;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.95rem;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: #667eea;
+        color: white;
+    }
+    
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+    
+    .event-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    }
+    
+    .event-image {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .event-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .event-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .badge-upcoming {
+        background: #10b981;
+    }
+    
+    .badge-happening {
+        background: #f59e0b;
+        animation: pulse 2s infinite;
+    }
+    
+    .badge-past {
+        background: #6b7280;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    .event-content {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .event-type {
+        font-size: 0.85rem;
+        color: #667eea;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+    
+    .event-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0 0 12px;
+        line-height: 1.3;
+        color: #1f2937;
+    }
+    
+    .event-description {
+        font-size: 0.95rem;
+        color: #6b7280;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        flex-grow: 1;
+    }
+    
+    .event-meta {
+        font-size: 0.9rem;
+        color: #9ca3af;
+        margin-bottom: 12px;
+    }
+    
+    .event-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    
+    .event-meta-item i {
+        width: 16px;
+        text-align: center;
+        color: #667eea;
+    }
+    
+    .event-cta {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+    }
+    
+    .event-cta:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #6b7280;
+        margin: 0 0 10px;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 40px;
+    }
+    
+    .pagination a,
+    .pagination span {
+        padding: 10px 14px;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        text-decoration: none;
+        color: #667eea;
+        transition: all 0.3s;
+    }
+    
+    .pagination a:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .pagination .current {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    @media (max-width: 768px) {
+        .events-header h1 {
+            font-size: 1.8rem;
+        }
+        
+        .events-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .filters-container {
+            flex-direction: column;
+        }
+        
+        .filter-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="events-header">
+    <h1>📅 Événements & Annonces</h1>
+    <p>Découvrez les nouveaux livres, ateliers et conférences</p>
+    
+    <div class="events-stats">
+        <div class="stat-item">
+            <span class="stat-number">{{ happening_count }}</span>
+            <span class="stat-label">En cours</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{{ upcoming_count }}</span>
+            <span class="stat-label">À venir</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number">{{ past_count }}</span>
+            <span class="stat-label">Passés</span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filtres -->
+    <div class="filters-container">
+        <a href="{% url 'catalogue:events_list' %}" class="filter-btn {% if not selected_status %}active{% endif %}">
+            🔥 Tous les événements
+        </a>
+        {% for type_code, type_label in event_types %}
+        <a href="?type={{ type_code }}" class="filter-btn {% if selected_type == type_code %}active{% endif %}">
+            {% if type_code == 'NEW_BOOK' %}📚{% elif type_code == 'WORKSHOP' %}🎓{% elif type_code == 'CONFERENCE' %}🎤{% elif type_code == 'ANNOUNCEMENT' %}📢{% else %}📍{% endif %}
+            {{ type_label }}
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- Grille d'événements -->
+    {% if events %}
+    <div class="events-grid">
+        {% for event in events %}
+        <a href="{% url 'catalogue:event_detail' event.id %}" class="event-card">
+            <div class="event-image">
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                {% else %}
+                    {% if event.event_type == 'NEW_BOOK' %}
+                        📚
+                    {% elif event.event_type == 'WORKSHOP' %}
+                        🎓
+                    {% elif event.event_type == 'CONFERENCE' %}
+                        🎤
+                    {% elif event.event_type == 'ANNOUNCEMENT' %}
+                        📢
+                    {% else %}
+                        📍
+                    {% endif %}
+                {% endif %}
+                
+                <!-- Badge statut -->
+                {% if event.is_happening_now %}
+                    <span class="event-badge badge-happening">🔴 EN COURS</span>
+                {% elif event.is_upcoming %}
+                    <span class="event-badge badge-upcoming">✅ À VENIR</span>
+                {% else %}
+                    <span class="event-badge badge-past">⏱️ PASSÉ</span>
+                {% endif %}
+            </div>
+            
+            <div class="event-content">
+                <div class="event-type">{{ event.get_event_type_display }}</div>
+                
+                <h3 class="event-title">{{ event.title }}</h3>
+                
+                <p class="event-description">
+                    {{ event.description|truncatewords:20 }}
+                </p>
+                
+                <div class="event-meta">
+                    <div class="event-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>{{ event.date_start|date:"d M Y - H:i" }}</span>
+                    </div>
+                    
+                    {% if event.location %}
+                    <div class="event-meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ event.location }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if event.book %}
+                    <div class="event-meta-item">
+                        <i class="fas fa-book"></i>
+                        <span>{{ event.book.title }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="event-cta">
+                    👉 Voir les détails
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h3>Aucun événement trouvé</h3>
+        <p>Il n'y a pas d'événement correspondant à vos critères pour le moment.</p>
+        <a href="{% url 'catalogue:events_list' %}" class="event-cta" style="display: inline-block; margin-top: 20px;">
+            Réinitialiser les filtres
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">« Première</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Précédente</a>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="current">{{ num }}</span>
+            {% else %}
+                <a href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Suivante</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Dernière »</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</div>
+
+<!-- Event Registration Modal -->
+{% include 'catalogue/events_modal.html' %}
+
+{% endblock %}

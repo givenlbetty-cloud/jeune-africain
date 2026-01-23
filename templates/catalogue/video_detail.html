@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ video.title }} - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="mb-4">
+        <a href="{% url 'catalogue:videos_list' %}" class="text-decoration-none"><i class="fas fa-arrow-left"></i> Retour aux vidéos</a>
+    </div>
+
+    <h1>{{ video.title }}</h1>
+
+    {% if video.video_file %}
+    <div class="mb-4">
+        <video controls class="w-100 rounded shadow-sm" style="max-height: 600px; background: #000;">
+            <source src="{{ video.video_file.url }}" type="video/mp4">
+            <source src="{{ video.video_file.url }}" type="video/webm">
+            Votre navigateur ne supporte pas la lecture de cette vidéo.
+        </video>
+    </div>
+    {% elif video.external_url %}
+    <div class="mb-4">
+        <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
+            <iframe src="{{ video.embed_url }}" title="{{ video.title }}" allowfullscreen></iframe>
+        </div>
+        <div class="mt-2 text-end">
+            <small class="text-muted"><i class="fas fa-external-link-alt"></i> Source: <a href="{{ video.external_url }}" target="_blank" rel="noopener noreferrer">{{ video.external_url|truncatechars:50 }}</a></small>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> Aucune source vidéo disponible.
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            {% if video.description %}
+            <h4>À propos</h4>
+            <p>{{ video.description }}</p>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    {% if video.book %}
+                    <p><strong>Livre:</strong> {{ video.book.title }}</p>
+                    {% endif %}
+                    {% if video.duration %}
+                    <p><strong>Durée:</strong> {{ video.duration }} secondes</p>
+                    {% endif %}
+                    {% if video.rating %}
+                    <p><strong>Note:</strong> <i class="fas fa-star"></i> {{ video.rating|floatformat:1 }}/5</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

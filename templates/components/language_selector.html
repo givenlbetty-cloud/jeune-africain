@@ -1,0 +1,202 @@
+{% load i18n %}
+
+<!-- Language Selector with Flag Icons and Smooth Animation -->
+<div class="language-selector" id="languageSelector">
+    <button class="language-toggle" id="languageToggle" title="{% trans 'Sélectionner la langue' %}">
+        <i class="fas fa-globe"></i>
+        <span class="current-lang" id="currentLang">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% if LANGUAGE_CODE == 'fr' %}
+                <span class="flag-emoji">🇫🇷</span>
+                <span class="lang-text">FR</span>
+            {% elif LANGUAGE_CODE == 'en' %}
+                <span class="flag-emoji">🇬🇧</span>
+                <span class="lang-text">EN</span>
+            {% else %}
+                <span class="flag-emoji">🇸🇦</span>
+                <span class="lang-text">AR</span>
+            {% endif %}
+        </span>
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    
+    <!-- Language Menu -->
+    <div class="language-menu" id="languageMenu">
+        <form method="post" action="{% url 'set_language' %}" class="language-form">
+            {% csrf_token %}
+            
+            <!-- French -->
+            <button type="submit" name="language" value="fr" class="language-option">
+                <span class="flag-emoji">🇫🇷</span>
+                <span class="lang-name">Français</span>
+                {% if LANGUAGE_CODE == 'fr' %}<i class="fas fa-check"></i>{% endif %}
+            </button>
+            
+            <!-- English -->
+            <button type="submit" name="language" value="en" class="language-option">
+                <span class="flag-emoji">🇬🇧</span>
+                <span class="lang-name">English</span>
+                {% if LANGUAGE_CODE == 'en' %}<i class="fas fa-check"></i>{% endif %}
+            </button>
+            
+            <!-- Arabic -->
+            <button type="submit" name="language" value="ar" class="language-option">
+                <span class="flag-emoji">🇸🇦</span>
+                <span class="lang-name">العربية</span>
+                {% if LANGUAGE_CODE == 'ar' %}<i class="fas fa-check"></i>{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .language-selector {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .language-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        color: #333;
+    }
+    
+    .language-toggle:hover {
+        background: #f5f5f5;
+        border-color: #667eea;
+        color: #667eea;
+    }
+    
+    .current-lang {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .flag-emoji {
+        font-size: 18px;
+    }
+    
+    .lang-text {
+        font-weight: 600;
+        font-size: 12px;
+    }
+    
+    .language-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-top: 8px;
+        min-width: 150px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .language-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .language-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .language-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border: none;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        color: #333;
+        font-size: 14px;
+        width: 100%;
+    }
+    
+    .language-option:first-child {
+        border-radius: 7px 7px 0 0;
+    }
+    
+    .language-option:last-child {
+        border-radius: 0 0 7px 7px;
+    }
+    
+    .language-option:hover {
+        background: #f5f5f5;
+        color: #667eea;
+    }
+    
+    .language-option.active {
+        background: #f0f3ff;
+        color: #667eea;
+        font-weight: 600;
+    }
+    
+    .language-option i {
+        margin-left: auto;
+        color: #667eea;
+    }
+    
+    .lang-name {
+        flex: 1;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const languageToggle = document.getElementById('languageToggle');
+    const languageMenu = document.getElementById('languageMenu');
+    const languageForm = document.querySelector('.language-form');
+    
+    if (!languageToggle) return;
+    
+    // Toggle menu
+    languageToggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        languageMenu.classList.toggle('active');
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.language-selector')) {
+            languageMenu.classList.remove('active');
+        }
+    });
+    
+    // Handle language change with smooth animation
+    const languageOptions = document.querySelectorAll('.language-option');
+    languageOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            // Add fade out animation
+            document.documentElement.style.opacity = '0.7';
+            document.documentElement.style.transition = 'opacity 0.3s ease';
+            
+            // Submit form after brief delay for visual effect
+            setTimeout(() => {
+                this.closest('form').submit();
+            }, 150);
+        });
+    });
+});
+</script>

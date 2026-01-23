@@ -1,0 +1,9 @@
+./templates/base_old.html
+./templates/home_old.html
+./templates/catalogue/book_reader_modern.html.bak
+./templates/catalogue/catalogue_old.html
+./templates/catalogue/book_reader_old.html
+./templates/catalogue/book_reader_new_backup_hd.html
+./templates/catalogue/book_reader.html.bak
+./catalogue/tests_analytics.py.bak
+./catalogue/admin_backup.py

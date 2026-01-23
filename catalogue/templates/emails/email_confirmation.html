@@ -1,0 +1,106 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Confirmer Votre Adresse Email" %}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .confirmation-code {
+            background-color: #f0f0f0;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .confirm-button {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>{% trans "Confirmez Votre Email" %}</h1>
+        </div>
+        
+        <div class="content">
+            <p>{% blocktrans with email=user.email %}Merci pour votre inscription! Nous vous avons envoyé ce mail à {{ email }}{% endblocktrans %}</p>
+            
+            <p>{% trans "Pour accéder complètement à votre compte, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous." %}</p>
+            
+            <a href="{{ verification_url }}" class="confirm-button">
+                {% trans "Confirmer Mon Email" %}
+            </a>
+            
+            <p>{% trans "Ou entrez ce code de confirmation:" %}</p>
+            
+            <div class="confirmation-code">
+                {{ confirmation_code }}
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ {% trans "Important:" %}</strong><br>
+                {% trans "Ce lien expire dans 24 heures. Si vous n'avez pas demandé cette inscription, vous pouvez ignorer cet email." %}
+            </div>
+            
+            <p>{% trans "Des questions? Contactez-nous à support@bnc-library.com" %}</p>
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} BNC Digital Library</p>
+        </div>
+    </div>
+</body>
+</html>

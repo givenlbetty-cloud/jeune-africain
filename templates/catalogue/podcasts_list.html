@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Podcasts - BNC{% endblock %}
+
+{% block content %}
+<style>
+    /* YouTube-like Styles */
+    .media-container {
+        padding: 20px 40px;
+        background-color: #f9f9f9;
+        min-height: 100vh;
+    }
+    
+    .media-header {
+        margin-bottom: 30px;
+    }
+    
+    .chip-container {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .chip {
+        background: #0000000d;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        white-space: nowrap;
+        border: 1px solid transparent;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: var(--text-primary);
+    }
+    
+    .chip:hover {
+        background: #0000001a;
+        color: var(--text-primary);
+    }
+    
+    .chip.active {
+        background: var(--text-primary);
+        color: white;
+    }
+
+    .media-card {
+        border: none;
+        background: transparent;
+        margin-bottom: 30px;
+        cursor: pointer;
+    }
+    
+    .media-thumbnail {
+        position: relative;
+        border-radius: 12px;
+        overflow: hidden;
+        aspect-ratio: 1/1; /* Square for podcasts usually */
+        background: #e0e0e0;
+        margin-bottom: 12px;
+        max-width: 80%; /* Smaller than video thumbnail */
+        margin-left: auto; 
+        margin-right: auto;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .media-thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .media-card:hover .media-thumbnail img {
+        transform: scale(1.02);
+    }
+    
+    .episode-badge {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 3px 6px;
+        font-size: 0.75rem;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    
+    .media-info {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    
+    .media-details {
+        flex: 1;
+    }
+    
+    .media-title {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        color: var(--text-primary);
+    }
+    
+    .media-meta {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        line-height: 1.3;
+    }
+</style>
+
+<div class="media-container">
+    <!-- Header / Chips -->
+    <div class="chip-container">
+        <a href="?cat=all" class="chip active">Tout</a>
+        <a href="?cat=tech" class="chip">Technologie</a>
+        <a href="?cat=society" class="chip">Société</a>
+        <a href="?cat=culture" class="chip">Culture</a>
+        <a href="?cat=news" class="chip">Actualités</a>
+    </div>
+
+    <!-- Media Grid -->
+    {% if podcasts %}
+    <div class="row">
+        {% for podcast in podcasts %}
+        <div class="col-12 col-sm-6 col-lg-3 col-xl-2">
+            <div class="media-card" onclick="window.location.href='{% url 'catalogue:podcast_detail' podcast.id %}'">
+                <div class="media-thumbnail">
+                    {% if podcast.cover_url %}
+                        <img src="{{ podcast.cover_url }}" alt="{{ podcast.title }}">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center h-100 bg-secondary text-white">
+                            <i class="fas fa-microphone fa-3x"></i>
+                        </div>
+                    {% endif %}
+                    <span class="episode-badge">{{ podcast.episode_count|default:"0" }} épisodes</span>
+                </div>
+                
+                <div class="media-info">
+                    <div class="media-details">
+                        <h3 class="media-title">{{ podcast.title }}</h3>
+                        <div class="media-meta">
+                            {{ podcast.author }}<br>
+                            {{ podcast.subscriber_count|default:"0" }} abonnés
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-microphone fa-4x text-muted mb-3"></i>
+        <h3>Aucun podcast trouvé</h3>
+        <p class="text-muted">Explorez nos catégories pour en trouver.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

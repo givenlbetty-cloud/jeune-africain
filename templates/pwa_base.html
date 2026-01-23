@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a73e8">
+    <meta name="description" content="BNC - Bibliothèque Numérique Complète">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16x16.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+    
+    <title>BNC - Bibliothèque Numérique</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- PWA Styles -->
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #34a853;
+            --danger-color: #ea4335;
+            --warning-color: #fbbc04;
+            --light-color: #f8f9fa;
+            --dark-color: #202124;
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            transition: var(--transition);
+        }
+        
+        body.offline {
+            background-color: #fff3cd;
+        }
+        
+        /* Navigation bar */
+        .navbar {
+            background-color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+        
+        .navbar-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+        
+        /* Offline indicator */
+        .offline-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--danger-color);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+        
+        body.offline .offline-indicator {
+            opacity: 1;
+        }
+        
+        /* Sync status badge */
+        .sync-badge {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(120px);
+            transition: var(--transition);
+        }
+        
+        .sync-badge.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .sync-badge .spinner-border {
+            width: 16px;
+            height: 16px;
+            border-width: 2px;
+        }
+        
+        /* Service Worker status */
+        .sw-status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+        
+        .sw-status.active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .sw-status.inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        /* PWA Update notification */
+        .pwa-update-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            max-width: 320px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+            animation: slideInUp 0.3s ease;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .pwa-update-content {
+            padding: 16px;
+        }
+        
+        .pwa-update-content p {
+            margin: 0 0 12px 0;
+            font-weight: 500;
+        }
+        
+        .pwa-update-content .btn {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+        }
+        
+        /* Offline mode styles */
+        .offline-mode-badge {
+            background-color: var(--warning-color);
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .offline-mode-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--danger-color);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        /* Sync queue info */
+        .sync-queue-info {
+            padding: 12px 16px;
+            background-color: #e3f2fd;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 4px;
+            margin-bottom: 16px;
+        }
+        
+        .sync-queue-info.loading {
+            background-color: #fff3cd;
+            border-left-color: var(--warning-color);
+        }
+        
+        .sync-queue-info.success {
+            background-color: #d4edda;
+            border-left-color: var(--secondary-color);
+        }
+        
+        .sync-queue-info.error {
+            background-color: #f8d7da;
+            border-left-color: var(--danger-color);
+        }
+        
+        /* Content area adjustments for offline */
+        body.offline {
+            opacity: 0.95;
+        }
+        
+        body.offline .disabled-offline {
+            opacity: 0.6;
+            pointer-events: none;
+            cursor: not-allowed;
+        }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sync-badge,
+            .pwa-update-notification {
+                bottom: 16px;
+                right: 16px;
+                left: 16px;
+            }
+            
+            .sync-badge {
+                right: 16px;
+                left: auto;
+                max-width: none;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Offline indicator bar -->
+    <div class="offline-indicator"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book"></i> BNC
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/catalogue/">Catalogue</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/lecteur/">Lecteur</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled-offline" href="/library/">Bibliothèque</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> Compte
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="/profile/">Profil</a></li>
+                            <li><a class="dropdown-item" href="/settings/">Paramètres</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout/">Déconnexion</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main content -->
+    <main class="container-fluid">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Sync badge -->
+    <div class="sync-badge" id="syncBadge">
+        <span class="loading-spinner"></span>
+        <span id="syncStatus">Synchronisation...</span>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- PWA Manager -->
+    <script src="{% static 'js/pwa_manager.js' %}"></script>
+    
+    <!-- PWA Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize PWA Manager
+            if (window.pwaManager) {
+                // Offline callback
+                window.pwaManager.onOffline = () => {
+                    document.body.classList.add('offline');
+                    showOfflineBadge();
+                };
+                
+                // Online callback
+                window.pwaManager.onOnline = () => {
+                    document.body.classList.remove('offline');
+                    hideOfflineBadge();
+                };
+                
+                // Sync start
+                window.pwaManager.onSyncStart = () => {
+                    showSyncBadge('Synchronisation en cours...');
+                };
+                
+                // Sync complete
+                window.pwaManager.onSyncComplete = (result) => {
+                    showSyncBadge(`Synchronisé: ${result.message}`, 'success');
+                    setTimeout(() => hideSyncBadge(), 3000);
+                };
+                
+                // Sync error
+                window.pwaManager.onSyncError = (error) => {
+                    showSyncBadge(`Erreur: ${error.message}`, 'error');
+                    setTimeout(() => hideSyncBadge(), 5000);
+                };
+            }
+            
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        });
+        
+        // Helper functions
+        function showOfflineBadge() {
+            const badge = document.querySelector('.navbar-text');
+            if (badge) {
+                badge.innerHTML = '<span class="offline-mode-badge"><i class="fas fa-wifi-off"></i> Mode offline</span>';
+            }
+        }
+        
+        function hideOfflineBadge() {
+            const badge = document.querySelector('.navbar-text');
+            if (badge) {
+                badge.innerHTML = '<span class="sw-status active"><i class="fas fa-check-circle"></i> En ligne</span>';
+            }
+        }
+        
+        function showSyncBadge(message, type = 'info') {
+            const syncBadge = document.getElementById('syncBadge');
+            const syncStatus = document.getElementById('syncStatus');
+            
+            syncStatus.textContent = message;
+            syncBadge.classList.add('show');
+            
+            if (type === 'success') {
+                syncBadge.style.background = '#d4edda';
+                syncBadge.style.color = '#155724';
+            } else if (type === 'error') {
+                syncBadge.style.background = '#f8d7da';
+                syncBadge.style.color = '#721c24';
+            } else {
+                syncBadge.style.background = 'white';
+                syncBadge.style.color = 'inherit';
+            }
+        }
+        
+        function hideSyncBadge() {
+            const syncBadge = document.getElementById('syncBadge');
+            syncBadge.classList.remove('show');
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

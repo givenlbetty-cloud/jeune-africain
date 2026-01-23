@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ audiobook.title }} - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="mb-4">
+        <a href="{% url 'catalogue:audiobooks_list' %}" class="text-decoration-none"><i class="fas fa-arrow-left"></i> Retour aux audiobooks</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            {% if audiobook.book.cover_url %}
+            <img src="{{ audiobook.book.cover_url }}" alt="{{ audiobook.title }}" class="img-fluid rounded shadow">
+            {% endif %}
+        </div>
+        <div class="col-md-8">
+            <h1>{{ audiobook.title }}</h1>
+            <p class="text-muted"><strong>{{ audiobook.book.author.name }}</strong></p>
+            
+            {% if audiobook.description %}
+            <p>{{ audiobook.description }}</p>
+            {% endif %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Durée:</strong> {{ audiobook.duration_minutes|default:"--" }} minutes</p>
+                    <p><strong>Narrateur:</strong> {{ audiobook.narrator|default:"--" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Format:</strong> {{ audiobook.format|default:"--" }}</p>
+                    <p><strong>Bitrate:</strong> {{ audiobook.bitrate|default:"--" }}</p>
+                </div>
+            </div>
+
+            <a href="{% url 'catalogue:audiobook_player' audiobook.book.id %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-play-circle"></i> Écouter maintenant
+            </a>
+        </div>
+    </div>
+
+    {% if chapters %}
+    <div class="mt-5">
+        <h3>Chapitres</h3>
+        <div class="list-group">
+            {% for chapter in chapters %}
+            <div class="list-group-item">
+                <h6 class="mb-0">{{ chapter.chapter_number }}. {{ chapter.title }}</h6>
+                <small class="text-muted">{{ chapter.duration_minutes|default:"--" }} min</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

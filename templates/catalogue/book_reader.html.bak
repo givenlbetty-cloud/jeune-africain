@@ -1,0 +1,1331 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lire {{ book.title }} - BNC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/PDF.js/3.11.174/pdf_viewer.min.css">
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+    
+    .reader-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #f5f5f5, #ffffff);
+    }
+    
+    /* ============= READER HEADER ============= */
+    .reader-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 16px 24px;
+        border-bottom: 3px solid var(--secondary-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .reader-header h2 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .reader-header h2 i {
+        font-size: 1.5rem;
+    }
+    
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    /* ============= READER TOOLBAR ============= */
+    .reader-toolbar {
+        background: white;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+    
+    .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .toolbar-group.tools {
+        border-right: 1px solid #e0e0e0;
+        padding-right: 12px;
+    }
+    
+    .toolbar-button {
+        background: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .toolbar-button:hover {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .toolbar-button.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+    }
+    
+    .toolbar-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        border-color: #ccc;
+    }
+    
+    /* ============= PAGE CONTROLS ============= */
+    .page-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+    }
+    
+    .page-input {
+        width: 50px;
+        padding: 6px 8px;
+        border: 1px solid var(--border-color);
+        background: white;
+        color: var(--text-primary);
+        border-radius: 4px;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .page-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(26, 77, 62, 0.1);
+    }
+    
+    .page-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    /* ============= READER CONTENT ============= */
+    .reader-content {
+        flex: 1;
+        overflow: auto;
+        background: linear-gradient(135deg, #fafafa, #f5f5f5);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        position: relative;
+    }
+    
+    [data-bs-theme="dark"] .reader-content {
+        background: linear-gradient(135deg, #1a1a1a, #252525);
+    }
+    
+    /* Scrollbar personnalisé - ✨ Amélioré */
+    .reader-content::-webkit-scrollbar {
+        width: 12px;
+    }
+    
+    .reader-content::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+    }
+    
+    .reader-content::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+        border: 2px solid rgba(0, 0, 0, 0.05);
+        transition: background 0.3s ease;
+    }
+    
+    .reader-content::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-light);
+        box-shadow: 0 0 6px rgba(26, 77, 62, 0.4);
+    }
+    
+    [data-bs-theme="dark"] .reader-content::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .reader-canvas {
+        max-width: 100%;
+        max-height: 100%;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+        background: white;
+        /* ✨ Améliorations d'affichage */
+        image-rendering: high-quality;
+        image-rendering: crisp-edges;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
+        margin: 10px;
+    }
+    
+    [data-bs-theme="dark"] .reader-canvas {
+        background: #1a1a1a;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+    }
+    
+    /* ============= TEXT CONTENT ============= */
+    .text-content {
+        max-width: 820px;
+        background: white;
+        padding: 60px 50px;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        line-height: 1.9;
+        font-size: 17px;
+        color: #2c3e50;
+        font-family: Georgia, serif;
+    }
+    
+    [data-bs-theme="dark"] .text-content {
+        background: #2d2d2d;
+        color: #ecf0f1;
+    }
+    
+    .text-content p {
+        margin-bottom: 20px;
+    }
+    
+    .text-content h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin: 40px 0 20px;
+        color: var(--primary-color);
+    }
+    
+    [data-bs-theme="dark"] .text-content h1 {
+        color: var(--secondary-color);
+    }
+    
+    .text-content h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 30px 0 15px;
+        color: var(--primary-color);
+    }
+    
+    .text-content h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 25px 0 12px;
+        color: var(--primary-color);
+    }
+    
+    /* ============= READER SIDEBAR ============= */
+    .reader-sidebar {
+        position: fixed;
+        right: -350px;
+        top: 0;
+        width: 350px;
+        height: 100vh;
+        background: white;
+        border-left: 3px solid var(--secondary-color);
+        overflow-y: auto;
+        transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1050;
+        box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    [data-bs-theme="dark"] .reader-sidebar {
+        background: #2d2d2d;
+        border-left-color: var(--secondary-color);
+    }
+    
+    .reader-sidebar.open {
+        right: 0;
+    }
+    
+    .sidebar-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 20px;
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.1rem;
+        position: sticky;
+        top: 0;
+    }
+    
+    .sidebar-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.3s;
+    }
+    
+    .sidebar-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+    
+    .sidebar-content {
+        padding: 20px;
+    }
+    
+    .sidebar-section {
+        margin-bottom: 30px;
+    }
+    
+    .sidebar-section-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 1rem;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    [data-bs-theme="dark"] .sidebar-section-title {
+        color: var(--secondary-color);
+    }
+    
+    /* ============= READING STATS ============= */
+    .reading-stats {
+        background: linear-gradient(135deg, #f0f0f0, #f8f9fa);
+        padding: 16px;
+        border-radius: 8px;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    [data-bs-theme="dark"] .reading-stats {
+        background: linear-gradient(135deg, #1e1e1e, #252525);
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-item:last-child {
+        border-bottom: none;
+    }
+    
+    .stat-label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+    
+    /* ============= BOOKMARKS ============= */
+    .bookmark-item {
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    [data-bs-theme="dark"] .bookmark-item {
+        background: #353535;
+    }
+    
+    .bookmark-item:hover {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateX(4px);
+    }
+    
+    .bookmark-item.highlighted {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .bookmark-text {
+        font-size: 0.9rem;
+        font-style: italic;
+        margin-bottom: 6px;
+    }
+    
+    .bookmark-page {
+        font-size: 0.8rem;
+        opacity: 0.7;
+    }
+    
+    /* ============= PROGRESS BAR - ✨ SENSUELLE ============= */
+    .progress-bar-container {
+        width: 100%;
+        height: 6px;
+        background: rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        transition: height 0.3s ease;
+    }
+    
+    .progress-bar-container:hover {
+        height: 8px;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 0 12px rgba(26, 77, 62, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+        position: relative;
+    }
+    
+    .progress-bar-fill::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 20px;
+        height: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(26, 77, 62, 0.3);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .progress-bar-container:hover .progress-bar-fill::after {
+        opacity: 1;
+    }
+    
+    [data-bs-theme="dark"] .progress-bar-container {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* ============= RESPONSIVE ============= */
+    @media (max-width: 768px) {
+        .reader-header {
+            padding: 12px 16px;
+        }
+        
+        .reader-header h2 {
+            font-size: 1.1rem;
+        }
+        
+        .reader-toolbar {
+            padding: 10px 16px;
+            gap: 8px;
+        }
+        
+        .toolbar-button {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+        
+        .reader-sidebar {
+            width: 280px;
+            right: -280px;
+        }
+        
+        .text-content {
+            padding: 30px 20px;
+            font-size: 16px;
+        }
+        
+        .reader-content {
+            padding: 20px 10px;
+        }
+    }
+    
+    /* ============= ANIMATIONS ============= */
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 1; transform: translateX(-50%) translateY(0); }
+        to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    }
+    
+    @keyframes highlightPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+        50% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0); }
+    }
+    
+    @keyframes glow {
+        0%, 100% { filter: drop-shadow(0 0 4px rgba(26, 77, 62, 0.3)); }
+        50% { filter: drop-shadow(0 0 8px rgba(26, 77, 62, 0.6)); }
+    }
+    
+    .reader-container {
+        animation: slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    /* ============= HIGHLIGHT SENSUEL ============= */
+    .highlight {
+        position: relative;
+        background: linear-gradient(120deg, rgba(255, 193, 7, 0.4), rgba(255, 152, 0, 0.3));
+        border-radius: 4px;
+        padding: 2px 6px;
+        margin: 0 -2px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+    }
+    
+    .highlight:hover {
+        background: linear-gradient(120deg, rgba(255, 193, 7, 0.6), rgba(255, 152, 0, 0.5));
+        box-shadow: 0 4px 16px rgba(255, 193, 7, 0.4);
+        transform: translateY(-1px);
+    }
+    
+    .highlight.active {
+        animation: highlightPulse 2s infinite;
+        background: linear-gradient(120deg, rgba(255, 193, 7, 0.7), rgba(255, 152, 0, 0.6));
+    }
+    
+    /* ============= NOTE TOOLTIP ============= */
+    .note-tooltip {
+        position: absolute;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        z-index: 1100;
+        box-shadow: 0 4px 16px rgba(26, 77, 62, 0.3);
+        max-width: 250px;
+        animation: slideDown 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border-left: 3px solid var(--secondary-color);
+    }
+    
+    .note-tooltip::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 20px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 8px solid var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reader-container">
+    <!-- Header -->
+    <div class="reader-header">
+        <div>
+            <h2>
+                <i class="fas fa-book-open"></i>
+                {{ book.title }}
+            </h2>
+            <small style="opacity: 0.9; font-size: 0.9rem;">par {{ book.author }}</small>
+        </div>
+        <div class="header-right">
+            <div id="readingTime" style="font-size: 0.9rem; opacity: 0.9;">
+                <i class="fas fa-hourglass-half"></i> <span id="timeValue">0</span> min
+            </div>
+            <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-outline-light" style="padding: 6px 12px; font-size: 0.9rem;">
+                <i class="fas fa-times"></i> Fermer
+            </a>
+        </div>
+    </div>
+    
+    <!-- Toolbar -->
+    <div class="reader-toolbar">
+        <div class="toolbar-group tools">
+            <button class="toolbar-button" id="zoomOut" title="Réduire">
+                <i class="fas fa-search-minus"></i> Zoom -
+            </button>
+            <button class="toolbar-button" id="zoomIn" title="Agrandir">
+                <i class="fas fa-search-plus"></i> Zoom +
+            </button>
+            <button class="toolbar-button" id="toggleSidebar" title="Marque-pages">
+                <i class="fas fa-bookmark"></i> Marque-pages
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <button class="toolbar-button" id="prevPage" title="Page précédente" disabled>
+                <i class="fas fa-chevron-left"></i> Précédent
+            </button>
+            <div class="page-controls">
+                <input type="number" id="pageInput" class="page-input" min="1" value="1">
+                <span class="page-label">/ <span id="totalPages">1</span></span>
+            </div>
+            <button class="toolbar-button" id="nextPage" title="Page suivante">
+                <i class="fas fa-chevron-right"></i> Suivant
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <span id="percentDisplay" style="font-weight: 600; color: var(--primary-color); font-size: 0.95rem;">0%</span>
+        </div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar" style="width: 0%;"></div>
+    </div>
+    
+    <!-- Reader Content -->
+    <div class="reader-content" id="readerContent">
+        {% if book.get_file_url %}
+            <canvas id="pdfCanvas" class="reader-canvas"></canvas>
+        {% else %}
+            <div class="text-content" id="textContent">
+                {% autoescape off %}{{ book.content }}{% endautoescape %}
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="reader-sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span><i class="fas fa-bookmark"></i> Marque-pages</span>
+            <button class="sidebar-close" id="closeSidebar">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <!-- Reading Stats -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-chart-line"></i> Statistiques de lecture
+                </div>
+                <div class="reading-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Pages lues:</span>
+                        <span class="stat-value" id="pagesRead">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Progression:</span>
+                        <span class="stat-value" id="progressPercent">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Temps écoulé:</span>
+                        <span class="stat-value" id="elapsedTime">0 min</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bookmarks -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-flag"></i> Vos marque-pages
+                </div>
+                <div id="bookmarksList">
+                    <p style="color: var(--text-secondary); text-align: center; padding: 20px 0;">
+                        <i class="fas fa-inbox"></i><br>
+                        Aucun marque-page pour le moment
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Notes -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">
+                    <i class="fas fa-sticky-note"></i> Ajouter une note
+                </div>
+                <textarea 
+                    id="noteInput" 
+                    class="form-control" 
+                    placeholder="Écrivez votre note..."
+                    rows="4"
+                    style="resize: none; border-radius: 6px; border: 1px solid var(--border-color);">
+                </textarea>
+                <button 
+                    class="btn btn-primary mt-2 w-100"
+                    id="addNoteBtn"
+                    style="background: linear-gradient(135deg, var(--primary-color), var(--primary-light)); border: none;">
+                    <i class="fas fa-plus"></i> Ajouter la note
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PDF.js Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PDF.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PDF.js/3.11.174/pdf_viewer.min.js"></script>
+
+<script>
+    // Configuration
+    const pdfUrl = "{{ book.get_file_url }}";
+    const lastPageRead = {{ last_page|default:"1" }};  
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentZoom = 1.3;
+    let startTime = new Date();
+    let hasScrolled = false;
+    let selectedText = null;
+    let highlights = [];
+    
+    // ✨ Toast notification améliée
+    function showToast(message, duration = 3000, type = 'info') {
+        const toast = document.createElement('div');
+        let bgColor = 'linear-gradient(135deg, var(--primary-color), var(--primary-light))';
+        if (type === 'success') bgColor = 'linear-gradient(135deg, #10b981, #059669)';
+        if (type === 'warning') bgColor = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${bgColor};
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            font-weight: 600;
+            font-size: 0.95rem;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+        toast.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            setTimeout(() => toast.remove(), 400);
+        }, duration);
+    }
+    
+    // ✨ NOUVELLE: Système de surlignage intéractif
+    function enableTextHighlighting() {
+        const textContent = document.getElementById('textContent');
+        if (!textContent) return;
+        
+        textContent.addEventListener('mouseup', handleTextSelection);
+    }
+    
+    function handleTextSelection(event) {
+        const selection = window.getSelection();
+        if (selection.toString().length === 0) return;
+        
+        const selectedText = selection.toString();
+        const range = selection.getRangeAt(0);
+        
+        // Créer une div overlay pour afficher les actions
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            z-index: 2100;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        `;
+        
+        const highlightBtn = document.createElement('button');
+        highlightBtn.innerHTML = '<i class="fas fa-highlighter"></i>';
+        highlightBtn.title = 'Surligner';
+        highlightBtn.style.cssText = `
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        `;
+        
+        const noteBtn = document.createElement('button');
+        noteBtn.innerHTML = '<i class="fas fa-sticky-note"></i>';
+        noteBtn.title = 'Ajouter une note';
+        noteBtn.style.cssText = `
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        `;
+        
+        highlightBtn.addEventListener('click', () => {
+            highlightSelection(range, selectedText);
+            overlay.remove();
+            selection.removeAllRanges();
+        });
+        
+        noteBtn.addEventListener('click', () => {
+            showNoteDialog(selectedText);
+            overlay.remove();
+            selection.removeAllRanges();
+        });
+        
+        overlay.appendChild(highlightBtn);
+        overlay.appendChild(noteBtn);
+        document.body.appendChild(overlay);
+        
+        // Positionner le menu
+        const rect = range.getBoundingClientRect();
+        overlay.style.top = (rect.top - 50) + 'px';
+        overlay.style.left = (rect.left + rect.width / 2 - overlay.offsetWidth / 2) + 'px';
+        
+        // Fermer en cliquant ailleurs
+        setTimeout(() => {
+            document.addEventListener('click', (e) => {
+                if (!overlay.contains(e.target)) {
+                    overlay.remove();
+                }
+            }, { once: true });
+        }, 100);
+    }
+    
+    function highlightSelection(range, text) {
+        const span = document.createElement('span');
+        span.className = 'highlight';
+        span.textContent = text;
+        span.dataset.highlightId = 'hl_' + Date.now() + Math.random().toString(36).substr(2, 9);
+        
+        try {
+            range.surroundContents(span);
+            highlights.push({
+                id: span.dataset.highlightId,
+                text: text,
+                page: currentPage
+            });
+            
+            // Ajouter animation
+            span.style.animation = 'highlightPulse 1.5s ease-out';
+            
+            showToast('✨ Surlignage ajouté avec succès', 2000, 'success');
+            saveHighlight(span.dataset.highlightId, text);
+        } catch (e) {
+            showToast('❌ Impossible de surligner ce texte', 2000, 'warning');
+        }
+    }
+    
+    function showNoteDialog(selectedText) {
+        const dialog = document.createElement('div');
+        dialog.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+            z-index: 2200;
+            padding: 32px;
+            width: 90%;
+            max-width: 450px;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        `;
+        
+        dialog.innerHTML = `
+            <h4 style="margin: 0 0 16px 0; color: var(--primary-color); font-weight: 700;">
+                <i class="fas fa-edit"></i> Ajouter une note
+            </h4>
+            <blockquote style="
+                background: #f8f9fa;
+                border-left: 3px solid var(--primary-color);
+                padding: 12px;
+                margin: 0 0 20px 0;
+                font-style: italic;
+                color: #666;
+                border-radius: 4px;
+            ">"${selectedText}"</blockquote>
+            <textarea 
+                id="noteTextarea"
+                placeholder="Votre note..."
+                style="
+                    width: 100%;
+                    padding: 12px;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: 1rem;
+                    resize: vertical;
+                    min-height: 100px;
+                    transition: border-color 0.3s ease;
+                "
+            ></textarea>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button id="saveNoteBtn" style="
+                    flex: 1;
+                    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+                    color: white;
+                    border: none;
+                    padding: 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                "><i class="fas fa-save"></i> Enregistrer</button>
+                <button id="cancelNoteBtn" style="
+                    flex: 1;
+                    background: #f0f0f0;
+                    color: #333;
+                    border: none;
+                    padding: 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    transition: all 0.3s ease;
+                "><i class="fas fa-times"></i> Annuler</button>
+            </div>
+        `;
+        
+        document.body.appendChild(dialog);
+        const textarea = dialog.querySelector('#noteTextarea');
+        
+        dialog.querySelector('#saveNoteBtn').addEventListener('click', () => {
+            if (textarea.value.trim()) {
+                saveNote(selectedText, textarea.value);
+                dialog.remove();
+                showToast('📝 Note enregistrée', 2000, 'success');
+            }
+        });
+        
+        dialog.querySelector('#cancelNoteBtn').addEventListener('click', () => {
+            dialog.remove();
+        });
+        
+        textarea.focus();
+    }
+    
+    function saveHighlight(highlightId, text) {
+        // Placeholder pour API
+        console.log('Highlight saved:', highlightId, text);
+    }
+    
+    function saveNote(selectedText, noteText) {
+        // Placeholder pour API
+        console.log('Note saved:', selectedText, noteText);
+    }
+    
+    // Ajouter animations CSS ✨
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes slideUp {
+            from { opacity: 1; transform: translateX(-50%) translateY(0); }
+            to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+        .progress-bar-fill {
+            transition: width 0.3s ease !important;
+        }
+        .highlight {
+            position: relative;
+            background: linear-gradient(120deg, rgba(255, 193, 7, 0.4), rgba(255, 152, 0, 0.3));
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin: 0 -2px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+        }
+        .highlight:hover {
+            background: linear-gradient(120deg, rgba(255, 193, 7, 0.6), rgba(255, 152, 0, 0.5));
+            box-shadow: 0 4px 16px rgba(255, 193, 7, 0.4);
+            transform: translateY(-1px);
+        }
+        @keyframes highlightPulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Initialiser le surlignage texte
+    {% if not book.get_file_url %}
+        enableTextHighlighting();
+    {% endif %}
+    
+    // Initialize PDF.js if PDF exists
+    {% if book.get_file_url %}
+        let pdfDoc = null;
+        
+        async function initPDF() {
+            try {
+                pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
+                totalPages = pdfDoc.numPages;
+                document.getElementById('totalPages').textContent = totalPages;
+                
+                // ✨ Auto-jump à la dernière page lue si elle existe
+                if (lastPageRead > 1 && lastPageRead <= totalPages) {
+                    renderPage(lastPageRead);
+                    showToast(`📖 Reprendre à la page ${lastPageRead}`);
+                } else {
+                    renderPage(1);
+                }
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                alert('Erreur lors du chargement du PDF');
+            }
+        }
+        
+        async function renderPage(pageNum) {
+            try {
+                const canvas = document.getElementById('pdfCanvas');
+                
+                // ✨ Ajouter animation fade-out
+                canvas.style.opacity = '0.7';
+                canvas.style.transition = 'opacity 0.2s ease';
+                
+                const page = await pdfDoc.getPage(pageNum);
+                const scale = currentZoom;
+                const viewport = page.getViewport({ scale });
+                
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                
+                const context = canvas.getContext('2d');
+                await page.render({ canvasContext: context, viewport }).promise;
+                
+                // ✨ Fade-in après rendu
+                canvas.style.opacity = '1';
+                canvas.style.transition = 'opacity 0.3s ease';
+                
+                currentPage = pageNum;
+                
+                // ✨ Reset scroll au haut de la page
+                readerContent.scrollTop = 0;
+                
+                updateControls();
+            } catch (error) {
+                console.error('Error rendering page:', error);
+            }
+        }
+        
+        initPDF();
+    {% endif %}
+    
+    // Update controls - ✨ Amélioré et fluide
+    function updateControls() {
+        document.getElementById('pageInput').value = currentPage;
+        document.getElementById('prevPage').disabled = currentPage <= 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        
+        const percent = Math.round((currentPage / totalPages) * 100);
+        
+        // ✨ Animation ultra-fluide avec easing personalissé
+        const progressBar = document.getElementById('progressBar');
+        progressBar.style.transition = 'width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        progressBar.style.width = percent + '%';
+        
+        // Animer le pourcentage
+        const percentDisplay = document.getElementById('percentDisplay');
+        const currentValue = parseInt(percentDisplay.textContent);
+        if (currentValue !== percent) {
+            animateValue(percentDisplay, currentValue, percent, 400);
+        }
+        
+        document.getElementById('progressPercent').textContent = percent + '%';
+        document.getElementById('pagesRead').textContent = currentPage;
+        
+        // ✨ Feedback haptique pour une expérience sensuelle
+        if (navigator.vibrate && currentPage % 5 === 0) {
+            navigator.vibrate([10, 5, 10]);
+        }
+    }
+    
+    // ✨ Animation des nombres
+    function animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            element.textContent = value + '%';
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        };
+        requestAnimationFrame(step);
+    }
+    
+    // Page navigation avec feedback
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            {% if book.get_file_url %}
+                renderPage(currentPage - 1);
+            {% else %}
+                currentPage--;
+                updateControls();
+            {% endif %}
+            if (navigator.vibrate) navigator.vibrate(15);
+            showToast('⬅️ Page précédente', 1500);
+        }
+    });
+    
+    document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+            {% if book.get_file_url %}
+                renderPage(currentPage + 1);
+            {% else %}
+                currentPage++;
+                updateControls();
+            {% endif %}
+            if (navigator.vibrate) navigator.vibrate(15);
+            showToast('➡️ Page suivante', 1500);
+        }
+    });
+    
+    // ✨ Navigation au clavier intuitive
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            document.getElementById('nextPage').click();
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            document.getElementById('prevPage').click();
+        }
+    });
+    
+    // Page input avec validation et feedback
+    document.getElementById('pageInput').addEventListener('change', (e) => {
+        let page = parseInt(e.target.value);
+        if (isNaN(page) || page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        
+        const oldPage = currentPage;
+        {% if book.get_file_url %}
+            renderPage(page);
+        {% else %}
+            currentPage = page;
+            updateControls();
+        {% endif %}
+        
+        if (page !== oldPage) {
+            showToast(`📖 Page ${page}/${totalPages}`, 1500);
+        }
+    });
+    
+    // ✨ Clique aussi sur Entrée
+    document.getElementById('pageInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.target.blur();
+        }
+    });
+    
+    // Zoom controls améliorés avec feedback
+    document.getElementById('zoomIn').addEventListener('click', () => {
+        if (currentZoom < 2.5) {
+            currentZoom += 0.2;
+            {% if book.get_file_url %}
+                renderPage(currentPage);
+            {% else %}
+                const textContent = document.getElementById('textContent');
+                textContent.style.fontSize = (17 * currentZoom) + 'px';
+            {% endif %}
+            showToast(`🔍 Zoom: ${Math.round(currentZoom * 100)}%`, 1200);
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+    });
+    
+    document.getElementById('zoomOut').addEventListener('click', () => {
+        if (currentZoom > 0.5) {
+            currentZoom -= 0.2;
+            {% if book.get_file_url %}
+                renderPage(currentPage);
+            {% else %}
+                const textContent = document.getElementById('textContent');
+                textContent.style.fontSize = (17 * currentZoom) + 'px';
+            {% endif %}
+            showToast(`🔍 Zoom: ${Math.round(currentZoom * 100)}%`, 1200);
+            if (navigator.vibrate) navigator.vibrate(10);
+        }
+    });
+    
+    // Sidebar toggle avec animation fluide
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        if (sidebar.classList.contains('open')) {
+            showToast('📌 Marque-pages ouverts', 1000);
+            if (navigator.vibrate) navigator.vibrate([10, 5, 10]);
+        } else {
+            showToast('📌 Marque-pages fermés', 1000);
+        }
+    });
+    
+    document.getElementById('closeSidebar').addEventListener('click', () => {
+        sidebar.classList.remove('open');
+    });
+    
+    // ✨ Fermer la barre latérale en cliquant sur le contenu
+    readerContent.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+            sidebar.classList.remove('open');
+        }
+    });
+    
+    // Reading time tracking
+    setInterval(() => {
+        const elapsed = Math.floor((new Date() - startTime) / 60000);
+        document.getElementById('timeValue').textContent = elapsed;
+        document.getElementById('elapsedTime').textContent = elapsed + ' min';
+    }, 60000);
+    
+    // ✨ NOUVELLE: Suivi progression continue au scroll avec easing
+    const readerContent = document.getElementById('readerContent');
+    let saveProgressTimeout;
+    let lastScrollPercent = 0;
+    
+    readerContent.addEventListener('scroll', () => {
+        if (!hasScrolled && totalPages > 1) {
+            hasScrolled = true;
+        }
+        
+        // Mettre à jour la barre de progression en temps réel avec animation fluide
+        const scrollTop = readerContent.scrollTop;
+        const scrollHeight = readerContent.scrollHeight - readerContent.clientHeight;
+        const scrollPercent = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+        
+        // Progression totale = page actuelle + scroll dans la page
+        const totalProgress = (currentPage - 1 + scrollPercent) / totalPages;
+        const progressPercent = Math.round(totalProgress * 100);
+        
+        // Update barre avec animation ultra-fluide
+        if (Math.abs(progressPercent - lastScrollPercent) > 0) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = progressPercent + '%';
+            document.getElementById('percentDisplay').textContent = progressPercent + '%';
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            lastScrollPercent = progressPercent;
+            
+            // ✨ Micro-feedback hapitque lors du scroll
+            if (progressPercent % 10 === 0 && progressPercent !== 0) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(5);
+                }
+            }
+        }
+        
+        // Sauvegarder la position avec debounce efficace
+        clearTimeout(saveProgressTimeout);
+        saveProgressTimeout = setTimeout(() => {
+            saveReadingProgress(currentPage, lastScrollPercent);
+        }, 1500);
+    }, { passive: true });
+    
+    // ✨ NOUVELLE: Fonction pour sauvegarder la progression
+    function saveReadingProgress(page, percent) {
+        // Sauvegarder via AJAX si endpoint existe
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (!csrfToken) {
+            console.log('CSRF token not found');
+            return;
+        }
+        
+        fetch('{{ book.id }}/update-progress/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                current_page: page,
+                progress_percent: percent,
+                is_completed: percent >= 95
+            })
+        }).then(response => {
+            if (response.ok) {
+                console.log('✅ Progression sauvegardée');
+            }
+        }).catch(err => {
+            console.log('Progress save attempt:', err.message);
+        });
+    }
+    
+    // Initial setup
+    {% if not book.get_file_url %}
+        totalPages = 1;
+        document.getElementById('totalPages').textContent = '1';
+    {% endif %}
+    updateControls();
+    
+    // ✨ Initialiser le lecteur amélioré
+    if (typeof EBookReader !== 'undefined') {
+        const reader = new EBookReader({
+            bookId: {{ book.id }},
+            totalPages: totalPages,
+            lastPage: currentPage,
+            isPdf: {% if book.get_file_url %}'true'{% else %}'false'{% endif %}
+        });
+    }
+</script>
+
+<!-- CSS du lecteur -->
+<link rel="stylesheet" href="{% static 'css/reader.css' %}">
+
+<!-- Script du lecteur amélioré -->
+<script src="{% static 'js/ebook-reader.js' %}"></script>
+
+{% endblock %}

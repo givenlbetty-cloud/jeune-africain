@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Mode Hors Ligne - BNC{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <!-- Icône hors ligne -->
+            <div class="mb-4">
+                <i class="fas fa-wifi-off" style="font-size: 4rem; color: #ffc107;"></i>
+            </div>
+            
+            <!-- Message -->
+            <h1 class="mb-3">Mode Hors Ligne Activé</h1>
+            <p class="lead text-muted mb-4">
+                Vous êtes actuellement hors ligne. Vous pouvez continuer à lire les livres téléchargés.
+            </p>
+            
+            <!-- Actions disponibles -->
+            <div class="alert alert-info mb-4">
+                <h5>✅ Disponible hors ligne:</h5>
+                <ul class="mb-0 text-start">
+                    <li>Lecture des livres téléchargés</li>
+                    <li>Navigation entre les pages</li>
+                    <li>Affichage des recommandations en cache</li>
+                </ul>
+            </div>
+            
+            <!-- Actions non disponibles -->
+            <div class="alert alert-warning mb-4">
+                <h5>⚠️ Non disponible hors ligne:</h5>
+                <ul class="mb-0 text-start">
+                    <li>Synchronisation des évaluations</li>
+                    <li>Mise à jour des préférences</li>
+                    <li>Téléchargement de nouveaux livres</li>
+                    <li>Actions nécessitant internet</li>
+                </ul>
+            </div>
+            
+            <!-- Info de sync -->
+            <div class="card bg-light mb-4">
+                <div class="card-body">
+                    <p class="mb-0">
+                        <i class="fas fa-sync-alt"></i>
+                        <strong>Synchronisation automatique:</strong>
+                        Les actions en attente seront synchronisées automatiquement une fois que vous serez de nouveau en ligne.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Actions disponibles -->
+            <div class="btn-group mb-4" role="group">
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-home"></i> Accueil
+                </a>
+                <a href="/books/recommendations/dashboard/" class="btn btn-primary">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+            </div>
+            
+            <!-- Status de connexion -->
+            <p class="text-muted small">
+                <i class="fas fa-info-circle"></i>
+                L'application repassera automatiquement en mode en ligne dès que votre connexion sera rétablie.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Détecter quand la connexion revient
+    window.addEventListener('online', function() {
+        // Afficher notification
+        showToast('Connexion rétablie!', 'Synchronisation en cours...', 'success');
+        
+        // Sync data
+        navigator.serviceWorker.controller?.postMessage({
+            type: 'SYNC_DATA'
+        });
+        
+        // Rediriger vers accueil après 2 secondes
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 2000);
+    });
+    
+    // Check si online
+    if (navigator.onLine) {
+        window.location.href = '/';
+    }
+</script>
+
+{% endblock %}

@@ -325,8 +325,8 @@ GET /api/books/?page=2
 
 ## 💱 DEVISES & PRIX
 
-- **Devise**: XOF (Francs CFA Ouest-africains)
-- **Exemple**: 15000 XOF = ~22.88 EUR
+- **Devise**: CDF (Francs Congolais)
+- **Exemple**: 15000 CDF
 
 Prix final = `price - (price * discount_percentage / 100)`
 

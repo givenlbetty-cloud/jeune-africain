@@ -1,0 +1,562 @@
+{% extends 'base.html' %}
+
+{% block title %}📖 {{ book.title }} - Lecture HD{% endblock %}
+
+{% block extra_css %}
+<!-- PDF.js CSS for Text Layer -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+<style>
+    :root {
+        --header-height: 60px;
+        --toolbar-height: 50px;
+        --bg-color: #525659;
+        --page-gap: 20px;
+    }
+
+    /* Reset & Layout */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        overflow: hidden; /* Prevent body scroll, handle in reader-content */
+    }
+
+    .reader-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
+        position: relative;
+    }
+
+    /* HEADER */
+    .reader-header {
+        height: var(--header-height);
+        background: #2c2c2c;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        z-index: 100;
+    }
+
+    .book-title {
+        font-weight: 600;
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 50vw;
+    }
+
+    .header-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-icon {
+        background: transparent;
+        border: none;
+        color: #ddd;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    .btn-icon:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+    .btn-close {
+        color: #ff6b6b;
+    }
+
+    /* TOOLBAR */
+    .reader-toolbar {
+        height: var(--toolbar-height);
+        background: #333;
+        color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        border-bottom: 1px solid #444;
+        font-size: 0.9rem;
+    }
+
+    .zoom-controls, .page-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.05);
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+
+    .page-input {
+        background: transparent;
+        border: none;
+        color: white;
+        width: 40px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    /* MAIN CONTENT AREA */
+    .reader-content {
+        flex: 1;
+        overflow: auto; /* Enable scrolling here */
+        position: relative;
+        padding: var(--page-gap);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* Smooth scrolling */
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* PDF PAGE CONTAINER */
+    .pdf-page {
+        position: relative;
+        margin-bottom: var(--page-gap);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        background-color: white;
+    }
+
+    /* CANVAS HD FIX */
+    .pdf-page canvas {
+        display: block;
+        width: 100%; /* Make responsive */
+        height: auto;
+    }
+
+    /* TEXT LAYER - VITAL FOR SELECTION */
+    /* Override PDF.js defaults to fit our structure */
+    .textLayer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        opacity: 0.2; /* Debug: set to 0.2 to see text layer, normally 0 */
+        line-height: 1.0;
+        transform-origin: 0 0; /* Important for scaling */
+    }
+    
+    .textLayer ::selection {
+        background: rgba(0,0,255, 0.2);
+    }
+    
+    /* Make text layer transparent effectively but selectable */
+    .textLayer span, .textLayer br {
+        color: transparent;
+        position: absolute;
+        white-space: pre;
+        cursor: text;
+        transform-origin: 0% 0%;
+    }
+
+    /* PROGRESS BAR */
+    .progress-bar-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(255,255,255,0.2);
+        z-index: 200;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        background: var(--primary-color);
+        width: 0%;
+        transition: width 0.3s;
+    }
+
+    /* TOAST */
+    .toast-container {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none;
+    }
+    .toast {
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-size: 14px;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: toastIn 0.3s forwards;
+    }
+    .toast.out {
+        animation: toastOut 0.3s forwards;
+    }
+    @keyframes toastIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(-20px); } }
+
+    /* MOBILE OPTIMIZATION */
+    @media (max-width: 768px) {
+        .reader-toolbar {
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .textLayer {
+            opacity: 0.05; /* Hide completely on mobile but keep selectable */
+        }
+        .header-controls span { display: none; } /* Hide text labels */
+    }
+
+    /* APERÇU LIMITÉ */
+    .preview-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: #e74c3c;
+        color: white;
+        padding: 5px 10px;
+        font-weight: bold;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        z-index: 50;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reader-wrapper">
+    <!-- Header -->
+    <header class="reader-header">
+        <a href="{% url 'catalogue:book_detail' book.id %}" class="btn-icon btn-close" title="Quitter">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="book-title">{{ book.title }}</div>
+        <div class="header-controls">
+            <button class="btn-icon" id="btnToggleSidebar" title="Table des matières"><i class="fas fa-list"></i></button>
+            <button class="btn-icon" id="btnFullscreen" title="Plein écran"><i class="fas fa-expand"></i></button>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <div class="reader-toolbar">
+        <div class="page-controls">
+            <button class="btn-icon" id="btnPrevPage"><i class="fas fa-chevron-left"></i></button>
+            <span><input type="text" id="pageInput" class="page-input" value="1"> / <span id="totalPages">--</span></span>
+            <button class="btn-icon" id="btnNextPage"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="zoom-controls">
+            <button class="btn-icon" id="btnZoomOut"><i class="fas fa-minus"></i></button>
+            <span id="zoomLevelDisplay">100%</span>
+            <button class="btn-icon" id="btnZoomIn"><i class="fas fa-plus"></i></button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="reader-content" id="readerContent">
+        <div id="pdfContainer"></div>
+        <!-- End of Preview Banner will be appended here via JS -->
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    // Config Worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // Context Data
+    const CONFIG = {
+        bookId: "{{ book.id }}",
+        pdfUrl: "{{ book.get_file_url|safe }}",
+        lastPage: parseInt("{{ last_page }}" || "1"),
+        isPaid: {{ has_full_access|lower }} === false,
+        hasAccess: {{ has_full_access|lower }},
+        isPreview: {{ has_preview_access|lower }},
+        maxPages: {{ max_preview_pages|default:"null" }},
+        urls: {
+            progress: "{% url 'catalogue:update_progress' book.id %}",
+            highlight: "{% url 'catalogue:add_highlight' book.id %}"
+        }
+    };
+
+    // State
+    const state = {
+        pdf: null,
+        scale: 1.2, // Base scale
+        currentPage: 1,
+        totalPages: 0,
+        rendering: false,
+        pagesRendered: []
+    };
+
+    // DOM Elements
+    const container = document.getElementById('pdfContainer');
+    const scrollContainer = document.getElementById('readerContent');
+    
+    // ============= INIT =============
+    async function initReader() {
+        try {
+            showToast('🔄 Chargement du livre HD...');
+            
+            state.pdf = await pdfjsLib.getDocument(CONFIG.pdfUrl).promise;
+            state.totalPages = state.pdf.numPages;
+            
+            document.getElementById('totalPages').textContent = state.totalPages;
+            
+            console.log('✅ PDF Loaded, pages:', state.totalPages);
+            
+            // Determine render limit
+            let renderLimit = state.totalPages;
+            if (CONFIG.isPreview && !CONFIG.hasAccess && CONFIG.maxPages) {
+                renderLimit = Math.min(CONFIG.maxPages, state.totalPages);
+                console.log('🔒 Preview mode limited to', renderLimit);
+            }
+
+            // Render pages sequentially
+            for (let i = 1; i <= renderLimit; i++) {
+                await renderPage(i);
+            }
+
+            // End of preview banner
+            if (renderLimit < state.totalPages) {
+                appendEndPreviewBanner(renderLimit);
+            }
+
+            // Jump to last location
+            if (CONFIG.lastPage > 1) {
+                scrollToPage(CONFIG.lastPage);
+            }
+
+            setupScrollTracking();
+            
+        } catch (err) {
+            console.error(err);
+            showToast('❌ Erreur de chargement');
+        }
+    }
+
+    // ============= RENDER PAGE (VECTOR + HD CANVAS) =============
+    async function renderPage(pageNum) {
+        if (state.pagesRendered.includes(pageNum)) return;
+        
+        try {
+            const page = await state.pdf.getPage(pageNum);
+            
+            // 1. Create Page Structure
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+            pageDiv.id = `page-${pageNum}`;
+            pageDiv.setAttribute('data-page-number', pageNum);
+            
+            // Add Badge for Preview
+            if (pageNum === 1 && CONFIG.isPreview && !CONFIG.hasAccess) {
+                const badge = document.createElement('div');
+                badge.className = 'preview-badge';
+                badge.innerText = '🔒 EXTRAIT GRATUIT';
+                pageDiv.appendChild(badge);
+            }
+
+            // 2. Viewport & Scaling (HD Support)
+            // Use device pixel ratio for sharp rendering on mobiles/retina
+            const dpr = window.devicePixelRatio || 1;
+            const viewport = page.getViewport({ scale: state.scale });
+            
+            // Update pageDiv dimensions
+            pageDiv.style.width = `${viewport.width}px`;
+            pageDiv.style.height = `${viewport.height}px`;
+
+            // 3. Canvas for Graphics/Images
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set actual canvas size (HRD)
+            canvas.width = Math.floor(viewport.width * dpr);
+            canvas.height = Math.floor(viewport.height * dpr);
+            
+            // Set display size (CSS)
+            canvas.style.width = `${viewport.width}px`;
+            canvas.style.height = `${viewport.height}px`;
+            
+            // Normalize coordinate system to use css pixels
+            ctx.scale(dpr, dpr);
+
+            pageDiv.appendChild(canvas);
+            
+            // 4. Text Layer (Selectable Text)
+            const textLayerDiv = document.createElement('div');
+            textLayerDiv.className = 'textLayer';
+            // Important: match dimensions
+            textLayerDiv.style.width = `${viewport.width}px`;
+            textLayerDiv.style.height = `${viewport.height}px`;
+            pageDiv.appendChild(textLayerDiv);
+            
+            container.appendChild(pageDiv);
+
+            // 5. Render Canvas
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport,
+                transform: [dpr, 0, 0, dpr, 0, 0] // Optional: force transform if needed, but ctx.scale usually enough
+            };
+            
+            // render context is usually simpler, let's reset to simple dpr scale
+            // The transform param in pdf.js render context is strictly for the viewport transform
+            // Instead, we just use the scaled canvas context.
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            }).promise;
+
+            // 6. Render Text Layer
+            const textContent = await page.getTextContent();
+            pdfjsLib.renderTextLayer({
+                textContentSource: textContent,
+                container: textLayerDiv,
+                viewport: viewport,
+                textDivs: []
+            });
+
+            state.pagesRendered.push(pageNum);
+
+        } catch (err) {
+            console.error(`Error rendering page ${pageNum}`, err);
+        }
+    }
+
+    // ============= NAVIGATION & SCROLL INTEGRATION =============
+    function scrollToPage(pageNum) {
+        const el = document.getElementById(`page-${pageNum}`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            updateUI(pageNum);
+        }
+    }
+
+    function setupScrollTracking() {
+        // Intersection Observer to detect current page
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const pageNum = parseInt(entry.target.getAttribute('data-page-number'));
+                    updateUI(pageNum);
+                }
+            });
+        }, {
+            threshold: 0.5 // Trigger when 50% of page is visible
+        });
+
+        document.querySelectorAll('.pdf-page').forEach(page => observer.observe(page));
+        
+        // Progress Save Interval
+        setInterval(() => {
+            saveProgress();
+        }, 10000);
+    }
+    
+    function updateUI(pageNum) {
+        if (state.currentPage === pageNum) return;
+        state.currentPage = pageNum;
+        
+        // Update Input
+        document.getElementById('pageInput').value = pageNum;
+        
+        // Update Progress Bar
+        const percent = (pageNum / state.totalPages) * 100;
+        document.getElementById('progressBar').style.width = `${percent}%`;
+    }
+
+    // ============= CONTROLS =============
+    document.getElementById('btnPrevPage').onclick = () => scrollToPage(state.currentPage - 1);
+    document.getElementById('btnNextPage').onclick = () => scrollToPage(state.currentPage + 1);
+    
+    document.getElementById('pageInput').onchange = (e) => {
+        let p = parseInt(e.target.value);
+        if (p >= 1 && p <= state.totalPages) scrollToPage(p);
+    };
+
+    document.getElementById('btnZoomIn').onclick = () => {
+        state.scale += 0.2;
+        reloadAll();
+    };
+    document.getElementById('btnZoomOut').onclick = () => {
+        state.scale = Math.max(0.5, state.scale - 0.2);
+        reloadAll();
+    };
+
+    document.getElementById('btnFullscreen').onclick = () => {
+        document.documentElement.requestFullscreen();
+    };
+
+    function reloadAll() {
+        container.innerHTML = '';
+        state.pagesRendered = [];
+        document.getElementById('zoomLevelDisplay').innerText = `${Math.round(state.scale * 100)}%`;
+        initReader();
+    }
+
+    // ============= UTILS =============
+    function appendEndPreviewBanner(limit) {
+        const div = document.createElement('div');
+        div.style.cssText = "padding: 40px; text-align: center; color: white; background: #333; margin-top: 20px; border-radius: 8px;";
+        div.innerHTML = `
+            <h2>🔒 Fin de l'extrait gratuit</h2>
+            <p>Vous avez lu les ${limit} premières pages.</p>
+            <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-primary" style="margin-top: 10px; display: inline-block; padding: 10px 20px; background: var(--primary-color); color: white; text-decoration: none; border-radius: 4px;">
+                Acheter le livre complet
+            </a>
+        `;
+        container.appendChild(div);
+    }
+    
+    function saveProgress() {
+        if (!CONFIG.hasAccess && CONFIG.isPreview) return; // Don't save preview progress
+        
+        fetch(CONFIG.urls.progress, {
+            method: 'POST',
+            body: JSON.stringify({ current_page: state.currentPage }),
+            headers: { 
+                'X-CSRFToken': getCookie(),
+                'Content-Type': 'application/json'
+            }
+        }).catch(e => console.error("Save error", e));
+    }
+
+    function getCookie(name = 'csrftoken') {
+        let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return v ? v[2] : null;
+    }
+
+    function showToast(msg) {
+        const c = document.querySelector('.toast-container') || document.body.appendChild(document.createElement('div'));
+        if (!c.className) c.className = 'toast-container';
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.innerText = msg;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    // Start
+    initReader();
+
+</script>
+{% endblock %}

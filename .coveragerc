@@ -1,0 +1,31 @@
+[run]
+branch = True
+omit =
+    */migrations/*
+    */tests/*
+    manage.py
+    setup.py
+    */venv/*
+    */virtualenv/*
+    */site-packages/*
+    */asgi.py
+    */wsgi.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+
+precision = 2
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

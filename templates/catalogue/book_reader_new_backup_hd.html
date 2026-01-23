@@ -1,0 +1,908 @@
+{% extends 'base.html' %}
+
+{% block title %}📖 {{ book.title }} - Lire{% endblock %}
+
+{% block extra_css %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #f5f5f5; }
+    
+    .reader-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
+    }
+    
+    /* TOP BAR */
+    .reader-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+    }
+    
+    .reader-header-title {
+        font-size: 18px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .reader-header-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    
+    .reader-time {
+        font-size: 14px;
+        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-close-reader {
+        background: rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-close-reader:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    
+    /* TOOLBAR */
+    .reader-toolbar {
+        background: white;
+        border-bottom: 1px solid #e0e0e0;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .toolbar-btn {
+        background: white;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 8px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+    }
+    
+    .toolbar-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .toolbar-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    /* PAGE CONTROLS */
+    .page-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+    }
+    
+    .page-input {
+        width: 50px;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 4px;
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .page-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(26,77,62,0.1);
+    }
+    
+    .page-label {
+        color: #666;
+        font-weight: 500;
+        font-size: 14px;
+    }
+    
+    /* PROGRESS BAR */
+    .progress-container {
+        height: 4px;
+        background: #e0e0e0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+        width: 0%;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 8px rgba(26,77,62,0.4);
+    }
+    
+    /* CONTENT */
+    .reader-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 20px;
+    }
+    
+    [data-bs-theme="dark"] .reader-content {
+        background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+    }
+    
+    /* CANVAS - RESPONSIVE ET LISIBLE */
+    #pdfCanvas {
+        width: 100%;
+        max-width: 900px;
+        height: auto;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        border-radius: 4px;
+        background: white;
+        margin: 20px auto;
+        display: block;
+    }
+    
+    [data-bs-theme="dark"] #pdfCanvas {
+        background: #1a1a1a;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+    }
+    
+    /* PAGES EMPILEES - CONTINUOUS SCROLL */
+    .pdf-pages-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        /* Pas de transform! CSS zoom affecte le layout naturellement */
+    }
+    
+    .pdf-page {
+        width: 100%;
+        max-width: 900px;
+        margin: 20px auto;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+        border-radius: 4px;
+        background: white;
+        display: flex;
+        justify-content: center;
+        page-break-after: always;
+        overflow: hidden;
+    }
+    
+    [data-bs-theme="dark"] .pdf-page {
+        background: #1a1a1a;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+    }
+    
+    .pdf-page canvas {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+    
+    /* RESPONSIVE - Tablette */
+    @media (max-width: 1024px) {
+        #pdfCanvas {
+            max-width: 100%;
+            width: 95%;
+        }
+    }
+    
+    /* RESPONSIVE - Mobile */
+    @media (max-width: 768px) {
+        .reader-content {
+            padding: 20px 10px;
+        }
+        #pdfCanvas {
+            width: 100%;
+            max-width: 100%;
+        }
+        .toolbar-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+    }
+    
+    /* SCROLLBAR */
+    .reader-content::-webkit-scrollbar {
+        width: 12px;
+    }
+    
+    /* HIGHLIGHT OVERLAY */
+    .highlight-overlay {
+        position: absolute;
+        background: rgba(255, 235, 59, 0.4);
+        pointer-events: none;
+        border-radius: 2px;
+    }
+    
+    .highlight-overlay:hover {
+        background: rgba(255, 235, 59, 0.6);
+    }
+    
+    /* HIGHLIGHT MENU */
+    .highlight-menu {
+        position: fixed;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        display: none;
+        z-index: 1001;
+    }
+    
+    .highlight-menu.active {
+        display: block;
+    }
+    
+    .highlight-menu button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+    }
+    
+    .highlight-menu button:hover {
+        opacity: 0.8;
+    }
+    
+    .reader-content::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+        border-radius: 10px;
+    }
+    
+    .reader-content::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+        transition: background 0.3s;
+    }
+    
+    .reader-content::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-light);
+        box-shadow: 0 0 6px rgba(26,77,62,0.4);
+    }
+    
+    /* TOAST */
+    .toast-container {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2000;
+    }
+    
+    .toast {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 14px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        font-weight: 600;
+        animation: slideDown 0.3s ease;
+        margin-bottom: 10px;
+    }
+    
+    .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    @keyframes slideOut {
+        to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    }
+    
+    .toast.out { animation: slideOut 0.3s ease forwards; }
+    
+    /* PERCENTAGE DISPLAY */
+    .percent-display {
+        font-weight: 700;
+        color: var(--primary-color);
+        min-width: 50px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reader-wrapper">
+    <!-- HEADER -->
+    <div class="reader-header">
+        <div class="reader-header-title">
+            <i class="fas fa-book-open"></i>
+            <span>{{ book.title }}</span>
+        </div>
+        <div class="reader-header-right">
+            <div class="reader-time">
+                <i class="fas fa-hourglass-half"></i>
+                <span id="readTime">0</span> min
+            </div>
+            <a href="{% url 'catalogue:book_detail' book.id %}" class="btn-close-reader">
+                <i class="fas fa-times"></i> Fermer
+            </a>
+        </div>
+    </div>
+    
+    <!-- PREVIEW BANNER -->
+    {% include 'catalogue/preview_banner.html' %}
+    
+    <!-- TOOLBAR -->
+    <div class="reader-toolbar">
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="btnHighlight" title="Mode surlignage">
+                <i class="fas fa-highlighter"></i> Surligner
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <button class="toolbar-btn" id="btnZoomOut" title="Zoom moins">
+                <i class="fas fa-search-minus"></i> -
+            </button>
+            <button class="toolbar-btn" id="btnZoomIn" title="Zoom plus">
+                <i class="fas fa-search-plus"></i> +
+            </button>
+        </div>
+        
+        <div class="toolbar-group">
+            <div class="page-controls">
+                <input type="number" id="pageInput" class="page-input" min="1" value="1">
+                <span class="page-label">/ <span id="totalPages">1</span></span>
+            </div>
+        </div>
+        
+        <div class="percent-display" id="percentDisplay">0%</div>
+    </div>
+    
+    <!-- PROGRESS BAR -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <!-- CONTENT - PAGES EMPILEES EN VERTICAL -->
+    <div class="reader-content" id="readerContent">
+        <div id="pdfPages" class="pdf-pages-container"></div>
+    </div>
+    
+    <!-- HIGHLIGHT MENU -->
+    <div class="highlight-menu" id="highlightMenu">
+        <button id="btnSaveHighlight">💾 Surligner</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script>
+    // ============= CONFIGURATION PDF.js =============
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    // ============= CONFIGURATION =============
+    const pdfUrl = "{{ book.get_file_url|safe }}";
+    const lastPageFromDB = parseInt("{{ last_page }}" || "1");
+    
+    // FREE PREVIEW MODE
+    const hasFullAccess = {{ has_full_access|lower }};
+    const hasPreviewAccess = {{ has_preview_access|lower }};
+    const maxPreviewPages = {{ max_preview_pages|default:"null" }};
+    
+    let pdfDoc = null;
+    let totalPages = 1;
+    let zoomLevel = 1;  // Zoom level (100% = 1)
+    let startTime = new Date();
+    let lastSaveTime = Date.now();
+    let lastSavedPage = 1;
+    
+    const readerContent = document.getElementById('readerContent');
+    const pdfPages = document.getElementById('pdfPages');
+    const pageInput = document.getElementById('pageInput');
+    const btnZoomIn = document.getElementById('btnZoomIn');
+    const btnZoomOut = document.getElementById('btnZoomOut');
+    const progressBar = document.getElementById('progressBar');
+    const percentDisplay = document.getElementById('percentDisplay');
+    const totalPagesSpan = document.getElementById('totalPages');
+    
+    // ============= TOAST NOTIFICATIONS =============
+    function showToast(message, duration = 3000) {
+        const container = document.querySelector('.toast-container') || createToastContainer();
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = message;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('out');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+    
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // ============= RENDER ALL PAGES =============
+    async function renderAllPages() {
+        if (!pdfDoc) return;
+        
+        pdfPages.innerHTML = ''; // Vider
+        showToast('📖 Chargement du livre...', 2000);
+        
+        // Déterminer le nombre maximal de pages à rendre
+        let pagesToRender = totalPages;
+        if (hasPreviewAccess && !hasFullAccess && maxPreviewPages) {
+            pagesToRender = Math.min(maxPreviewPages, totalPages);
+        }
+        
+        for (let pageNum = 1; pageNum <= pagesToRender; pageNum++) {
+            try {
+                const page = await pdfDoc.getPage(pageNum);
+                
+                // Créer un conteneur pour la page
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'pdf-page';
+                pageDiv.id = `page-${pageNum}`;
+                
+                // Ajouter un badge "APERÇU GRATUIT" à la première page si preview
+                if (pageNum === 1 && hasPreviewAccess && !hasFullAccess) {
+                    const badge = document.createElement('div');
+                    badge.style.cssText = `
+                        position: absolute;
+                        top: 10px;
+                        right: 10px;
+                        background: #ff6b6b;
+                        color: white;
+                        padding: 8px 12px;
+                        border-radius: 4px;
+                        font-weight: bold;
+                        font-size: 12px;
+                        z-index: 100;
+                        box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+                    `;
+                    badge.textContent = '🔒 APERÇU GRATUIT';
+                    pageDiv.style.position = 'relative';
+                    pageDiv.appendChild(badge);
+                }
+                
+                // Créer une canvas pour cette page
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Calculer le viewport responsive
+                const viewport = page.getViewport({ scale: 1.5 });
+                const maxWidth = readerContent.clientWidth - 40;
+                
+                let scale = 1.5;
+                if (viewport.width > maxWidth) {
+                    scale = 1.5 * (maxWidth / viewport.width);
+                }
+                
+                const finalViewport = page.getViewport({ scale });
+                canvas.width = finalViewport.width;
+                canvas.height = finalViewport.height;
+                
+                // Rendre la page
+                await page.render({
+                    canvasContext: ctx,
+                    viewport: finalViewport
+                }).promise;
+                
+                pageDiv.appendChild(canvas);
+                pdfPages.appendChild(pageDiv);
+                
+            } catch (error) {
+                console.error(`Erreur page ${pageNum}:`, error);
+            }
+        }
+        
+        // Message si preview limité
+        if (hasPreviewAccess && !hasFullAccess && maxPreviewPages) {
+            const message = `✅ ${pagesToRender} pages de prévisualisation gratuites chargées (${totalPages} pages totales)`;
+            showToast(message, 3000);
+            console.log('📖 FREE PREVIEW MODE:', pagesToRender, '/', totalPages, 'pages');
+            
+            // Ajouter un message de fin d'aperçu
+            if (pagesToRender < totalPages) {
+                const endBanner = document.createElement('div');
+                endBanner.style.cssText = `
+                    width: 100%;
+                    max-width: 900px;
+                    margin: 40px auto;
+                    padding: 30px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 8px;
+                    text-align: center;
+                    font-weight: bold;
+                    font-size: 16px;
+                `;
+                endBanner.innerHTML = `
+                    <div style="margin-bottom: 12px; font-size: 32px;">🔒</div>
+                    <div style="margin-bottom: 12px;">Fin de l'aperçu gratuit</div>
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 16px;">
+                        Vous avez lu ${pagesToRender}/${totalPages} pages. 
+                        <br>Achetez ce livre pour accéder aux pages restantes.
+                    </div>
+                    <a href="{% url 'catalogue:book_detail' book.id %}" style="
+                        background: white;
+                        color: #667eea;
+                        padding: 10px 24px;
+                        border-radius: 6px;
+                        text-decoration: none;
+                        font-weight: bold;
+                        display: inline-block;
+                    ">
+                        📖 Acheter le livre complet
+                    </a>
+                `;
+                pdfPages.appendChild(endBanner);
+            }
+        } else {
+            showToast(`✅ ${totalPages} pages chargées`, 2000);
+        }
+        
+        updateProgressBar();
+    }
+    
+    // ============= INITIALIZATION =============
+    async function initPDF() {
+        try {
+            console.log('📖 Initialisation du lecteur...');
+            console.log('📄 PDF URL:', pdfUrl);
+            console.log('📍 Dernière page sauvegardée:', lastPageFromDB);
+            
+            // Initialiser le système de prévisualisation
+            initializePreviewSystem("{{ book.id }}");
+            
+            pdfDoc = await pdfjsLib.getDocument(pdfUrl).promise;
+            totalPages = pdfDoc.numPages;
+            totalPagesSpan.textContent = totalPages;
+            
+            console.log('✅ PDF chargé:', totalPages, 'pages');
+            
+            // Charger toutes les pages
+            await renderAllPages();
+            
+            // Auto-jump à dernière page lue
+            if (lastPageFromDB > 1 && lastPageFromDB <= totalPages) {
+                setTimeout(() => {
+                    const pageElement = document.getElementById(`page-${lastPageFromDB}`);
+                    if (pageElement) {
+                        pageElement.scrollIntoView({ behavior: 'smooth' });
+                        showToast(`📖 Reprise page ${lastPageFromDB}/${totalPages}`);
+                        console.log('✅ Auto-jump à page', lastPageFromDB);
+                    }
+                }, 500);
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur PDF:', error);
+            showToast('❌ Impossible charger PDF');
+        }
+    }
+    
+    // ============= UPDATE PROGRESS BAR =============
+    function updateProgressBar() {
+        const scrollTop = readerContent.scrollTop;
+        const scrollHeight = readerContent.scrollHeight - readerContent.clientHeight;
+        const scrollPercent = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+        
+        // Déterminer la page actuelle basée sur le scroll
+        const visiblePage = getVisiblePage();
+        pageInput.value = visiblePage;
+        
+        // Check page access and update preview progress
+        onPageChange(visiblePage, "{{ book.id }}");
+        
+        // Mettre à jour la barre de progression
+        const progress = scrollPercent;
+        const percent = Math.round(progress * 100);
+        
+        progressBar.style.width = percent + '%';
+        percentDisplay.textContent = percent + '%';
+    }
+    
+    // ============= GET VISIBLE PAGE =============
+    function getVisiblePage() {
+        const pages = document.querySelectorAll('.pdf-page');
+        let visiblePage = 1;
+        let maxIntersection = 0;
+        
+        pages.forEach((page, index) => {
+            const rect = page.getBoundingClientRect();
+            const intersection = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
+            
+            if (intersection > maxIntersection) {
+                maxIntersection = intersection;
+                visiblePage = index + 1;
+            }
+        });
+        
+        return visiblePage;
+    }
+    
+    // ============= NAVIGATION PAR SAISIE =============
+    pageInput.addEventListener('change', (e) => {
+        let page = parseInt(e.target.value) || 1;
+        
+        // Vérifier si la page est accessible
+        if (hasPreviewAccess && !hasFullAccess && maxPreviewPages && page > maxPreviewPages) {
+            showToast(`⛔ Page ${page} non accessible. Aperçu jusqu'à page ${maxPreviewPages}.`, 2500, 'warning');
+            pageInput.value = maxPreviewPages;
+            return;
+        }
+        
+        page = Math.max(1, Math.min(page, totalPages));
+        
+        const pageElement = document.getElementById(`page-${page}`);
+        if (pageElement) {
+            pageElement.scrollIntoView({ behavior: 'smooth' });
+            showToast(`📄 Page ${page}`);
+        }
+    });
+    
+    // ============= ZOOM AVEC CSS ZOOM (COMME CHROME) =============
+    btnZoomIn.addEventListener('click', () => {
+        zoomLevel = Math.min(zoomLevel + 0.1, 2.5);
+        pdfPages.style.zoom = zoomLevel;
+        showToast(`🔍 ${Math.round(zoomLevel * 100)}%`, 800);
+    });
+    
+    btnZoomOut.addEventListener('click', () => {
+        zoomLevel = Math.max(zoomLevel - 0.1, 0.6);
+        pdfPages.style.zoom = zoomLevel;
+        showToast(`🔍 ${Math.round(zoomLevel * 100)}%`, 800);
+    });
+    
+
+    // ============= SCROLL TRACKING =============
+    readerContent.addEventListener('scroll', () => {
+        updateProgressBar();
+        
+        // Sauvegarder la progression tous les 5 secondes
+        const now = Date.now();
+        if (now - lastSaveTime > 5000) {
+            lastSaveTime = now;
+            const currentPage = getVisiblePage();
+            
+            if (currentPage !== lastSavedPage) {
+                lastSavedPage = currentPage;
+                saveProgress(currentPage);
+            }
+        }
+    });
+    
+    // ============= RESPONSIVE - REDESSINER AU RESIZE =============
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            renderAllPages();
+        }, 500);
+    });
+    
+    // ============= SAVE PROGRESS =============
+    function saveProgress(currentPage) {
+        // Utiliser l'URL Django correcte
+        const url = "{% url 'catalogue:update_progress' book.id %}";
+        
+        console.log('💾 Tentative sauvegarde...', { page: currentPage, url });
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                current_page: currentPage,
+                progress_percent: Math.round((currentPage / totalPages) * 100)
+            })
+        })
+        .then(response => {
+            console.log('📡 Réponse HTTP:', response.status, response.statusText);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log('✅ Page sauvegardée:', currentPage);
+            } else {
+                console.error('❌ Erreur sauvegarde:', data.error);
+            }
+        })
+        .catch(err => {
+            console.error('❌ Erreur:', err.message);
+        });
+    }
+    
+    // ============= READING TIME =============
+    setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 60000);
+        document.getElementById('readTime').textContent = elapsed;
+    }, 60000);
+    
+    // ============= HELPERS =============
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // ============= HIGHLIGHTING =============
+    const btnHighlight = document.getElementById('btnHighlight');
+    const highlightMenu = document.getElementById('highlightMenu');
+    const btnSaveHighlight = document.getElementById('btnSaveHighlight');
+    
+    let highlightMode = false;
+    let selectedText = '';
+    let selectedPageNum = 1;
+    
+    // Toggle mode surlignage
+    btnHighlight.addEventListener('click', () => {
+        highlightMode = !highlightMode;
+        btnHighlight.style.opacity = highlightMode ? '1' : '0.6';
+        showToast(highlightMode ? '✏️ Mode surlignage ACTIF' : '✏️ Mode surlignage désactivé', 1000);
+    });
+    
+    // Déterminer la page au moment de la sélection
+    document.addEventListener('mouseup', () => {
+        if (!highlightMode) return;
+        
+        selectedText = window.getSelection().toString().trim();
+        if (!selectedText) {
+            highlightMenu.classList.remove('active');
+            return;
+        }
+        
+        selectedPageNum = getVisiblePage();
+        
+        // Afficher le menu
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            highlightMenu.style.left = rect.left + 'px';
+            highlightMenu.style.top = (rect.bottom + 10) + 'px';
+            highlightMenu.classList.add('active');
+        }
+    });
+    
+    // Sauvegarder le highlight
+    btnSaveHighlight.addEventListener('click', async () => {
+        if (!selectedText) return;
+        
+        const url = "{% url 'catalogue:add_highlight' book.id %}";
+        
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    text: selectedText,
+                    page_number: selectedPageNum
+                })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                showToast('✅ Texte surligné!', 1500);
+                highlightMenu.classList.remove('active');
+                selectedText = '';
+                window.getSelection().removeAllRanges();
+                
+                // Recharger les highlights
+                loadHighlights();
+            }
+        } catch (err) {
+            console.error('Erreur:', err);
+            showToast('❌ Erreur surlignage', 2000);
+        }
+    });
+    
+    // Charger les highlights existants
+    async function loadHighlights() {
+        const url = "{% url 'catalogue:get_highlights' book.id %}";
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            if (data.success) {
+                console.log('✅ Highlights chargés:', data.highlights.length);
+                // Les highlights sont chargés mais on ne peut pas les afficher sur PDF
+                // Car on n'a pas les coordonnées exactes du texte
+            }
+        } catch (err) {
+            console.error('Erreur chargement highlights:', err);
+        }
+    }
+    
+    // Charger les highlights au démarrage
+    setTimeout(() => {
+        loadHighlights();
+    }, 1000);
+    
+    // ============= START =============
+    initPDF();
+</script>
+
+<!-- Include Payment Modal Component -->
+{% include 'catalogue/payment_modal.html' %}
+
+<script>
+  // Initialize payment modal with book ID (after DOM is fully loaded)
+  document.addEventListener('DOMContentLoaded', function() {
+    const bookIdInput = document.getElementById('payment-book-id');
+    if (bookIdInput) {
+      bookIdInput.value = "{{ book.id }}";
+      console.log('✅ Payment book ID initialized:', "{{ book.id }}");
+    } else {
+      console.warn('⚠️  payment-book-id input not found');
+    }
+  });
+</script>
+
+{% endblock %}

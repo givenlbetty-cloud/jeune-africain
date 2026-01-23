@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Mes Statistiques" %} - BNC{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- En-tête -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <h1>
+                    <i class="fas fa-chart-line"></i>
+                    {% trans "Mon Tableau de Bord Analytique" %}
+                </h1>
+                <button class="btn btn-sm btn-outline-secondary" id="refresh-stats">
+                    <i class="fas fa-sync"></i> {% trans "Actualiser" %}
+                </button>
+            </div>
+            <p class="text-muted">{% trans "Suivez votre progression de lecture et découvrez vos habitudes" %}</p>
+        </div>
+    </div>
+
+    <!-- Chargement -->
+    <div id="loading-spinner" class="text-center" style="display: none;">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">{% trans "Chargement..." %}</span>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-4" id="kpi-cards">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 bg-light border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-text text-muted small">{% trans "Livres Lus" %}</p>
+                            <h2 class="mb-0" id="total-books">0</h2>
+                        </div>
+                        <div class="fs-1 text-primary">📖</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 bg-light border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-text text-muted small">{% trans "Heures de Lecture" %}</p>
+                            <h2 class="mb-0"><span id="total-hours">0</span>h</h2>
+                        </div>
+                        <div class="fs-1 text-success">⚡</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 bg-light border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-text text-muted small">{% trans "Avis Écrits" %}</p>
+                            <h2 class="mb-0" id="total-reviews">0</h2>
+                        </div>
+                        <div class="fs-1 text-warning">⭐</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 bg-light border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="card-text text-muted small">{% trans "Notes Prises" %}</p>
+                            <h2 class="mb-0" id="total-notes">0</h2>
+                        </div>
+                        <div class="fs-1 text-info">✏️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progression Objectif -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-target"></i>
+                        {% trans "Progression Annuelle" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{% trans "Objectif: 50 livres/an" %}</span>
+                            <strong id="goal-percentage">0%</strong>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" id="goal-progress" role="progressbar" 
+                                 style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-0">
+                        {% trans "Continuez votre lecture pour atteindre votre objectif!" %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-fire"></i>
+                        {% trans "Rythme de Lecture" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-center mb-0" id="reading-pace">
+                        0 <small class="text-muted">{% trans "pages/heure" %}</small>
+                    </h3>
+                    <p class="text-center small text-muted mt-3 mb-0">
+                        {% trans "Votre vitesse moyenne de lecture" %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line"></i>
+                        {% trans "Tendances de Lecture (30 jours)" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trends-chart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-circle-pie-chart"></i>
+                        {% trans "Par Genre" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="genres-chart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Préférences -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-heart"></i>
+                        {% trans "Mes Préférences" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{% trans "Genre Préféré" %}</label>
+                        <h5 id="fav-genre">—</h5>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{% trans "Auteur Préféré" %}</label>
+                        <h5 id="fav-author">—</h5>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted">{% trans "Langue Préférée" %}</label>
+                        <h5 id="fav-language">—</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-certificate"></i>
+                        {% trans "Accomplissements" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="achievements-list" class="d-flex flex-wrap gap-2">
+                        <!-- Chargé via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques Détaillées -->
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table"></i>
+                        {% trans "Statistiques Détaillées" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <p class="text-muted small">{% trans "Pages Lues" %}</p>
+                                <h3 id="total-pages">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <p class="text-muted small">{% trans "En Cours" %}</p>
+                                <h3 id="in-progress">0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <p class="text-muted small">{% trans "Note Moyenne Donnée" %}</p>
+                                <h3 id="avg-rating">0.0</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <p class="text-muted small">{% trans "Dernière Lecture" %}</p>
+                                <p id="last-reading">—</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<script>
+const API_BASE = '/api';
+
+// Initialiser les graphiques
+let trendsChart = null;
+let genresChart = null;
+
+function loadAnalytics() {
+    const spinner = document.getElementById('loading-spinner');
+    spinner.style.display = 'block';
+
+    // Charger les analytics
+    fetch(`${API_BASE}/analytics/`)
+        .then(r => r.json())
+        .then(data => {
+            // KPI Cards
+            document.getElementById('total-books').textContent = data.total_books_read;
+            document.getElementById('total-hours').textContent = data.total_reading_hours.toFixed(1);
+            document.getElementById('total-reviews').textContent = data.total_reviews;
+            document.getElementById('total-notes').textContent = data.total_notes;
+
+            // Progression
+            document.getElementById('goal-percentage').textContent = data.reading_goal_progress + '%';
+            document.getElementById('goal-progress').style.width = data.reading_goal_progress + '%';
+
+            // Rythme
+            document.getElementById('reading-pace').innerHTML = 
+                `${data.average_reading_pace.toFixed(1)} <small class="text-muted">{% trans "pages/heure" %}</small>`;
+
+            // Stats détaillées
+            document.getElementById('total-pages').textContent = data.total_pages_read;
+            document.getElementById('in-progress').textContent = data.total_books_in_progress;
+            document.getElementById('avg-rating').textContent = data.average_book_rating.toFixed(1);
+
+            if (data.last_reading_date) {
+                const date = new Date(data.last_reading_date);
+                document.getElementById('last-reading').textContent = date.toLocaleDateString();
+            }
+
+            // Préférences
+            document.getElementById('fav-genre').textContent = data.favorite_genre || '—';
+            document.getElementById('fav-author').textContent = data.favorite_author || '—';
+            document.getElementById('fav-language').textContent = data.favorite_language || '—';
+
+            spinner.style.display = 'none';
+        })
+        .catch(err => {
+            console.error('Erreur:', err);
+            spinner.style.display = 'none';
+        });
+
+    // Charger les tendances
+    fetch(`${API_BASE}/analytics/trends/`)
+        .then(r => r.json())
+        .then(data => {
+            updateTrendsChart(data);
+        })
+        .catch(err => console.error('Erreur tendances:', err));
+
+    // Charger les préférences
+    fetch(`${API_BASE}/analytics/preferences/`)
+        .then(r => r.json())
+        .then(data => {
+            updateGenresChart(data.genres_breakdown);
+        })
+        .catch(err => console.error('Erreur préférences:', err));
+
+    // Charger les accomplissements
+    fetch(`${API_BASE}/analytics/achievements/`)
+        .then(r => r.json())
+        .then(data => {
+            displayAchievements(data);
+        })
+        .catch(err => console.error('Erreur accomplissements:', err));
+}
+
+function updateTrendsChart(data) {
+    const ctx = document.getElementById('trends-chart').getContext('2d');
+    const dates = data.map(d => new Date(d.date).toLocaleDateString('fr-FR', {month: 'short', day: 'numeric'}));
+    const hours = data.map(d => d.hours_read);
+    
+    if (trendsChart) trendsChart.destroy();
+    
+    trendsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: '{% trans "Heures de lecture" %}',
+                data: hours,
+                borderColor: '#4CAF50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#4CAF50',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '{% trans "Heures" %}'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateGenresChart(genreData) {
+    const ctx = document.getElementById('genres-chart').getContext('2d');
+    const labels = genreData.map(g => g.genre);
+    const counts = genreData.map(g => g.count);
+    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+    
+    if (genresChart) genresChart.destroy();
+    
+    genresChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: colors.slice(0, labels.length)
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function displayAchievements(data) {
+    const container = document.getElementById('achievements-list');
+    container.innerHTML = '';
+
+    // Badges gagnés
+    if (data.earned.length > 0) {
+        data.earned.forEach(achievement => {
+            const badge = document.createElement('div');
+            badge.className = 'badge bg-success p-2 fs-6';
+            badge.innerHTML = `${achievement.badge_emoji} ${achievement.badge_display}`;
+            container.appendChild(badge);
+        });
+    } else {
+        container.innerHTML = '<p class="text-muted">{% trans "Commencez votre lecture pour débloquer des badges!" %}</p>';
+    }
+}
+
+// Charger au démarrage
+document.addEventListener('DOMContentLoaded', loadAnalytics);
+
+// Bouton actualiser
+document.getElementById('refresh-stats').addEventListener('click', () => {
+    loadAnalytics();
+    setTimeout(() => alert('{% trans "Statistiques actualisées!" %}'), 500);
+});
+</script>
+{% endblock %}

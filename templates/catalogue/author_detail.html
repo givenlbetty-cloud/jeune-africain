@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ author.get_full_name }} - BNC{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- En-tête auteur -->
+    <div class="row mb-5">
+        <div class="col-md-3 text-center mb-4">
+            {% if author.photo %}
+                <img src="{{ author.photo.url }}" alt="{{ author.get_full_name }}" class="img-fluid rounded-circle" style="max-width: 250px;">
+            {% else %}
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 250px; height: 250px; margin: 0 auto;">
+                    <i class="fas fa-user fa-5x text-muted"></i>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-9">
+            <h1>{{ author.get_full_name }}</h1>
+            
+            {% if author.nationality %}
+                <p class="text-muted">
+                    <i class="fas fa-globe"></i> {{ author.get_nationality_display }}
+                </p>
+            {% endif %}
+            
+            {% if author.is_verified %}
+                <p>
+                    <span class="badge bg-success">
+                        <i class="fas fa-check-circle"></i> Auteur vérifiée
+                    </span>
+                </p>
+            {% endif %}
+            
+            {% if author.biography %}
+                <div class="mt-4">
+                    <h5>Biographie</h5>
+                    <p>{{ author.biography }}</p>
+                </div>
+            {% endif %}
+            
+            {% if author.birth_date %}
+                <p class="text-muted">
+                    <i class="fas fa-birthday-cake"></i> Né(e) le {{ author.birth_date|date:"d F Y" }}
+                </p>
+            {% endif %}
+            
+            {% if author.website %}
+                <p>
+                    <a href="{{ author.website }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-globe"></i> Site web
+                    </a>
+                </p>
+            {% endif %}
+            
+            {% if author.email %}
+                <p class="text-muted">
+                    <i class="fas fa-envelope"></i> {{ author.email }}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <hr>
+    
+    <!-- Livres de l'auteur -->
+    <div class="mt-5">
+        <h2>Livres ({{ total_books }})</h2>
+        
+        {% if books %}
+            <div class="row">
+                {% for book in books %}
+                    <div class="col-md-4 col-lg-3 mb-4">
+                        <div class="card h-100 book-card">
+                            {% if book.cover %}
+                                <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <i class="fas fa-book fa-4x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <h6 class="card-title">{{ book.title }}</h6>
+                                
+                                {% if book.genre %}
+                                    <p class="text-muted small">{{ book.get_genre_display }}</p>
+                                {% endif %}
+                                
+                                {% if book.is_free %}
+                                    <p class="text-success font-weight-bold">Gratuit</p>
+                                {% else %}
+                                    <p class="text-danger font-weight-bold">${{ book.price }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-footer bg-white border-top-0">
+                                <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-sm btn-primary w-100">
+                                    <i class="fas fa-book-open"></i> Lire
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Aucun livre pour cet auteur.
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Bouton retour -->
+    <div class="mt-5">
+        <a href="{% url 'catalogue:catalogue' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour au catalogue
+        </a>
+    </div>
+</div>
+
+<style>
+    .book-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-img-top {
+        object-fit: cover;
+        height: 250px;
+    }
+</style>
+{% endblock %}

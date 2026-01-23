@@ -1,0 +1,49 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+
+{% block subject %}
+{% trans "Notification - Réaction au forum - BNC Digital Library" %}
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="logo">📚 BNC Digital Library</div>
+</div>
+
+<div class="content">
+    <h1>{% trans "Nouvelle activité sur votre discussion!" %}</h1>
+
+    <div class="alert alert-info">
+        <strong>{{ commenter.first_name }}</strong> {% trans "a réagi à votre message dans le forum:" %}
+    </div>
+
+    <div class="recommendation" style="border-left: 4px solid #9b59b6;">
+        <div class="recommendation-title">
+            {% trans "Discussions:" %} {{ discussion.title }}
+        </div>
+        <p><strong>{% trans "Message original:" %}</strong></p>
+        <p>{{ original_message|truncatewords:50 }}</p>
+        <hr>
+        <p><strong>{% trans "Réaction:" %}</strong></p>
+        <p>{{ comment_text|truncatewords:50 }}</p>
+    </div>
+
+    <p>
+        <a href="{{ discussion_url }}" class="button">
+            {% trans "Voir la discussion complète" %}
+        </a>
+    </p>
+
+    <h2>{% trans "À propos de BNC Digital Library" %}</h2>
+    <p>{% trans "Rejoignez une communauté de lecteurs passionnés et découvrez des livres qui vous fascineront." %}</p>
+
+    <div class="footer">
+        <p>
+            {% trans "Préférences de notification:" %}
+            <a href="{{ notification_settings_url }}">{% trans "Gérer vos notifications" %}</a>
+        </p>
+        <p>© 2025 BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+    </div>
+</div>
+
+{% endblock %}

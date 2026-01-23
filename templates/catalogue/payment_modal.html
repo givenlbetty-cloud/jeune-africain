@@ -1,0 +1,359 @@
+<!-- Payment Modal / Form -->
+<div id="payment-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="paymentModalLabel">
+          💰 Acheter le livre
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Book Info -->
+        <div class="mb-4 p-3 bg-light rounded">
+          <h6 id="payment-book-title" class="mb-2">Book Title</h6>
+          <p id="payment-book-price" class="mb-0">
+            <strong>Prix: </strong><span class="text-success fs-5">500 FC</span>
+          </p>
+        </div>
+
+        <!-- Payment Form -->
+        <form id="payment-form">
+          <!-- Provider Selection -->
+          <div class="mb-3">
+            <label for="payment-provider" class="form-label fw-bold">
+              🏦 Sélectionnez un fournisseur de paiement
+            </label>
+            <select id="payment-provider" class="form-select form-select-lg" required>
+              <option value="">-- Choisir un fournisseur --</option>
+              <option value="airtel_money">
+                🇺🇬 Airtel Money (Uganda, DRC, Zambia)
+              </option>
+              <option value="mpesa">
+                🇰🇪 M-Pesa (Kenya, Uganda)
+              </option>
+              <option value="orange_money">
+                🇨🇩 Orange Money RDC (DRC)
+              </option>
+            </select>
+            <small class="text-muted d-block mt-2">
+              Choisissez le fournisseur disponible dans votre région
+            </small>
+          </div>
+
+          <!-- Phone Number Input -->
+          <div class="mb-3">
+            <label for="payment-phone" class="form-label fw-bold">
+              📱 Numéro de téléphone
+            </label>
+            <div class="input-group input-group-lg">
+              <span class="input-group-text" id="phone-prefix">+256</span>
+              <input 
+                type="tel" 
+                id="payment-phone" 
+                class="form-control" 
+                placeholder="701234567"
+                required
+                pattern="[0-9]{9,10}"
+              >
+            </div>
+            <small class="text-muted d-block mt-2">
+              ℹ️ <span id="phone-format-info">Format: 9-10 chiffres (sans le +)</span>
+            </small>
+          </div>
+
+          <!-- Provider Info -->
+          <div id="provider-info" class="alert alert-info" style="display:none;">
+            <strong id="provider-info-title"></strong>
+            <p id="provider-info-text" class="mb-0 mt-2"></p>
+          </div>
+
+          <!-- Terms -->
+          <div class="mb-3 form-check">
+            <input 
+              type="checkbox" 
+              class="form-check-input" 
+              id="payment-terms" 
+              required
+            >
+            <label class="form-check-label" for="payment-terms">
+              J'accepte les <a href="/terms" target="_blank">conditions d'utilisation</a>
+            </label>
+          </div>
+
+          <!-- Error Message -->
+          <div id="payment-error" class="alert alert-danger" style="display:none;" role="alert">
+            <strong>Erreur:</strong> <span id="payment-error-text"></span>
+          </div>
+
+          <!-- Loading State -->
+          <div id="payment-loading" style="display:none;">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Traitement...</span>
+            </div>
+            <span class="ms-2">Traitement de votre paiement...</span>
+          </div>
+
+          <!-- Hidden Book ID Input -->
+          <input type="hidden" id="payment-book-id" name="payment_book_id" value="">
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          data-bs-dismiss="modal"
+        >
+          Annuler
+        </button>
+        <button 
+          type="button" 
+          id="payment-submit-btn" 
+          class="btn btn-success btn-lg"
+          onclick="submitPayment()"
+        >
+          💳 Procéder au paiement
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Status Modal (shown after payment initiation) -->
+<div id="payment-status-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="paymentStatusLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentStatusLabel">
+          ⏳ Statut du paiement
+        </h5>
+      </div>
+      
+      <div class="modal-body text-center py-5">
+        <!-- Pending State -->
+        <div id="payment-pending">
+          <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Vérification...</span>
+          </div>
+          <h5>Veuillez confirmer le paiement sur votre téléphone</h5>
+          <p class="text-muted">Numéro: <strong id="payment-phone-display"></strong></p>
+          <p class="text-muted">Nous vérifions le paiement...</p>
+          <div class="mt-3">
+            <small class="text-warning">⏱️ Cela peut prendre 30-60 secondes</small>
+          </div>
+        </div>
+
+        <!-- Success State -->
+        <div id="payment-success" style="display:none;">
+          <div class="mb-3">
+            <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+          </div>
+          <h5>✅ Paiement réussi!</h5>
+          <p class="text-muted">Vous avez maintenant accès au livre complet</p>
+          <p id="payment-success-message" class="text-success fw-bold mt-2"></p>
+        </div>
+
+        <!-- Error State -->
+        <div id="payment-error-state" style="display:none;">
+          <div class="mb-3">
+            <i class="fas fa-times-circle text-danger" style="font-size: 3rem;"></i>
+          </div>
+          <h5>❌ Paiement échoué</h5>
+          <p id="payment-error-message" class="text-danger mt-2"></p>
+          <p class="text-muted">Veuillez vérifier votre numéro et réessayer</p>
+        </div>
+      </div>
+
+      <div class="modal-footer" id="payment-status-footer">
+        <button 
+          type="button" 
+          id="payment-close-btn"
+          class="btn btn-primary" 
+          data-bs-dismiss="modal"
+          style="display:none;"
+        >
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #payment-modal .modal-header {
+    border-bottom: 2px solid #0d6efd;
+  }
+  
+  #payment-modal .form-label {
+    color: #212529;
+  }
+  
+  #payment-modal .input-group-text {
+    background-color: #e7f1ff;
+    border: 1px solid #0d6efd;
+    font-weight: bold;
+  }
+
+  #payment-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  #payment-submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+  }
+</style>
+
+<script>
+// Update phone prefix based on provider
+document.getElementById('payment-provider').addEventListener('change', function(e) {
+  const provider = e.target.value;
+  const prefixEl = document.getElementById('phone-prefix');
+  const infoEl = document.getElementById('provider-info');
+  const infoTitle = document.getElementById('provider-info-title');
+  const infoText = document.getElementById('provider-info-text');
+  const formatInfo = document.getElementById('phone-format-info');
+
+  const prefixMap = {
+    'airtel_money': { prefix: '+256', info: '🇺🇬 Airtel Money', text: 'Opérateur: Airtel Uganda. Format: 9-10 chiffres (par ex: 701234567)' },
+    'mpesa': { prefix: '+254', info: '🇰🇪 M-Pesa', text: 'Opérateur: Safaricom Kenya. Format: 9-10 chiffres (par ex: 712345678)' },
+    'orange_money': { prefix: '+243', info: '🇨🇩 Orange Money RDC', text: 'Opérateur: Orange RDC. Format: 9-10 chiffres (par ex: 812345678)' }
+  };
+
+  if (prefixMap[provider]) {
+    prefixEl.textContent = prefixMap[provider].prefix;
+    infoTitle.textContent = prefixMap[provider].info;
+    infoText.textContent = prefixMap[provider].text;
+    formatInfo.textContent = prefixMap[provider].text;
+    infoEl.style.display = 'block';
+  } else {
+    infoEl.style.display = 'none';
+  }
+});
+
+// Submit payment
+async function submitPayment() {
+  const bookId = document.getElementById('payment-book-id')?.value;
+  const provider = document.getElementById('payment-provider').value;
+  const phone = document.getElementById('payment-phone').value;
+  const prefix = document.getElementById('phone-prefix').textContent;
+
+  if (!provider || !phone) {
+    showPaymentError('Veuillez sélectionner un fournisseur et entrer votre numéro');
+    return;
+  }
+
+  const fullPhone = prefix + phone;
+  const submitBtn = document.getElementById('payment-submit-btn');
+  submitBtn.disabled = true;
+
+  try {
+    // Call payment API
+    const response = await fetch(`/api/payments/mobile-money/${bookId}/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+      },
+      body: JSON.stringify({
+        provider: provider,
+        phone_number: fullPhone
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      // Hide payment form, show status modal
+      const paymentModal = bootstrap.Modal.getInstance(document.getElementById('payment-modal'));
+      paymentModal?.hide();
+
+      const statusModal = new bootstrap.Modal(document.getElementById('payment-status-modal'));
+      document.getElementById('payment-phone-display').textContent = fullPhone;
+      document.getElementById('payment-pending').style.display = 'block';
+      document.getElementById('payment-success').style.display = 'none';
+      document.getElementById('payment-error-state').style.display = 'none';
+      statusModal.show();
+
+      // Poll for payment status
+      pollPaymentStatus(data.payment_id);
+    } else {
+      showPaymentError(data.message || 'Erreur lors de l\'initiation du paiement');
+    }
+  } catch (error) {
+    showPaymentError('Erreur réseau: ' + error.message);
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+// Poll payment status
+async function pollPaymentStatus(paymentId) {
+  let attempts = 0;
+  const maxAttempts = 60; // 60 * 2 seconds = 2 minutes
+
+  const poll = async () => {
+    attempts++;
+
+    try {
+      const response = await fetch(`/api/payments/mobile-money/${paymentId}/status/`);
+      const data = await response.json();
+
+      if (data.success) {
+        const status = data.status;
+
+        if (status === 'COMPLETED') {
+          showPaymentSuccess(paymentId);
+        } else if (status === 'FAILED') {
+          showPaymentFailed(data.message || 'Paiement échoué');
+        } else if (attempts < maxAttempts) {
+          // Keep polling
+          setTimeout(poll, 2000); // Check every 2 seconds
+        } else {
+          showPaymentFailed('Délai d\'attente dépassé. Veuillez vérifier votre transaction.');
+        }
+      }
+    } catch (error) {
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 2000);
+      } else {
+        showPaymentFailed('Erreur lors de la vérification du paiement');
+      }
+    }
+  };
+
+  poll();
+}
+
+// Show payment success
+function showPaymentSuccess(paymentId) {
+  document.getElementById('payment-pending').style.display = 'none';
+  document.getElementById('payment-success').style.display = 'block';
+  document.getElementById('payment-error-state').style.display = 'none';
+  document.getElementById('payment-close-btn').style.display = 'block';
+  document.getElementById('payment-success-message').textContent = 'Accès complet au livre activé!';
+
+  // Reload page after 3 seconds to show updated content
+  setTimeout(() => {
+    location.reload();
+  }, 3000);
+}
+
+// Show payment failed
+function showPaymentFailed(message) {
+  document.getElementById('payment-pending').style.display = 'none';
+  document.getElementById('payment-success').style.display = 'none';
+  document.getElementById('payment-error-state').style.display = 'block';
+  document.getElementById('payment-error-message').textContent = message;
+  document.getElementById('payment-close-btn').style.display = 'block';
+}
+
+// Show payment error
+function showPaymentError(message) {
+  document.getElementById('payment-error').style.display = 'block';
+  document.getElementById('payment-error-text').textContent = message;
+}
+</script>

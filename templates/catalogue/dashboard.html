@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Recommandations - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .recommendation-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .recommendation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stats-card {
+        border-left: 4px solid #667eea;
+        padding: 20px;
+        background: linear-gradient(to right, rgba(102, 126, 234, 0.1), transparent);
+    }
+    
+    .dashboard-section {
+        margin-bottom: 40px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-2">
+                        <i class="fas fa-chart-line"></i> Votre Dashboard
+                    </h1>
+                    <p class="text-muted">
+                        Découvrez des livres recommandés rien que pour vous
+                    </p>
+                </div>
+                <div>
+                    <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ratingModal">
+                        <i class="fas fa-star"></i> Évaluer un livre
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistiques utilisateur -->
+    {% if user.is_authenticated %}
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card rounded">
+                <h6 class="text-muted mb-2"><i class="fas fa-book"></i> Livres lus</h6>
+                <h3 class="mb-0">{{ user_stats.books_read|default:0 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card rounded" style="border-left-color: #ffc107;">
+                <h6 class="text-muted mb-2"><i class="fas fa-star"></i> Évaluations</h6>
+                <h3 class="mb-0">{{ user_stats.total_ratings|default:0 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card rounded" style="border-left-color: #28a745;">
+                <h6 class="text-muted mb-2"><i class="fas fa-heart"></i> Favoris</h6>
+                <h3 class="mb-0">{{ user_stats.liked_count|default:0 }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card rounded" style="border-left-color: #dc3545;">
+                <h6 class="text-muted mb-2"><i class="fas fa-star-half-alt"></i> Note moyenne</h6>
+                <h3 class="mb-0">{{ user_stats.avg_rating|default:0|floatformat:1 }}/5</h3>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Section principale avec 2 colonnes -->
+    <div class="row">
+        <!-- Colonne gauche: Recommandations (2/3) -->
+        <div class="col-lg-8">
+            <div class="dashboard-section">
+                {% include "catalogue/components/recommendations_widget.html" %}
+            </div>
+        </div>
+        
+        <!-- Colonne droite: Tendances et infos (1/3) -->
+        <div class="col-lg-4">
+            <div class="dashboard-section">
+                {% include "catalogue/components/trending_widget.html" %}
+            </div>
+            
+            <!-- Infos rapides -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb"></i> Conseils
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <small>
+                            <strong>💡 Astuce:</strong> Évaluez les livres que vous avez lus pour améliorer vos recommandations!
+                        </small>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <small>
+                            <strong>⚙️ Personnalisation:</strong> Configurez vos préférences pour des recommandations plus pertinentes.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include "catalogue/components/rating_form_modal.html" %}
+{% include "catalogue/components/preferences_form_modal.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser les popovers Bootstrap
+        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        const popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl);
+        });
+        
+        // Initialiser les tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,588 +1,496 @@
 """
-Configuration Django Admin pour l'application catalogue.
-SÉCURISÉ : Isolation des données par LIBRARY_ADMIN (multi-tenant).
-Avec Jazzmin, django-import-export et autorisation granulaire.
+Configuration Django Admin SIMPLIFIÉE pour utilisateurs non-techniques.
+Focus sur les actions essentielles uniquement.
 """
 
 from django.contrib import admin
-from django.utils.translation import gettext_lazy as _
-from django.db.models import Q
-from import_export import resources
-from import_export.admin import ImportExportModelAdmin
+from django.utils.html import format_html, mark_safe
+from django.urls import reverse
+from django.db.models import Count
 from .models import (
-    Author, AuthorMedia, Library, Book, AuthorBook, 
-    LibraryBook, ReadingSession, Payment
+    Book, Author, Library, Payment, Event, 
+    ReadingSession, BookRating, Category, AuthorBook, MerchantPaymentAccount,
+    BookSimilarity, UserPreference, UserRecommendation, RecommendationStatistic,
+    SyncQueue, UserRecommendationFeedback,
+    AudiobookMetadata, VideoMaterial, Podcast,
+    SiteConfiguration
+)
+from .proxy_models import (
+    AudiobookProxy, VideoProxy, PodcastProxy, 
+    PaymentProxy, MerchantAccountProxy, 
+    EventProxy
 )
 
-
 # =============================================================
-# RESSOURCES POUR IMPORT/EXPORT
-# =============================================================
-
-class AuthorResource(resources.ModelResource):
-    """Ressource pour import/export des auteurs."""
-    class Meta:
-        model = Author
-        fields = ('id', 'first_name', 'last_name', 'email', 'nationality', 'website', 'is_verified')
-        export_order = ('id', 'first_name', 'last_name', 'email', 'nationality', 'website', 'is_verified')
-
-
-class BookResource(resources.ModelResource):
-    """Ressource pour import/export des livres."""
-    class Meta:
-        model = Book
-        fields = ('id', 'title', 'isbn', 'genre', 'language', 'pages_count', 'price', 'discount_percentage', 'is_published')
-        export_order = ('id', 'title', 'isbn', 'genre', 'language', 'pages_count', 'price', 'discount_percentage', 'is_published')
-
-
-class LibraryResource(resources.ModelResource):
-    """Ressource pour import/export des bibliothèques."""
-    class Meta:
-        model = Library
-        fields = ('id', 'name', 'city', 'country', 'is_active', 'max_users')
-        export_order = ('id', 'name', 'city', 'country', 'is_active', 'max_users')
-
-
-class PaymentResource(resources.ModelResource):
-    """Ressource pour import/export des paiements."""
-    class Meta:
-        model = Payment
-        fields = ('id', 'user', 'book', 'amount', 'status', 'payment_method', 'created_at')
-        export_order = ('id', 'user', 'book', 'amount', 'status', 'payment_method', 'created_at')
-
-
-# =============================================================
-# ADMIN INLINES
+# SIMPLIFICATIONS - Affichage des listes
 # =============================================================
 
-class AuthorMediaInline(admin.TabularInline):
-    """Inline pour les médias (vidéos, podcasts) d'auteur."""
-    model = AuthorMedia
-    extra = 1
-    fields = ('title', 'media_type', 'platform', 'url', 'is_published', 'published_date')
-    ordering = ('-published_date',)
+class AudiobookInline(admin.StackedInline):
+    """Inline pour l'audiobook."""
+    model = AudiobookMetadata
+    extra = 0
+    fields = ('duration_hours', 'narrator', 'audio_file', 'is_published')
 
+class VideoInline(admin.TabularInline):
+    """Inline pour les vidéos."""
+    model = VideoMaterial
+    extra = 0
+    fields = ('title', 'video_type', 'external_url', 'is_published')
+
+class PodcastInline(admin.TabularInline):
+    """Inline pour les podcasts."""
+    model = Podcast
+    extra = 0
+    fields = ('title', 'episode_count', 'is_active')
 
 class AuthorBookInline(admin.TabularInline):
     """Inline pour gérer les auteurs depuis le livre."""
     model = AuthorBook
     extra = 1
-    fields = ('author', 'role', 'order')
-    ordering = ('order',)
+    autocomplete_fields = ['author'] # To allow searching authors
+    verbose_name = "Associer un auteur"
+    verbose_name_plural = "Auteurs du livre"
 
-
-class LibraryBookInline(admin.TabularInline):
-    """Inline pour gérer les bibliothèques depuis le livre."""
-    model = LibraryBook
-    extra = 1
-    fields = ('library', 'quantity', 'available_quantity')
-    readonly_fields = ()
-
-
-class ReadingSessionInline(admin.TabularInline):
-    """Inline pour les sessions de lecture."""
-    model = ReadingSession
-    extra = 0
-    fields = ('user', 'start_time', 'end_time', 'pages_read', 'is_completed', 'duration_minutes')
-    readonly_fields = ('user', 'start_time', 'end_time', 'pages_read', 'duration_minutes')
-    can_delete = False
-
-
-class PaymentInline(admin.TabularInline):
-    """Inline pour les paiements."""
-    model = Payment
-    extra = 0
-    fields = ('user', 'amount', 'status', 'payment_method', 'created_at')
-    readonly_fields = ('user', 'amount', 'status', 'created_at')
-    can_delete = False
-
-
-# =============================================================
-# ADMIN CLASSES AVEC SÉCURITÉ MULTI-TENANT
-# =============================================================
-
-@admin.register(Author)
-class AuthorAdmin(ImportExportModelAdmin):
-    """
-    Admin pour les auteurs.
-    SÉCURITÉ : LIBRARY_ADMIN ne voit que ses auteurs (via ses livres).
-    """
-    resource_classes = [AuthorResource]
-    inlines = [AuthorMediaInline]
+@admin.register(Book)
+class BookAdmin(admin.ModelAdmin):
+    """Admin simplifié pour les livres."""
     
-    list_display = ('get_full_name', 'email', 'nationality', 'is_verified', 'created_at')
-    list_filter = ('is_verified', 'nationality', 'created_at')
-    search_fields = ('first_name', 'last_name', 'email')
-    ordering = ('-created_at',)
+    inlines = [AuthorBookInline, AudiobookInline, VideoInline, PodcastInline]
+    search_fields = ('title', 'isbn', 'description')  # Important pour autocomplete_fields des autres modèles
     
+    # ✅ Colonnes affichées - ESSENTIELLES UNIQUEMENT
+    list_display = ('title', 'get_authors', 'genre', 'price_display', 'is_paid_badge', 'get_cover_preview')
+    
+    # ✅ Filtres importants seulement
+    list_filter = ('is_paid', 'genre', 'language', 'created_at')
+    
+    # ✅ Recherche rapide
+    search_fields = ('title', 'isbn', 'description')
+    
+    # ✅ Champs du formulaire - RÉDUITS
     fieldsets = (
-        (_("Informations personnelles"), {
-            'fields': ('first_name', 'last_name', 'email', 'birth_date', 'photo', 'nationality')
+        ('📖 INFORMATIONS ESSENTIELLES', {
+            'fields': ('title', 'isbn', 'description', 'genre', 'language')
         }),
-        (_("Détails"), {
-            'fields': ('biography', 'website', 'is_verified', 'verified_date'),
-            'classes': ('collapse',)
+        ('📚 DETAILS', {
+            'fields': ('pages_count', 'cover', 'pdf_file', 'epub_file'),
+            'classes': ('collapse',),
         }),
-        (_("Dates"), {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+        ('💰 TARIFICATION', {
+            'fields': ('price', 'discount_percentage', 'is_paid', 'free_pages_count', 'is_published', 'publication_date'),
+            'description': 'Configurez le prix et la disponibilité du livre'
         }),
     )
     
     readonly_fields = ('created_at', 'updated_at')
     
-    # Actions personnalisées
-    actions = ['verify_authors', 'unverify_authors']
-    
-    def get_queryset(self, request):
-        """
-        SÉCURITÉ : Filtrer les auteurs selon le rôle.
-        - SUPER_ADMIN : voir tous les auteurs
-        - LIBRARY_ADMIN : voir seulement les auteurs de ses livres
-        """
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            # Super admin voit tous les auteurs
-            return qs
-        elif request.user.is_library_admin():
-            # Library admin voit uniquement les auteurs de ses livres
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                # Récupérer tous les auteurs liés à cette bibliothèque
-                author_ids = AuthorBook.objects.filter(
-                    book__librarybook__library=library
-                ).values_list('author_id', flat=True).distinct()
-                return qs.filter(id__in=author_ids)
-            return qs.none()  # Aucun auteur si pas de bibliothèque
-        else:
-            # Lecteur ordinaire ne voit aucun auteur
-            return qs.none()
-    
-    def verify_authors(self, request, queryset):
-        """Action pour vérifier les auteurs."""
-        updated = queryset.update(is_verified=True)
-        self.message_user(request, f"✅ {updated} auteur(s) vérifié(s).")
-    verify_authors.short_description = _("Vérifier les auteurs sélectionnés")
-    
-    def unverify_authors(self, request, queryset):
-        """Action pour dévérifier les auteurs."""
-        updated = queryset.update(is_verified=False)
-        self.message_user(request, f"✅ {updated} auteur(s) déveérifiés.")
-    unverify_authors.short_description = _("Déveérifier les auteurs sélectionnés")
-
-
-@admin.register(AuthorMedia)
-class AuthorMediaAdmin(admin.ModelAdmin):
-    """Admin pour les médias (vidéos, podcasts) d'auteur."""
-    
-    list_display = ('title', 'author', 'media_type', 'platform', 'is_published', 'published_date')
-    list_filter = ('media_type', 'platform', 'is_published', 'published_date')
-    search_fields = ('title', 'author__last_name', 'author__first_name', 'description')
-    readonly_fields = ('id', 'created_at', 'updated_at', 'is_valid_url')
-    ordering = ('-published_date',)
-    
-    fieldsets = (
-        (_("Informations de base"), {
-            'fields': ('author', 'title', 'description')
-        }),
-        (_("Contenu média"), {
-            'fields': ('media_type', 'platform', 'url', 'thumbnail_url')
-        }),
-        (_("Métadonnées"), {
-            'fields': ('duration_minutes', 'published_date', 'is_published')
-        }),
-        (_("Validation & Dates"), {
-            'fields': ('is_valid_url', 'created_at', 'updated_at', 'id'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def is_valid_url(self, obj):
-        """Afficher le statut de validation de l'URL."""
-        return obj.is_valid_url
-    is_valid_url.boolean = True
-    is_valid_url.short_description = _("URL valide")
-    
-    def get_queryset(self, request):
-        """SÉCURITÉ : Filtrer les médias selon le rôle."""
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                author_ids = AuthorBook.objects.filter(
-                    book__librarybook__library=library
-                ).values_list('author_id', flat=True).distinct()
-                return qs.filter(author_id__in=author_ids)
-            return qs.none()
-        else:
-            return qs.none()
-
-
-@admin.register(Library)
-class LibraryAdmin(ImportExportModelAdmin):
-    """
-    Admin pour les bibliothèques.
-    SÉCURITÉ : LIBRARY_ADMIN ne voit que sa propre bibliothèque.
-    """
-    resource_classes = [LibraryResource]
-    inlines = [LibraryBookInline]
-    
-    list_display = ('name', 'city', 'country', 'get_book_count', 'admin', 'is_active')
-    list_filter = ('is_active', 'country', 'created_at')
-    search_fields = ('name', 'city', 'country', 'admin__email')
-    readonly_fields = ('created_at', 'updated_at', 'current_users_count', 'get_book_count')
     ordering = ('-created_at',)
     
+    def get_authors(self, obj):
+        """Affiche les auteurs formatés."""
+        authors = obj.authorbook_set.all()
+        return ', '.join([f"{a.author.first_name} {a.author.last_name}" for a in authors]) or "—"
+    get_authors.short_description = "Auteur(s)"
+    
+    def price_display(self, obj):
+        """Affiche le prix avec couleur."""
+        if obj.is_paid:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">{} FC</span>',
+                obj.price
+            )
+        return mark_safe('<span style="color: blue;">GRATUIT</span>')
+    price_display.short_description = "Prix"
+    
+    def is_paid_badge(self, obj):
+        """Badge de tarification."""
+        if obj.is_paid:
+            return mark_safe('<span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 3px;">💰 Payant</span>')
+        return mark_safe('<span style="background: #007bff; color: white; padding: 3px 8px; border-radius: 3px;">✓ Gratuit</span>')
+    is_paid_badge.short_description = "Tarif"
+    
+    def get_cover_preview(self, obj):
+        """Aperçu miniature de la couverture."""
+        if obj.cover:
+            return format_html(
+                '<img src="{}" style="max-height: 40px; border-radius: 3px;" />',
+                obj.cover.url
+            )
+        return "—"
+    get_cover_preview.short_description = "Couverture"
+
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    """Admin simplifié pour les auteurs."""
+    
+    list_display = ('name', 'email', 'nationality', 'book_count', 'is_verified_badge')
+    list_filter = ('is_verified', 'created_at', 'nationality')
+    search_fields = ('first_name', 'last_name', 'email')
+    
     fieldsets = (
-        (_("Informations"), {
-            'fields': ('name', 'description', 'admin', 'logo')
+        ('👤 PROFIL', {
+            'fields': ('first_name', 'last_name', 'email', 'nationality'),
         }),
-        (_("Localisation"), {
-            'fields': ('location', 'city', 'country')
+        ('🔗 RÉSEAUX SOCIAUX', {
+            'fields': ('website', 'biography'),
+            'classes': ('collapse',)
         }),
-        (_("Gestion"), {
-            'fields': ('is_active', 'max_users', 'current_users_count')
+        ('✓ VÉRIFICATION', {
+            'fields': ('is_verified',),
         }),
-        (_("Statistiques"), {
-            'fields': ('get_book_count', 'created_at', 'updated_at'),
+    )
+    
+    readonly_fields = ('created_at',)
+    ordering = ('last_name', 'first_name')
+    
+    def name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+    name.short_description = "Nom"
+    
+    def book_count(self, obj):
+        count = obj.authorbook_set.count()
+        return format_html('<strong>{}</strong> livre(s)', count)
+    book_count.short_description = "Livres"
+    
+    def is_verified_badge(self, obj):
+        if obj.is_verified:
+            return mark_safe('<span style="color: green;">✓ Vérifié</span>')
+        return mark_safe('<span style="color: orange;">⚠ À vérifier</span>')
+    is_verified_badge.short_description = "Vérification"
+
+
+
+# Les modèles originaux sont masqués au profit des Proxies ci-dessous
+# pour permettre une séparation visuelle dans l'interface admin.
+# @admin.register(Payment)
+# class PaymentAdmin(admin.ModelAdmin):
+#    pass
+
+# @admin.register(Event)
+# class EventAdmin(admin.ModelAdmin):
+#    pass
+
+# @admin.register(MerchantPaymentAccount)
+# class MerchantPaymentAccountAdmin(admin.ModelAdmin):
+#    pass
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    """Admin simplifié pour les catégories."""
+    
+    list_display = ('name', 'book_count')
+    search_fields = ('name',)
+    ordering = ('name',)
+    
+    def book_count(self, obj):
+        count = obj.bookcategory_set.count()
+        return format_html('<strong>{}</strong>', count)
+    book_count.short_description = "Livres"
+
+
+# =============================================================
+# GESTION DES MÉDIAS (Audio, Vidéo, Podcast)
+# =============================================================
+
+@admin.register(AudiobookProxy)
+class AudiobookMetadataAdmin(admin.ModelAdmin):
+    """Admin pour les audiobooks."""
+    list_display = ('book_title', 'duration_display', 'narrator', 'is_published_badge')
+    list_filter = ('is_published', 'created_at')
+    search_fields = ('book__title', 'narrator')
+    autocomplete_fields = ['book']
+    
+    fieldsets = (
+        ('LIVRE ASSOCIÉ', {
+            'fields': ('book',)
+        }),
+        ('FICHIER & INFO', {
+            'fields': ('audio_file', 'duration_hours', 'narrator', 'cover_image')
+        }),
+        ('PUBLICATION', {
+            'fields': ('is_published',)
+        })
+    )
+
+    def book_title(self, obj):
+        return obj.book.title
+    book_title.short_description = "Livre"
+
+    def duration_display(self, obj):
+        return f"{obj.duration_hours}h"
+    duration_display.short_description = "Durée"
+
+    def is_published_badge(self, obj):
+        if obj.is_published:
+            return mark_safe('<span style="color: green;">✓ Publié</span>')
+        return mark_safe('<span style="color: red;">⊘ Caché</span>')
+    is_published_badge.short_description = "Statut"
+
+
+@admin.register(VideoProxy)
+class VideoMaterialAdmin(admin.ModelAdmin):
+    """Admin pour les vidéos."""
+    list_display = ('title', 'book_link', 'video_type', 'view_count', 'is_published_badge')
+    list_filter = ('is_published', 'video_type')
+    search_fields = ('title', 'book__title')
+    autocomplete_fields = ['book']
+
+    fieldsets = (
+        ('INFO VIDÉO', {
+            'fields': ('title', 'book', 'video_type', 'description')
+        }),
+        ('SOURCE', {
+            'fields': ('external_url', 'video_file', 'thumbnail', 'duration_seconds')
+        }),
+        ('PUBLICATION', {
+            'fields': ('is_published',)
+        })
+    )
+
+    def book_link(self, obj):
+        return obj.book.title
+    book_link.short_description = "Livre lié"
+
+    def is_published_badge(self, obj):
+        if obj.is_published:
+            return mark_safe('<span style="color: green;">✓ Publié</span>')
+        return mark_safe('<span style="color: red;">⊘ Caché</span>')
+    is_published_badge.short_description = "Statut"
+
+
+@admin.register(PodcastProxy)
+class PodcastAdmin(admin.ModelAdmin):
+    """Admin pour les podcasts."""
+    list_display = ('title', 'author', 'episode_count', 'is_active_badge')
+    list_filter = ('is_active',)
+    search_fields = ('title', 'author', 'book__title')
+    autocomplete_fields = ['book']
+
+    fieldsets = (
+        ('INFO PODCAST', {
+            'fields': ('title', 'author', 'book', 'description')
+        }),
+        ('MÉDIAS', {
+            'fields': ('rss_feed_url', 'image_url', 'website_url')
+        }),
+        ('STATUT', {
+            'fields': ('is_active', 'episode_count')
+        })
+    )
+
+    def is_active_badge(self, obj):
+        if obj.is_active:
+            return mark_safe('<span style="color: green;">✓ Actif</span>')
+        return mark_safe('<span style="color: red;">⊘ Inactif</span>')
+    is_active_badge.short_description = "Statut"
+
+
+# =============================================================
+# COMPTES DE PERCEPTION & FINANCE (Proxies)
+# =============================================================
+
+@admin.register(MerchantAccountProxy)
+class MerchantPaymentAccountAdmin(admin.ModelAdmin):
+    """Admin pour gérer les comptes de réception du vendeur."""
+    
+    list_display = ('get_method_display', 'account_number', 'account_holder_name', 'is_active_badge', 'bank_name')
+    list_filter = ('is_active', 'payment_method', 'created_at')
+    search_fields = ('account_number', 'account_holder_name', 'bank_name')
+    
+    fieldsets = (
+        ('💳 COMPTE DE RÉCEPTION', {
+            'fields': ('payment_method', 'account_number', 'account_holder_name'),
+            'description': 'Vos informations pour recevoir les paiements'
+        }),
+        ('🏦 DÉTAILS OPTIONNELS', {
+            'fields': ('bank_name', 'is_active', 'notes'),
             'classes': ('collapse',)
         }),
     )
     
-    def get_queryset(self, request):
-        """
-        SÉCURITÉ : Filtrer les bibliothèques selon le rôle.
-        - SUPER_ADMIN : voir toutes les bibliothèques
-        - LIBRARY_ADMIN : voir seulement sa propre bibliothèque
-        """
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            # Library admin ne voit que sa bibliothèque
-            return qs.filter(admin=request.user)
-        else:
-            # Lecteur ne voit aucune bibliothèque
-            return qs.none()
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('payment_method',)
     
-    def get_readonly_fields(self, request):
-        """SÉCURITÉ : LIBRARY_ADMIN ne peut pas modifier le propriétaire."""
-        if request.user.is_library_admin():
-            return self.readonly_fields + ('admin',)
-        return self.readonly_fields
+    def get_method_display(self, obj):
+        """Affiche la méthode avec couleur."""
+        # ... (same logic as before, omitted for brevity but using same helper if possible)
+        # Re-implementing simplified version
+        icons = {'airtel_money': '📱', 'mpesa': '📱', 'credit_card': '💳'}
+        return f"{icons.get(obj.payment_method, '💰')} {obj.get_payment_method_display()}"
+    get_method_display.short_description = "Méthode"
     
-    def get_book_count(self, obj):
-        """Afficher le nombre de livres."""
-        return obj.books.count()
-    get_book_count.short_description = _("Nombre de livres")
-    
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        """
-        SÉCURITÉ : LIBRARY_ADMIN ne peut que se sélectionner lui-même.
-        """
-        if db_field.name == 'admin' and request.user.is_library_admin():
-            kwargs['queryset'] = type(request.user).objects.filter(id=request.user.id)
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    def is_active_badge(self, obj):
+        """Badge actif/inactif."""
+        if obj.is_active:
+            return mark_safe('<span style="color: green;">✅ Actif</span>')
+        return mark_safe('<span style="color: red;">❌ Inactif</span>')
+    is_active_badge.short_description = "Statut"
 
 
-@admin.register(Book)
-class BookAdmin(ImportExportModelAdmin):
-    """
-    Admin pour les livres.
-    SÉCURITÉ : LIBRARY_ADMIN ne voit que les livres de sa bibliothèque.
-    AUTOMATION : La bibliothèque est remplie automatiquement.
-    """
-    resource_classes = [BookResource]
-    inlines = [AuthorBookInline, LibraryBookInline, ReadingSessionInline]
+@admin.register(PaymentProxy)
+class PaymentAdmin(admin.ModelAdmin):
+    """Admin simplifié pour les paiements."""
     
-    list_display = ('title', 'isbn', 'genre', 'language', 'get_price_display', 'is_published', 'created_at')
-    list_filter = ('is_published', 'genre', 'language', 'created_at')
-    search_fields = ('title', 'isbn', 'description')
-    readonly_fields = ('id', 'created_at', 'updated_at', 'get_final_price')
-    ordering = ('-created_at',)
-    
-    fieldsets = (
-        (_("Informations de base"), {
-            'fields': ('title', 'isbn', 'description')
-        }),
-        (_("Catalogage"), {
-            'fields': ('genre', 'language', 'pages_count', 'publication_date')
-        }),
-        (_("Fichiers"), {
-            'fields': ('pdf_file', 'epub_file'),
-            'classes': ('collapse',)
-        }),
-        (_("Tarification"), {
-            'fields': ('price', 'discount_percentage', 'get_final_price', 'is_paid'),
-            'classes': ('collapse',)
-        }),
-        (_("Publication"), {
-            'fields': ('is_published', 'published_date')
-        }),
-        (_("Métadonnées"), {
-            'fields': ('id', 'created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def get_queryset(self, request):
-        """
-        SÉCURITÉ : Filtrer les livres selon le rôle.
-        - SUPER_ADMIN : voir tous les livres
-        - LIBRARY_ADMIN : voir seulement les livres de sa bibliothèque
-        """
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            # Library admin ne voit que les livres de sa bibliothèque
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                return qs.filter(librarybook__library=library).distinct()
-            return qs.none()
-        else:
-            # Lecteur ne voit aucun livre dans l'admin
-            return qs.none()
-    
-    def save_model(self, request, obj, form, change):
-        """
-        AUTOMATION : Lors de la création d'un livre, l'ajouter à la bibliothèque du LIBRARY_ADMIN.
-        """
-        super().save_model(request, obj, form, change)
-        
-        # Si c'est un nouveau livre et que l'utilisateur est LIBRARY_ADMIN
-        if not change and request.user.is_library_admin():
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                # Ajouter le livre à la bibliothèque
-                LibraryBook.objects.get_or_create(
-                    library=library,
-                    book=obj,
-                    defaults={'quantity': 1, 'available_quantity': 1}
-                )
-                self.message_user(request, f"✅ Livre ajouté à votre bibliothèque '{library.name}'")
-    
-    def get_price_display(self, obj):
-        """Afficher le prix avec discount."""
-        if obj.discount_percentage > 0:
-            return f"{obj.price} XOF (-{obj.discount_percentage}%)"
-        return f"{obj.price} XOF"
-    get_price_display.short_description = _("Prix")
-    
-    def get_final_price(self, obj):
-        """Afficher le prix final après réduction."""
-        return f"{obj.get_final_price()} XOF"
-    get_final_price.short_description = _("Prix final")
-    
-    actions = ['publish_book', 'unpublish_book']
-    
-    def publish_book(self, request, queryset):
-        """Action pour publier les livres."""
-        updated = queryset.update(is_published=True)
-        self.message_user(request, f"✅ {updated} livre(s) publié(s).")
-    publish_book.short_description = _("Publier les livres sélectionnés")
-    
-    def unpublish_book(self, request, queryset):
-        """Action pour dépublier les livres."""
-        updated = queryset.update(is_published=False)
-        self.message_user(request, f"✅ {updated} livre(s) dépublié(s).")
-    unpublish_book.short_description = _("Dépublier les livres sélectionnés")
-
-
-@admin.register(AuthorBook)
-class AuthorBookAdmin(admin.ModelAdmin):
-    """Admin pour les relations auteur-livre."""
-    
-    list_display = ('author', 'book', 'role', 'order')
-    list_filter = ('role',)
-    search_fields = ('author__last_name', 'book__title')
-    ordering = ('book', 'order')
-    
-    fieldsets = (
-        (_("Relations"), {
-            'fields': ('author', 'book', 'role', 'order')
-        }),
-    )
-    
-    def get_queryset(self, request):
-        """SÉCURITÉ : Filtrer selon la bibliothèque de l'utilisateur."""
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                return qs.filter(book__librarybook__library=library).distinct()
-            return qs.none()
-        else:
-            return qs.none()
-
-
-@admin.register(LibraryBook)
-class LibraryBookAdmin(admin.ModelAdmin):
-    """Admin pour la gestion du stock de livres."""
-    
-    list_display = ('book', 'library', 'quantity', 'available_quantity', 'get_stock_percentage', 'date_added')
-    list_filter = ('library', 'date_added')
-    search_fields = ('book__title', 'library__name')
-    readonly_fields = ('date_added', 'updated_at', 'get_stock_percentage')
-    
-    fieldsets = (
-        (_("Relation"), {
-            'fields': ('library', 'book')
-        }),
-        (_("Stock"), {
-            'fields': ('quantity', 'available_quantity', 'get_stock_percentage')
-        }),
-        (_("Dates"), {
-            'fields': ('date_added', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def get_stock_percentage(self, obj):
-        """Afficher le pourcentage de stock disponible."""
-        if obj.quantity == 0:
-            return "N/A"
-        percentage = (obj.available_quantity / obj.quantity) * 100
-        return f"{percentage:.1f}%"
-    get_stock_percentage.short_description = _("% Disponible")
-    
-    def get_queryset(self, request):
-        """SÉCURITÉ : Filtrer selon la bibliothèque."""
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            return qs.filter(library__admin=request.user)
-        else:
-            return qs.none()
-
-
-@admin.register(ReadingSession)
-class ReadingSessionAdmin(admin.ModelAdmin):
-    """Admin pour les sessions de lecture."""
-    
-    list_display = ('user', 'book', 'start_time', 'duration_minutes', 'pages_read', 'is_completed')
-    list_filter = ('is_completed', 'start_time', 'created_at')
-    search_fields = ('user__email', 'book__title')
-    readonly_fields = ('user', 'book', 'start_time', 'end_time', 'duration_minutes', 'pages_read', 'created_at', 'updated_at')
-    ordering = ('-start_time',)
-    can_delete = False
-    
-    fieldsets = (
-        (_("Session"), {
-            'fields': ('user', 'book')
-        }),
-        (_("Timing"), {
-            'fields': ('start_time', 'end_time', 'duration_minutes')
-        }),
-        (_("Progression"), {
-            'fields': ('current_page', 'pages_read', 'is_completed')
-        }),
-        (_("Dates"), {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    def get_queryset(self, request):
-        """SÉCURITÉ : Filtrer selon la bibliothèque."""
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                return qs.filter(book__librarybook__library=library).distinct()
-            return qs.none()
-        else:
-            return qs.none()
-
-
-@admin.register(Payment)
-class PaymentAdmin(ImportExportModelAdmin):
-    """
-    Admin pour les paiements.
-    SÉCURITÉ : LIBRARY_ADMIN voit les paiements de ses livres.
-    """
-    resource_classes = [PaymentResource]
-    
-    list_display = ('get_user', 'book', 'get_amount', 'status', 'payment_method', 'created_at')
+    list_display = ('id_short', 'user_name', 'book_title', 'amount_display', 'status_badge', 'created_at')
     list_filter = ('status', 'payment_method', 'created_at')
-    search_fields = ('user__email', 'book__title', 'transaction_id')
-    readonly_fields = ('id', 'created_at', 'updated_at', 'get_user', 'get_amount')
-    ordering = ('-created_at',)
+    search_fields = ('user__email', 'book__title', 'id', 'phone_number')
     
     fieldsets = (
-        (_("Transaction"), {
-            'fields': ('user', 'book', 'transaction_id')
+        ('💰 TRANSACTION', {
+            'fields': ('user', 'book', 'amount', 'status'),
         }),
-        (_("Montant"), {
-            'fields': ('amount', 'currency', 'get_amount'),
-            'classes': ('collapse',)
-        }),
-        (_("Statut"), {
-            'fields': ('status', 'payment_method', 'paid_at')
-        }),
-        (_("Reçu"), {
-            'fields': ('receipt_url',),
-            'classes': ('collapse',)
-        }),
-        (_("Dates"), {
-            'fields': ('id', 'created_at', 'updated_at'),
+        ('DÉTAILS TECHNIQUES', {
+            'fields': ('transaction_id', 'payment_method', 'phone_number', 'currency'),
             'classes': ('collapse',)
         }),
     )
     
-    actions = ['mark_as_completed', 'mark_as_failed']
+    readonly_fields = ('created_at', 'updated_at')
+    can_delete = False
+    ordering = ('-created_at',)
     
-    def get_user(self, obj):
-        """Afficher l'utilisateur."""
+    def id_short(self, obj):
+        return str(obj.id)[:8]
+    id_short.short_description = "Ref"
+    
+    def user_name(self, obj):
         return obj.user.email
-    get_user.short_description = _("Utilisateur")
+    user_name.short_description = "Client"
     
-    def get_amount(self, obj):
-        """Afficher le montant avec devise."""
-        return f"{obj.amount} {obj.currency}"
-    get_amount.short_description = _("Montant")
+    def book_title(self, obj):
+        return obj.book.title
+    book_title.short_description = "Livre"
     
-    def get_queryset(self, request):
-        """SÉCURITÉ : Filtrer selon la bibliothèque."""
-        qs = super().get_queryset(request)
-        
-        if request.user.is_super_admin():
-            return qs
-        elif request.user.is_library_admin():
-            library = Library.objects.filter(admin=request.user).first()
-            if library:
-                return qs.filter(book__librarybook__library=library).distinct()
-            return qs.none()
-        else:
-            return qs.none()
+    def amount_display(self, obj):
+        return format_html('<strong>{} FC</strong>', obj.amount)
+    amount_display.short_description = "Montant"
     
-    def mark_as_completed(self, request, queryset):
-        """Action pour marquer les paiements comme complétés."""
-        from django.utils import timezone
-        updated = queryset.filter(status='pending').update(
-            status='completed',
-            paid_at=timezone.now()
+    def status_badge(self, obj):
+        colors = {'PENDING': '#ffc107', 'COMPLETED': '#28a745', 'FAILED': '#dc3545'}
+        color = colors.get(obj.status, '#6c757d')
+        return format_html(
+            '<span style="background: {}; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; font-size: 0.85em;">{}</span>',
+            color, obj.get_status_display()
         )
-        self.message_user(request, f"✅ {updated} paiement(s) marqué(s) comme complété(s).")
-    mark_as_completed.short_description = _("Marquer comme complété")
-    
-    def mark_as_failed(self, request, queryset):
-        """Action pour marquer les paiements comme échoués."""
-        updated = queryset.filter(status='pending').update(status='failed')
-        self.message_user(request, f"✅ {updated} paiement(s) marqué(s) comme échoué(s).")
-    mark_as_failed.short_description = _("Marquer comme échoué")
+    status_badge.short_description = "État"
 
+
+@admin.register(EventProxy)
+class EventAdmin(admin.ModelAdmin):
+    """Admin simplifié pour les événements."""
+    
+    list_display = ('title', 'type_display', 'date_start_display', 'registrations_count', 'is_published_badge')
+    list_filter = ('is_published', 'event_type', 'date_start')
+    search_fields = ('title', 'description')
+    
+    fieldsets = (
+        ('📅 INFO ÉVÉNEMENT', {
+            'fields': ('title', 'event_type', 'date_start', 'date_end', 'location'),
+        }),
+        ('CONTENU', {
+            'fields': ('image', 'description', 'book', 'url'),
+            'classes': ('collapse',)
+        }),
+        ('PUBLICATION', {
+            'fields': ('is_published',),
+        }),
+    )
+    
+    readonly_fields = ('created_at',)
+    ordering = ('-date_start',)
+    
+    def type_display(self, obj):
+        return obj.get_event_type_display()
+    type_display.short_description = "Type"
+    
+    def date_start_display(self, obj):
+        return obj.date_start.strftime('%d/%m %H:%M') if obj.date_start else "—"
+    date_start_display.short_description = "Date"
+    
+    def registrations_count(self, obj):
+        return obj.registrations.count()
+    registrations_count.short_description = "Inscrits"
+
+    def is_published_badge(self, obj):
+        return mark_safe('<span style="color: green;">✓ Publié</span>') if obj.is_published else mark_safe('<span style="color: red;">⊘ Brouillon</span>')
+    is_published_badge.short_description = "Statut"
+
+
+# =============================================================
+# MODELS TECHNIQUES (Masqués pour simplifier l'interface)
+# =============================================================
+
+# Les modèles suivants sont masqués car ils sont gérés automatiquement
+# par le système de recommandation et n'ont pas besoin d'être édités manuellement.
+
+# @admin.register(BookSimilarity)
+# class BookSimilarityAdmin(admin.ModelAdmin):
+#     """Admin pour les similarités entre livres"""
+#     list_display = ('book1_title', 'book2_title', 'overall_similarity', 'calculated_at')
+#     pass
+
+# @admin.register(UserPreference)
+# class UserPreferenceAdmin(admin.ModelAdmin):
+#     """Admin pour les préférences utilisateur"""
+#     pass
+
+# @admin.register(UserRecommendation)
+# class UserRecommendationAdmin(admin.ModelAdmin):
+#     """Admin pour les recommandations utilisateur"""
+#     pass
+
+# @admin.register(RecommendationStatistic)
+# class RecommendationStatisticAdmin(admin.ModelAdmin):
+#     """Admin pour les statistiques de recommandations"""
+#     pass
+
+# @admin.register(SyncQueue)
+# class SyncQueueAdmin(admin.ModelAdmin):
+#     """Admin pour la queue de synchronisation offline"""
+#     pass
+
+# @admin.register(UserRecommendationFeedback)
+# class UserRecommendationFeedbackAdmin(admin.ModelAdmin):
+#     """Admin pour les feedbacks sur les recommandations"""
+#     pass
+
+
+# =============================================================
+# CONFIG SITE ADMIN
+# =============================================================
+
+
+# =============================================================
+# CONFIG SITE ADMIN
+# =============================================================
+
+admin.site.site_header = "📚 Bibliothèque Numérique Continentale"
+admin.site.site_title = "Admin BNC"
+admin.site.index_title = "Gestion de la bibliothèque"
+
+@admin.register(SiteConfiguration)
+class SiteConfigurationAdmin(admin.ModelAdmin):
+    list_display = ('site_name', 'home_title')
+    fieldsets = (
+        ('Identité du site', {
+            'fields': ('site_name', 'logo'),
+            'description': "Gérez le nom et le logo du site visible par les utilisateurs."
+        }),
+        ('Page d\'accueil', {
+            'fields': ('home_title', 'home_description'),
+            'description': "Personnalisez le texte principal de la page d'accueil."
+        }),
+        ('Pied de page', {
+            'fields': ('footer_text',),
+            'description': "Texte affiché en bas de chaque page."
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Empêcher de créer plus d'une configuration
+        return not SiteConfiguration.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False

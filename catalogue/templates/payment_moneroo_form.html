@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Paiement Moneroo - BNC</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 30px;
+            margin: 0 auto 15px;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .info-box {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .info-box strong {
+            color: #667eea;
+        }
+        
+        button {
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .method-card {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .method-card:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .method-card input[type="radio"] {
+            display: none;
+        }
+        
+        .method-card input[type="radio"]:checked + .method-label {
+            color: white;
+        }
+        
+        .method-label {
+            display: block;
+            transition: all 0.3s;
+        }
+        
+        .payment-methods input[type="radio"]:checked + .method-label {
+            color: white;
+        }
+        
+        .payment-methods input[type="radio"]:checked ~ .method-label {
+            color: white;
+        }
+        
+        .phone-help {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .test-numbers {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-size: 12px;
+            color: #856404;
+        }
+        
+        .test-numbers strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .test-numbers p {
+            margin: 4px 0;
+            margin-left: 15px;
+        }
+        
+        .success-text {
+            color: #28a745;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">💳</div>
+            <h1>Paiement Moneroo</h1>
+            <p>Test de la plateforme de paiement BNC</p>
+        </div>
+        
+        <form method="POST" action="{% url 'initiate_moneroo_payment' %}">
+            {% csrf_token %}
+            
+            <div class="info-box">
+                <strong>ℹ️ Mode Sandbox:</strong> Utilisez les numéros de test ci-dessous
+            </div>
+            
+            <!-- Montant -->
+            <div class="form-group">
+                <label for="amount">Montant (CDF)</label>
+                <input 
+                    type="number" 
+                    id="amount" 
+                    name="amount" 
+                    step="0.01" 
+                    min="0.01"
+                    value="2500.00"
+                    placeholder="2500.00"
+                    required
+                >
+            </div>
+            
+            <!-- Devise et Méthode -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="currency">Devise</label>
+                    <select id="currency" name="currency" required>
+                        <option value="CDF">CDF - Franc Congolais</option>
+                        <option value="USD">USD - Dollar US</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="payment_method">Méthode de Paiement</label>
+                    <select id="payment_method" name="payment_method" required>
+                        <option value="mobile_money">Mobile Money</option>
+                        <option value="card">Carte Bancaire</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Numéro de téléphone -->
+            <div class="form-group">
+                <label for="phone">Numéro de Téléphone</label>
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    placeholder="+254712345678"
+                    value="+254712345678"
+                    required
+                >
+                <div class="phone-help">Format: +254 (Kenya), +243 (RDC), etc.</div>
+            </div>
+            
+            <!-- Référence de commande -->
+            <div class="form-group">
+                <label for="reference">Référence de Commande</label>
+                <input 
+                    type="text" 
+                    id="reference" 
+                    name="reference" 
+                    placeholder="TEST-001"
+                    value="TEST-{% now 'YmdHis' %}"
+                    required
+                >
+            </div>
+            
+            <!-- Numéros de test -->
+            <div class="test-numbers">
+                <strong>📞 Numéros de Test (Sandbox):</strong>
+                <p><strong>M-Pesa (Kenya):</strong> +254712345678</p>
+                <p><strong>Orange Money (RDC):</strong> +243815123456</p>
+                <p><strong>Airtel Money (RDC):</strong> +243821234567</p>
+                <p><strong>Carte Test:</strong> 4532015112830366</p>
+            </div>
+            
+            <!-- Bouton -->
+            <button type="submit">💰 Payer avec Moneroo</button>
+            
+            <div class="success-text">
+                ✓ Paiement sécurisé avec Moneroo
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        // Mise à jour automatique de la référence
+        function updateReference() {
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[:-]/g, '').slice(0, 14);
+            document.getElementById('reference').value = `TEST-${timestamp}`;
+        }
+        
+        // Auto-remplissage du numéro selon la devise
+        const currencySelect = document.getElementById('currency');
+        const phoneInput = document.getElementById('phone');
+        
+        currencySelect.addEventListener('change', function() {
+            if (this.value === 'CDF') {
+                phoneInput.value = '+243815123456';
+            } else {
+                phoneInput.value = '+254712345678';
+            }
+        });
+        
+        // Mise à jour de la référence au chargement
+        updateReference();
+    </script>
+</body>
+</html>

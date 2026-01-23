@@ -1,0 +1,344 @@
+"""
+Tests unitaires pour le système Analytics.
+À placer dans catalogue/tests_analytics.py
+"""
+
+from django.test import TestCase, Client
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
+from rest_framework.test import APIClient
+from rest_framework import status
+
+from catalogue.models import (
+    UserAnalytics, UserAchievements, ReadingSession,
+    Review, Note, Book, Author
+)
+
+User = get_user_model()
+
+
+class UserAnalyticsModelTests(TestCase):
+    """Test du modèle UserAnalytics."""
+    
+    def setUp(self):
+        """Créer les données de test."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.author = Author.objects.create(
+            first_name='John',
+            last_name='Doe',
+            nationality='US'
+        )
+        self.book = Book.objects.create(
+            title='Test Book',
+            isbn='1234567890',
+            is_published=True
+        )
+        self.book.authors.add(self.author)
+    
+    def test_get_or_create_for_user(self):
+        """Test la création/récupération des analytics."""
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        self.assertIsNotNone(analytics)
+        self.assertEqual(analytics.user, self.user)
+        
+        # Doit retourner le même objet
+        analytics2 = UserAnalytics.get_or_create_for_user(self.user)
+        self.assertEqual(analytics.id, analytics2.id)
+    
+    def test_recalculate_stats_empty(self):
+        """Test le recalcul avec aucune session."""
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        analytics.recalculate_stats()
+        
+        self.assertEqual(analytics.total_books_read, 0)
+        self.assertEqual(analytics.total_reading_hours, 0.0)
+        self.assertEqual(analytics.total_reviews, 0)
+        self.assertEqual(analytics.total_notes, 0)
+    
+    def test_recalculate_stats_with_session(self):
+        """Test le recalcul avec une session de lecture."""
+        # Créer une session
+        session = ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now() - timedelta(hours=2),
+            end_time=timezone.now(),
+            pages_read=50
+        )
+        
+        # Recalculer
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        analytics.recalculate_stats()
+        
+        # Vérifier
+        self.assertEqual(analytics.total_books_read, 1)
+        self.assertEqual(analytics.total_pages_read, 50)
+        self.assertAlmostEqual(analytics.total_reading_hours, 2.0, places=1)
+        self.assertAlmostEqual(analytics.average_reading_pace, 25.0, places=1)  # 50 pages / 2h
+    
+    def test_get_reading_goal_progress(self):
+        """Test la progression de l'objectif."""
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        
+        # Aucun livre
+        self.assertEqual(analytics.get_reading_goal_progress(), 0)
+        
+        # 50 livres (100% de l'objectif)
+        analytics.total_books_read = 50
+        self.assertEqual(analytics.get_reading_goal_progress(), 100.0)
+        
+        # 25 livres (50% de l'objectif)
+        analytics.total_books_read = 25
+        self.assertEqual(analytics.get_reading_goal_progress(), 50.0)
+    
+    def test_get_weekly_stats(self):
+        """Test les stats de la semaine."""
+        # Créer 3 sessions cette semaine
+        now = timezone.now()
+        for i in range(3):
+            ReadingSession.objects.create(
+                user=self.user,
+                book=self.book,
+                start_time=now - timedelta(days=i),
+                end_time=now - timedelta(days=i, hours=-1),
+                pages_read=20
+            )
+        
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        stats = analytics.get_weekly_stats()
+        
+        self.assertEqual(stats['sessions_count'], 3)
+        self.assertEqual(stats['pages_read'], 60)
+        self.assertGreater(stats['books_count'], 0)
+    
+    def test_get_genre_breakdown(self):
+        """Test la répartition par genre."""
+        self.book.genre = 'Fiction'
+        self.book.save()
+        
+        ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now(),
+            end_time=timezone.now() + timedelta(hours=1),
+            pages_read=50
+        )
+        
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        analytics.recalculate_stats()
+        
+        breakdown = analytics.get_genre_breakdown()
+        self.assertEqual(len(breakdown), 1)
+        self.assertEqual(breakdown[0]['genre'], 'Fiction')
+        self.assertEqual(breakdown[0]['count'], 1)
+
+
+class UserAchievementsTests(TestCase):
+    """Test du système de badges."""
+    
+    def setUp(self):
+        """Créer les données de test."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+    
+    def test_create_achievement(self):
+        """Test la création d'un badge."""
+        achievement = UserAchievements.objects.create(
+            user=self.user,
+            badge='first_book'
+        )
+        self.assertEqual(achievement.badge, 'first_book')
+        self.assertEqual(achievement.get_badge_display(), 'Premier Livre')
+    
+    def test_unique_constraint(self):
+        """Test qu'on ne peut pas avoir 2x le même badge."""
+        UserAchievements.objects.create(
+            user=self.user,
+            badge='first_book'
+        )
+        
+        # Devrait lever une IntegrityError
+        with self.assertRaises(Exception):
+            UserAchievements.objects.create(
+                user=self.user,
+                badge='first_book'
+            )
+    
+    def test_badge_emoji(self):
+        """Test les emojis des badges."""
+        self.assertEqual(UserAchievements.get_badge_emoji('first_book'), '📖')
+        self.assertEqual(UserAchievements.get_badge_emoji('collector_5'), '📚')
+        self.assertEqual(UserAchievements.get_badge_emoji('speed_reader_10h'), '⚡')
+
+
+class AnalyticsAPITests(TestCase):
+    """Test des endpoints API."""
+    
+    def setUp(self):
+        """Créer les données de test et le client."""
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.client.force_authenticate(user=self.user)
+        
+        # Créer une session de test
+        self.author = Author.objects.create(
+            first_name='John',
+            last_name='Doe'
+        )
+        self.book = Book.objects.create(
+            title='Test Book',
+            isbn='1234567890',
+            is_published=True
+        )
+        self.book.authors.add(self.author)
+        
+        ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now() - timedelta(hours=1),
+            end_time=timezone.now(),
+            pages_read=50
+        )
+    
+    def test_analytics_list_endpoint(self):
+        """Test GET /api/analytics/"""
+        response = self.client.get('/api/analytics/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        data = response.json()
+        self.assertIn('total_books_read', data)
+        self.assertIn('total_reading_hours', data)
+        self.assertGreater(data['total_books_read'], 0)
+    
+    def test_analytics_trends_endpoint(self):
+        """Test GET /api/analytics/trends/"""
+        response = self.client.get('/api/analytics/trends/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        data = response.json()
+        self.assertIsInstance(data, list)
+    
+    def test_analytics_preferences_endpoint(self):
+        """Test GET /api/analytics/preferences/"""
+        response = self.client.get('/api/analytics/preferences/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        data = response.json()
+        self.assertIn('favorite_genre', data)
+        # genres_breakdown peut être absent si pas de données
+        if 'genres_breakdown' in data:
+            self.assertIsInstance(data['genres_breakdown'], list)
+    
+    def test_analytics_achievements_endpoint(self):
+        """Test GET /api/analytics/achievements/"""
+        response = self.client.get('/api/analytics/achievements/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        data = response.json()
+        self.assertIn('earned', data)
+        self.assertIn('progress', data)
+    
+    def test_achievements_list_endpoint(self):
+        """Test GET /api/achievements/"""
+        response = self.client.get('/api/achievements/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        data = response.json()
+        # La pagination peut avoir 'results'
+        if isinstance(data, dict) and 'results' in data:
+            self.assertIsInstance(data['results'], list)
+        else:
+            self.assertIsInstance(data, list)
+    
+    def test_recalculate_endpoint(self):
+        """Test POST /api/analytics/recalculate/"""
+        response = self.client.post('/api/analytics/recalculate/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        data = response.json()
+        self.assertEqual(data['status'], 'recalculated')
+        self.assertIn('analytics', data)
+    
+    def test_unauthenticated_access(self):
+        """Test que les endpoints requirent l'authentification."""
+        self.client.force_authenticate(user=None)
+        
+        response = self.client.get('/api/analytics/')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class SignalIntegrationTests(TestCase):
+    """Test l'intégration des signals."""
+    
+    def setUp(self):
+        """Créer les données de test."""
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpass123'
+        )
+        self.author = Author.objects.create(
+            first_name='John',
+            last_name='Doe'
+        )
+        self.book = Book.objects.create(
+            title='Test Book',
+            isbn='1234567890',
+            is_published=True
+        )
+        self.book.authors.add(self.author)
+    
+    def test_signal_updates_analytics_on_reading_session(self):
+        """Test que les analytics sont mises à jour quand une session est créée."""
+        # Avant: pas de session
+        analytics = UserAnalytics.get_or_create_for_user(self.user)
+        self.assertEqual(analytics.total_books_read, 0)
+        
+        # Créer une session
+        ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now(),
+            end_time=timezone.now() + timedelta(hours=1),
+            pages_read=50
+        )
+        
+        # Après: les analytics doivent être mises à jour
+        analytics.refresh_from_db()
+        self.assertEqual(analytics.total_books_read, 1)
+        self.assertEqual(analytics.total_pages_read, 50)
+    
+    def test_signal_unlocks_badges(self):
+        """Test que les badges sont débloqués automatiquement."""
+        # Créer une session
+        ReadingSession.objects.create(
+            user=self.user,
+            book=self.book,
+            start_time=timezone.now(),
+            end_time=timezone.now() + timedelta(hours=1),
+            pages_read=50
+        )
+        
+        # Vérifier que "First Book" est débloqué
+        achievements = UserAchievements.objects.filter(
+            user=self.user,
+            badge='first_book'
+        )
+        self.assertEqual(achievements.count(), 1)
+
+
+if __name__ == '__main__':
+    import unittest
+    unittest.main()

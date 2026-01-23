@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Nouveautés & Recommandations - BNC{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    
+    <!-- Annonces -->
+    <div class="alert alert-info border-0 shadow-sm mb-5 p-4" style="background-color: #e3f2fd; color: #0d47a1;">
+        <div class="d-flex align-items-center mb-2">
+            <i class="fas fa-bullhorn me-3 fa-2x"></i>
+            <h4 class="mb-0 fw-bold">Annonces & Actualités</h4>
+        </div>
+        <hr style="opacity: 0.1;">
+        <p class="mb-2"><strong>🎉 Bienvenue sur la nouvelle interface !</strong></p>
+        <p class="mb-0">Profitez d'une expérience de lecture améliorée avec notre nouveau mode sombre automatique et une navigation simplifiée. Découvrez les derniers ajouts ci-dessous.</p>
+    </div>
+
+    <!-- Nouveautés Section Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="fw-bold mb-1"><i class="fas fa-newspaper text-primary"></i> Quoi de neuf ?</h1>
+            <p class="text-muted">Découvrez les dernières publications ajoutées au catalogue</p>
+        </div>
+    </div>
+    
+    <!-- Zone "Nouveautés" (Simulée avec les recommandations pour l'instant si pas de var distincte) -->
+    <div class="mb-5">
+        <h2 class="mb-3 h4 border-bottom pb-2">🆕 Derniers Ajouts</h2>
+        <div class="row">
+           {% if recommendations %}
+                <!-- Affiche les 3 premiers comme "Nouveautés" -->
+                {% for book in recommendations|slice:":3" %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 book-card shadow-sm border-0">
+                        {% if book.cover %}
+                        <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 220px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                            <i class="fas fa-book fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        <span class="badge bg-success position-absolute top-0 end-0 m-2">Nouveau</span>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title book-title fs-6">{{ book.title }}</h5>
+                            <p class="card-text book-author small text-muted">
+                                {% for author in book.authors.all %}
+                                    {{ author.get_full_name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pb-3">
+                            <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-outline-primary btn-sm w-100 rounded-pill">
+                                Découvrir
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+           {% else %}
+                <p>Aucune nouveauté pour le moment.</p>
+           {% endif %}
+        </div>
+    </div>
+    
+    <!-- Toutes les recommandations -->
+    {% if recommendations %}
+    <div class="mb-5">
+        <h2 class="mb-4 h4 border-bottom pb-2">✨ Spécialement Pour Vous</h2>
+        <div class="row">
+            {% for book in recommendations %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 book-card">
+                    {% if book.cover %}
+                    <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 250px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                        <i class="fas fa-book fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h5 class="card-title book-title">{{ book.title }}</h5>
+                        <p class="card-text book-author">
+                            {% for author in book.authors.all %}
+                                <small>{{ author.get_full_name }}</small>
+                                {% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </p>
+                        
+                        <div class="mb-2">
+                            <span class="badge bg-info">{{ book.get_genre_display }}</span>
+                            {% if book.rating %}
+                            <span class="rating">
+                                <i class="fas fa-star" style="color: #f39c12;"></i>
+                                {{ book.rating|floatformat:1 }} ({{ book.rating_count }})
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        {% if book.is_free %}
+                        <p class="book-price">Gratuit</p>
+                        {% else %}
+                        <p class="book-price">{{ book.get_final_price|floatformat:0 }} FC</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-footer bg-white">
+                        <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-sm btn-primary w-100">
+                            Voir détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Genres préférés (cachés pour simplifier l'interface mais toujours là si besoin) -->
+    <!-- Recommandations par catégorie -->
+    <div class="row">
+        <!-- Par genre -->
+        {% if genre_recs %}
+        <div class="col-lg-6 mb-5">
+            <h3>📖 Basées sur vos genres favoris</h3>
+            <div class="list-group">
+                {% for book in genre_recs %}
+                <a href="{% url 'catalogue:book_detail' book.id %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ book.title }}</h6>
+                            <small class="text-muted">
+                                {% for author in book.authors.all %}
+                                    {{ author.first_name }}
+                                {% endfor %}
+                            </small>
+                        </div>
+                        <span class="badge bg-info">{{ book.get_genre_display }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Par auteurs -->
+        {% if author_recs %}
+        <div class="col-lg-6 mb-5">
+            <h3>✍️ De vos auteurs favoris</h3>
+            <div class="list-group">
+                {% for book in author_recs %}
+                <a href="{% url 'catalogue:book_detail' book.id %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1">{{ book.title }}</h6>
+                            <small class="text-muted">
+                                {% for author in book.authors.all %}
+                                    {{ author.get_full_name }}
+                                {% endfor %}
+                            </small>
+                        </div>
+                        <span class="badge bg-success">
+                            <i class="fas fa-star"></i> {{ book.rating|floatformat:1 }}
+                        </span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Par rating -->
+    {% if rating_recs %}
+    <div class="mb-5">
+        <h3>⭐ Livres les mieux notés</h3>
+        <div class="row">
+            {% for book in rating_recs %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ book.title|truncatewords:5 }}</h5>
+                        <p class="text-muted small">
+                            {% for author in book.authors.all %}
+                                {{ author.first_name }}
+                            {% endfor %}
+                        </p>
+                        <div class="rating">
+                            <i class="fas fa-star" style="color: #f39c12;"></i>
+                            <strong>{{ book.rating|floatformat:1 }}/5</strong>
+                            <small class="text-muted">({{ book.rating_count }} avis)</small>
+                        </div>
+                        <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-sm btn-outline-primary mt-3">
+                            Découvrir
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Aucune recommandation -->
+    {% if not recommendations %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Pas encore de recommandations</strong><br>
+        Commencez à lire des livres pour obtenir des recommandations personnalisées!
+        <a href="{% url 'catalogue:catalogue' %}" class="alert-link">Découvrir le catalogue</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .book-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .book-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% load static %}
+
+{% comment %}
+Formulaire pour les préférences utilisateur
+Soumis via AJAX à /api/preferences/
+{% endcomment %}
+
+<div class="modal fade" id="preferencesModal" tabindex="-1" role="dialog" aria-labelledby="preferencesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="preferencesModalLabel">
+                    <i class="fas fa-cog"></i> Vos Préférences
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <form id="preferencesForm" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Catégories préférées -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="categoriesSelect" class="form-label">
+                                    <i class="fas fa-folder"></i> Catégories préférées
+                                </label>
+                                <select class="form-select" id="categoriesSelect" name="preferred_categories" multiple size="6">
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" 
+                                            {% if category in user_preferences.preferred_categories.all %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Sélectionnez une ou plusieurs catégories (Ctrl+Click)</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Auteurs préférés -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="authorsSelect" class="form-label">
+                                    <i class="fas fa-user-edit"></i> Auteurs préférés
+                                </label>
+                                <select class="form-select" id="authorsSelect" name="preferred_authors" multiple size="6">
+                                    {% for author in authors %}
+                                    <option value="{{ author.id }}"
+                                            {% if author in user_preferences.preferred_authors.all %}selected{% endif %}>
+                                        {{ author.get_full_name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="text-muted">Sélectionnez un ou plusieurs auteurs (Ctrl+Click)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Préférences de langue -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">
+                                <i class="fas fa-globe"></i> Préférences de langue
+                            </h6>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="frenchWeight" class="form-label">
+                                🇫🇷 Français
+                            </label>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range" id="frenchWeight" name="french_preference" 
+                                       min="0" max="1" step="0.1" 
+                                       value="{{ user_preferences.french_preference|default:0.5 }}">
+                                <span class="ms-2 badge bg-primary" id="frenchPercentage">
+                                    <script>document.write(Math.round({{ user_preferences.french_preference|default:0.5 }} * 100));</script>%
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="englishWeight" class="form-label">
+                                🇬🇧 Anglais
+                            </label>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range" id="englishWeight" name="english_preference" 
+                                       min="0" max="1" step="0.1"
+                                       value="{{ user_preferences.english_preference|default:0.5 }}">
+                                <span class="ms-2 badge bg-success" id="englishPercentage">
+                                    <script>document.write(Math.round({{ user_preferences.english_preference|default:0.5 }} * 100));</script>%
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="arabicWeight" class="form-label">
+                                🇸🇦 Arabe
+                            </label>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range" id="arabicWeight" name="arabic_preference" 
+                                       min="0" max="1" step="0.1"
+                                       value="{{ user_preferences.arabic_preference|default:0.0 }}">
+                                <span class="ms-2 badge bg-warning text-dark" id="arabicPercentage">
+                                    <script>document.write(Math.round({{ user_preferences.arabic_preference|default:0.0 }} * 100));</script>%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats utilisateur (lecture seule) -->
+                    <div class="row mt-4 bg-light p-3 rounded">
+                        <div class="col-md-6">
+                            <small class="text-muted">Évaluations totales</small>
+                            <h5>{{ user_preferences.total_ratings }}</h5>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">Livres lus</small>
+                            <h5>{{ user_preferences.books_read }}</h5>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary" id="submitPreferencesBtn">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const preferencesForm = document.getElementById('preferencesForm');
+    
+    // Mise à jour des pourcentages en temps réel
+    document.getElementById('frenchWeight').addEventListener('input', function() {
+        document.getElementById('frenchPercentage').textContent = Math.round(this.value * 100) + '%';
+    });
+    document.getElementById('englishWeight').addEventListener('input', function() {
+        document.getElementById('englishPercentage').textContent = Math.round(this.value * 100) + '%';
+    });
+    document.getElementById('arabicWeight').addEventListener('input', function() {
+        document.getElementById('arabicPercentage').textContent = Math.round(this.value * 100) + '%';
+    });
+    
+    // Soumission du formulaire
+    preferencesForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(preferencesForm);
+        
+        const data = {
+            preferred_categories: Array.from(document.getElementById('categoriesSelect').selectedOptions).map(o => o.value),
+            preferred_authors: Array.from(document.getElementById('authorsSelect').selectedOptions).map(o => o.value),
+            french_preference: parseFloat(formData.get('french_preference')),
+            english_preference: parseFloat(formData.get('english_preference')),
+            arabic_preference: parseFloat(formData.get('arabic_preference'))
+        };
+        
+        // Envoyer à l'API
+        fetch('/api/preferences/', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('✅ Préférences enregistrées!');
+                document.getElementById('preferencesModal').querySelector('.btn-close').click();
+                // Rafraîchir la page
+                location.reload();
+            } else {
+                alert('❌ Erreur lors de l\'enregistrement');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Erreur de communication');
+        });
+    });
+});
+</script>

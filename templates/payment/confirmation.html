@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmation Paiement - BNC{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-clock fa-3x text-warning"></i>
+                    </div>
+                    
+                    <h2 class="text-center mb-3">Paiement en Attente</h2>
+                    
+                    <div class="alert alert-info">
+                        <h5>{{ payment.book.title }}</h5>
+                        <p class="mb-0">Montant: <strong>{{ payment.amount }} {{ payment.currency }}</strong></p>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <p><strong>Méthode de paiement:</strong> {{ payment.get_payment_method_display }}</p>
+                            <p><strong>Référence:</strong> {{ payment.transaction_id }}</p>
+                            <p><strong>Statut:</strong> <span class="badge bg-warning">{{ payment.get_payment_status_display }}</span></p>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            Confirmer le paiement
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'catalogue:book_detail' payment.book.id %}" class="btn btn-outline-secondary w-100">
+                        Annuler
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

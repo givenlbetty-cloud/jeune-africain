@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .section h2 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .item-list {
+            list-style: none;
+        }
+        .item-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+        .item-list strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Statistiques des Livres</h1>
+
+        <!-- KPI Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total Livres</div>
+                <div class="value">{{ total_books }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Publiés</div>
+                <div class="value">{{ published }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Non Publiés</div>
+                <div class="value">{{ unpublished }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Gratuits</div>
+                <div class="value">{{ free }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Payants</div>
+                <div class="value">{{ paid }}</div>
+            </div>
+        </div>
+
+        <!-- Livres par Catégorie -->
+        <div class="section">
+            <h2>📂 Livres par Catégorie</h2>
+            <ul class="item-list">
+                {% for cat in by_category %}
+                <li>
+                    <span>{{ cat.name }}</span>
+                    <strong>{{ cat.book_count }} livres</strong>
+                </li>
+                {% empty %}
+                <li>Aucune catégorie</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Livres par Langue -->
+        <div class="section">
+            <h2>🌍 Livres par Langue</h2>
+            <ul class="item-list">
+                {% for lang in by_language %}
+                <li>
+                    <span>{{ lang.language|default:"Non spécifiée" }}</span>
+                    <strong>{{ lang.count }}</strong>
+                </li>
+                {% empty %}
+                <li>Aucune donnée</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Top Livres Lus -->
+        <div class="section">
+            <h2>⭐ Top Livres Lus</h2>
+            <ul class="item-list">
+                {% for book in top_read %}
+                <li>
+                    <span>{{ book.title }}</span>
+                    <strong>{{ book.reads_count }} lectures</strong>
+                </li>
+                {% empty %}
+                <li>Aucun livre</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Top Livres Téléchargés -->
+        <div class="section">
+            <h2>📥 Top Livres Téléchargés</h2>
+            <ul class="item-list">
+                {% for book in top_downloaded %}
+                <li>
+                    <span>{{ book.title }}</span>
+                    <strong>{{ book.downloads_count }} téléchargements</strong>
+                </li>
+                {% empty %}
+                <li>Aucun livre</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Statistiques de Prix -->
+        {% if price_stats.avg_price %}
+        <div class="section">
+            <h2>💰 Statistiques de Prix</h2>
+            <ul class="item-list">
+                <li>
+                    <span>Prix Moyen</span>
+                    <strong>{{ price_stats.avg_price|floatformat:2 }} €</strong>
+                </li>
+                <li>
+                    <span>Prix Minimum</span>
+                    <strong>{{ price_stats.min_price|floatformat:2 }} €</strong>
+                </li>
+                <li>
+                    <span>Prix Maximum</span>
+                    <strong>{{ price_stats.max_price|floatformat:2 }} €</strong>
+                </li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

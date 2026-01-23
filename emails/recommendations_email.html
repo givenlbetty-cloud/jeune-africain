@@ -1,0 +1,68 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+
+{% block subject %}
+{% trans "Vos recommandations personnalisées - BNC Digital Library" %}
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="logo">📚 BNC Digital Library</div>
+</div>
+
+<div class="content">
+    <h1>{% trans "Découvrez vos nouvelles recommandations," %} {{ user.first_name }}!</h1>
+
+    <p>{% trans "Nous avons sélectionné" %} <strong>{{ recommendations_count }}</strong> {% trans "nouveaux livres qui pourraient vous intéresser basé sur vos lectures précédentes." %}</p>
+
+    <div class="alert alert-info">
+        <strong>💡 {% trans "Conseil:" %}</strong>
+        {% trans "Nos recommandations s'améliore chaque fois que vous évaluez un livre. Notez les livres que vous lisez!" %}
+    </div>
+
+    <h2>{% trans "Nos meilleures recommandations cette semaine" %}</h2>
+
+    {% for recommendation in recommendations %}
+    <div class="recommendation">
+        <div class="recommendation-title">
+            {{ recommendation.book.title }}
+        </div>
+        <div class="recommendation-author">
+            {{ recommendation.book.author }}
+        </div>
+        <p>{{ recommendation.book.description|truncatewords:30 }}</p>
+        <div>
+            <span class="score">
+                {% trans "Score:" %} {{ recommendation.score|floatformat:2 }}/1.0
+            </span>
+        </div>
+        <a href="{{ recommendation_url }}{{ recommendation.id }}/" class="button">
+            {% trans "Voir plus" %}
+        </a>
+    </div>
+    {% endfor %}
+
+    <h2>{% trans "Pourquoi ces recommandations?" %}</h2>
+    <ul>
+        <li>{% trans "Similaires aux livres que vous avez aimés" %}</li>
+        <li>{% trans "Tendance dans votre catégorie favorite" %}</li>
+        <li>{% trans "Recommandés par des lecteurs ayant vos goûts" %}</li>
+        <li>{% trans "Nouveautés dans vos genres préférés" %}</li>
+    </ul>
+
+    <p>
+        <a href="{{ library_url }}" class="button">
+            {% trans "Explorez plus de livres" %}
+        </a>
+    </p>
+</div>
+
+<div class="footer">
+    <p>
+        {% trans "Vous ne voulez plus recevoir ces emails?" %}
+        <a href="{{ unsubscribe_url }}">{% trans "Désinscrivez-vous" %}</a>
+    </p>
+    <p>© 2025 BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+</div>
+
+{% endblock %}

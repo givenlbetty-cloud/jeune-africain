@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Discussions - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h1><i class="fas fa-comments"></i> Toutes les discussions</h1>
+        </div>
+        <div class="col-md-4">
+            <form class="d-flex" method="get">
+                <input class="form-control" type="search" name="q" placeholder="Rechercher..." value="{{ query }}">
+                <button class="btn btn-primary ms-2" type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    {% if discussions %}
+    <div class="card shadow-sm">
+        <div class="list-group list-group-flush">
+            {% for discussion in discussions %}
+            <a href="{% url 'catalogue:forum_thread_detail' discussion.id %}" class="list-group-item list-group-item-action p-3">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">{{ discussion.title }}</h6>
+                        <p class="text-muted small mb-0">
+                            Par <strong>{{ discussion.author.username }}</strong>
+                            {% if discussion.created_at %}
+                            il y a {{ discussion.created_at|timesince }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-success me-2"><i class="fas fa-comments"></i> {{ discussion.comments_count }}</span>
+                        <span class="badge bg-warning text-dark"><i class="fas fa-thumbs-up"></i> {{ discussion.upvotes_count }}</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation" class="mt-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page=1&q={{ query }}">Première</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}">Précédente</a></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}">Suivante</a></li>
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}">Dernière</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle"></i> Aucune discussion trouvée.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

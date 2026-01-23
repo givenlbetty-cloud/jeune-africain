@@ -1,0 +1,406 @@
+<!-- Events Listing Component -->
+<div id="events-container" class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h2 class="mb-0">
+        <i class="fas fa-calendar-alt"></i> Événements & Annonces
+      </h2>
+      <p class="text-muted">Découvrez nos prochains événements, ateliers et conférences</p>
+    </div>
+    <div class="col-md-4">
+      <div class="input-group">
+        <span class="input-group-text bg-white">
+          <i class="fas fa-search"></i>
+        </span>
+        <input 
+          type="text" 
+          id="events-search" 
+          class="form-control" 
+          placeholder="Rechercher un événement..."
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Type Filter -->
+  <div class="mb-4 d-flex gap-2 flex-wrap">
+    <button class="btn btn-outline-primary event-filter-btn" onclick="filterEvents('ALL')">
+      📅 Tous
+    </button>
+    <button class="btn btn-outline-info event-filter-btn" onclick="filterEvents('NEW_BOOK')">
+      📕 Nouveaux Livres
+    </button>
+    <button class="btn btn-outline-warning event-filter-btn" onclick="filterEvents('WORKSHOP')">
+      🎓 Ateliers
+    </button>
+    <button class="btn btn-outline-danger event-filter-btn" onclick="filterEvents('CONFERENCE')">
+      🎤 Conférences
+    </button>
+    <button class="btn btn-outline-success event-filter-btn" onclick="filterEvents('LOCAL_EVENT')">
+      📍 Événements Locaux
+    </button>
+  </div>
+
+  <!-- Upcoming Events Section -->
+  <div class="mb-5">
+    <h4 class="mb-3">
+      <i class="fas fa-clock"></i> Événements à Venir
+    </h4>
+    <div id="upcoming-events" class="row g-3">
+      <!-- Loaded dynamically -->
+    </div>
+  </div>
+
+  <!-- Happening Now Section -->
+  <div id="happening-section" class="mb-5" style="display: none;">
+    <h4 class="mb-3">
+      <i class="fas fa-play-circle text-danger"></i> Se déroulant maintenant
+    </h4>
+    <div id="happening-events" class="row g-3">
+      <!-- Loaded dynamically -->
+    </div>
+  </div>
+
+  <!-- Past Events Section -->
+  <div id="past-section" class="mb-5" style="display: none;">
+    <h4 class="mb-3">
+      <i class="fas fa-history"></i> Événements Passés
+    </h4>
+    <div id="past-events" class="row g-3">
+      <!-- Loaded dynamically -->
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="events-loading" class="text-center py-5" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="text-muted mt-2">Chargement des événements...</p>
+  </div>
+
+  <!-- No Events Message -->
+  <div id="events-empty" class="text-center py-5" style="display: none;">
+    <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc;"></i>
+    <p class="text-muted mt-2">Aucun événement ne correspond à votre recherche</p>
+  </div>
+</div>
+
+<style>
+  .event-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-left: 4px solid #0d6efd;
+    background: #f8f9fa;
+  }
+
+  .event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    background: white;
+  }
+
+  .event-card.new_book {
+    border-left-color: #0dcaf0;
+  }
+
+  .event-card.workshop {
+    border-left-color: #ffc107;
+  }
+
+  .event-card.conference {
+    border-left-color: #dc3545;
+  }
+
+  .event-card.local_event {
+    border-left-color: #198754;
+  }
+
+  .event-type-badge {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+  }
+
+  .event-status-live {
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .event-time {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+
+  .event-registrations {
+    color: #495057;
+    font-size: 0.9rem;
+  }
+
+  .event-filter-btn {
+    border-width: 2px;
+    font-weight: 500;
+  }
+
+  .event-filter-btn.active {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+  }
+</style>
+
+<script>
+let allEvents = [];
+let currentFilter = 'ALL';
+
+// Initialize events listing
+document.addEventListener('DOMContentLoaded', async function() {
+  await loadEvents();
+
+  // Setup search
+  document.getElementById('events-search').addEventListener('input', debounce(searchEvents, 300));
+});
+
+// Load events from API
+async function loadEvents() {
+  document.getElementById('events-loading').style.display = 'block';
+  document.getElementById('events-empty').style.display = 'none';
+
+  try {
+    const response = await fetch('/api/events/?limit=100');
+    const data = await response.json();
+
+    if (data.success) {
+      allEvents = data.events;
+      displayEvents();
+    } else {
+      showEmptyState();
+    }
+  } catch (error) {
+    console.error('Error loading events:', error);
+    showEmptyState();
+  } finally {
+    document.getElementById('events-loading').style.display = 'none';
+  }
+}
+
+// Display events by status
+function displayEvents() {
+  let upcoming = [];
+  let happening = [];
+  let past = [];
+
+  const now = new Date();
+
+  allEvents.forEach(event => {
+    const startDate = new Date(event.start_date);
+    const endDate = new Date(event.end_date);
+
+    if (endDate < now) {
+      past.push(event);
+    } else if (startDate <= now && endDate >= now) {
+      happening.push(event);
+    } else {
+      upcoming.push(event);
+    }
+  });
+
+  // Display upcoming events
+  displayEventCards('upcoming-events', upcoming);
+
+  // Display happening events
+  if (happening.length > 0) {
+    document.getElementById('happening-section').style.display = 'block';
+    displayEventCards('happening-events', happening);
+  } else {
+    document.getElementById('happening-section').style.display = 'none';
+  }
+
+  // Display past events
+  if (past.length > 0) {
+    document.getElementById('past-section').style.display = 'block';
+    displayEventCards('past-events', past);
+  } else {
+    document.getElementById('past-section').style.display = 'none';
+  }
+
+  // Show empty state if no events
+  if (allEvents.length === 0) {
+    showEmptyState();
+  }
+}
+
+// Display event cards
+function displayEventCards(containerId, events) {
+  const container = document.getElementById(containerId);
+  
+  if (events.length === 0) {
+    container.innerHTML = '<p class="text-muted">Aucun événement</p>';
+    return;
+  }
+
+  container.innerHTML = events.map(event => `
+    <div class="col-md-6 col-lg-4">
+      <div class="card event-card event-card.${event.event_type.toLowerCase()}">
+        <!-- Event Header -->
+        <div class="card-header bg-transparent border-bottom pb-2 pt-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              ${event.event_type === 'NEW_BOOK' ? '<i class="fas fa-book" style="color: #0dcaf0;"></i>' : ''}
+              ${event.event_type === 'WORKSHOP' ? '<i class="fas fa-graduation-cap" style="color: #ffc107;"></i>' : ''}
+              ${event.event_type === 'CONFERENCE' ? '<i class="fas fa-microphone" style="color: #dc3545;"></i>' : ''}
+              ${event.event_type === 'ANNOUNCEMENT' ? '<i class="fas fa-bullhorn" style="color: #6c757d;"></i>' : ''}
+              ${event.event_type === 'LOCAL_EVENT' ? '<i class="fas fa-map-pin" style="color: #198754;"></i>' : ''}
+              <strong>${event.title}</strong>
+            </div>
+            ${isEventHappening(event) ? '<span class="badge bg-danger event-status-live">EN DIRECT</span>' : ''}
+          </div>
+        </div>
+
+        <!-- Event Body -->
+        <div class="card-body">
+          <!-- Description -->
+          <p class="card-text text-muted mb-3" style="font-size: 0.95rem;">
+            ${truncateText(event.description, 100)}
+          </p>
+
+          <!-- Date & Time -->
+          <div class="mb-3 event-time">
+            <i class="fas fa-calendar"></i>
+            ${formatEventDate(event.start_date)}
+          </div>
+
+          <!-- Location -->
+          ${event.location ? `
+            <div class="mb-3 event-time">
+              <i class="fas fa-map-pin"></i>
+              ${event.location}
+            </div>
+          ` : ''}
+
+          <!-- Registrations -->
+          <div class="event-registrations">
+            <i class="fas fa-users"></i>
+            <strong>${event.registrations_count}</strong> 
+            inscrit${event.registrations_count > 1 ? 's' : ''}
+            ${event.max_capacity ? `/ ${event.max_capacity}` : ''}
+          </div>
+        </div>
+
+        <!-- Event Footer -->
+        <div class="card-footer bg-transparent border-top pt-3">
+          <button 
+            class="btn btn-primary w-100"
+            onclick="openEventRegistrationModal(${event.id})"
+          >
+            <i class="fas fa-sign-in-alt"></i> Détails
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Check if event is happening now
+function isEventHappening(event) {
+  const now = new Date();
+  const startDate = new Date(event.start_date);
+  const endDate = new Date(event.end_date);
+  return startDate <= now && endDate >= now;
+}
+
+// Format event date
+function formatEventDate(dateString) {
+  const date = new Date(dateString);
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  };
+  return date.toLocaleDateString('fr-FR', options);
+}
+
+// Filter events by type
+function filterEvents(type) {
+  currentFilter = type;
+
+  // Update button active state
+  document.querySelectorAll('.event-filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+
+  // Filter and display
+  if (type === 'ALL') {
+    displayEvents();
+  } else {
+    const filtered = allEvents.filter(e => e.event_type === type);
+    if (filtered.length === 0) {
+      showEmptyState();
+    } else {
+      const container = document.getElementById('upcoming-events');
+      container.innerHTML = '';
+      displayEventCards('upcoming-events', filtered);
+    }
+  }
+}
+
+// Search events
+function searchEvents() {
+  const query = document.getElementById('events-search').value.toLowerCase();
+
+  if (!query) {
+    displayEvents();
+    return;
+  }
+
+  const filtered = allEvents.filter(event => 
+    event.title.toLowerCase().includes(query) ||
+    event.description.toLowerCase().includes(query)
+  );
+
+  if (filtered.length === 0) {
+    showEmptyState();
+  } else {
+    displayEventCards('upcoming-events', filtered);
+  }
+}
+
+// Show empty state
+function showEmptyState() {
+  document.getElementById('upcoming-events').innerHTML = '';
+  document.getElementById('happening-section').style.display = 'none';
+  document.getElementById('past-section').style.display = 'none';
+  document.getElementById('events-empty').style.display = 'block';
+}
+
+// Utility: truncate text
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + '...';
+}
+
+// Utility: debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+</script>

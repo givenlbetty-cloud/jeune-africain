@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% load mathfilters %}
+
+{% block title %}{{ book.title }} - BNC{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/web/pdf_viewer.min.css">
+<style>
+    .book-reader {
+        background-color: #f5f5f5;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .reader-controls {
+        background-color: #333;
+        color: white;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .reader-controls button {
+        background-color: #555;
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    
+    .reader-controls button:hover {
+        background-color: #777;
+    }
+    
+    .page-info {
+        color: white;
+        margin: 0 10px;
+    }
+    
+    .book-review {
+        border-left: 4px solid var(--primary-color);
+        padding: 15px;
+        margin-bottom: 15px;
+        background-color: #f9f9f9;
+        border-radius: 3px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Book Info -->
+        <div class="col-md-3">
+            {% if book.cover %}
+                <img src="{{ book.cover.url }}" class="img-fluid rounded mb-3" alt="{{ book.title }}">
+            {% else %}
+                <div class="bg-light rounded p-5 text-center mb-3">
+                    <i class="fas fa-book fa-5x text-muted"></i>
+                </div>
+            {% endif %}
+            
+            {% if not book.is_paid %}
+                <!-- Livres gratuits : accessible à tous -->
+                <button class="btn btn-primary w-100 mb-2" onclick="readBook()">
+                    <i class="fas fa-book-open"></i> Lire gratuitement
+                </button>
+            {% elif has_free_preview and not is_purchased %}
+                <!-- Livres payants avec aperçu gratuit : accessible à tous -->
+                <button class="btn btn-success w-100 mb-2" onclick="readBook()">
+                    <i class="fas fa-book-open"></i> Lire aperçu gratuit ({{ free_pages_count }} pages)
+                </button>
+                <a href="{% url 'catalogue:simulate_purchase' book.id %}" class="btn btn-accent w-100 mb-2">
+                    <i class="fas fa-shopping-cart"></i> Acheter le livre complet ({{ book.get_final_price|floatformat:0 }} FC)
+                </a>
+            {% elif user.is_authenticated %}
+                <!-- Livres payants : authentifié uniquement -->
+                {% if is_purchased %}
+                    <button class="btn btn-primary w-100 mb-2" onclick="readBook()">
+                        <i class="fas fa-book-open"></i> Lire le livre
+                    </button>
+                    <a href="{% url 'users:my_library' %}" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-arrow-left"></i> Ma bibliothèque
+                    </a>
+                {% else %}
+                    <!-- MODE DEMO : Achat direct sans passerelle de paiement -->
+                    <a href="{% url 'catalogue:simulate_purchase' book.id %}" class="btn btn-accent w-100 mb-2">
+                        <i class="fas fa-shopping-cart"></i> Acheter ({{ book.get_final_price|floatformat:0 }} FC)
+                    </a>
+                {% endif %}
+            {% else %}
+                <!-- Non authentifié pour livre payant -->
+                <a href="{% url 'users:login' %}" class="btn btn-primary w-100 mb-2">
+                    <i class="fas fa-sign-in-alt"></i> Connexion pour lire
+                </a>
+            {% endif %}
+            
+            <a href="{% url 'catalogue:toggle_favorite' book.id %}" class="btn btn-outline-danger w-100 mb-2">
+                {% if is_favorite %}
+                    <i class="fas fa-heart"></i> Retirer des favoris
+                {% else %}
+                    <i class="far fa-heart"></i> Ajouter aux favoris
+                {% endif %}
+            </a>
+
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Détails</h6>
+                    <dl class="row small">
+                        <dt class="col-sm-6">ISBN:</dt>
+                        <dd class="col-sm-6">{{ book.isbn }}</dd>
+                        
+                        <dt class="col-sm-6">Genre:</dt>
+                        <dd class="col-sm-6">{{ book.genre }}</dd>
+                        
+                        <dt class="col-sm-6">Langue:</dt>
+                        <dd class="col-sm-6">{{ book.get_language_display }}</dd>
+                        
+                        <dt class="col-sm-6">Pages:</dt>
+                        <dd class="col-sm-6">{{ book.pages_count }}</dd>
+                        
+                        <dt class="col-sm-6">Édition:</dt>
+                        <dd class="col-sm-6">{{ book.edition|default:"N/A" }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Book Details -->
+        <div class="col-md-9">
+            <h1>{{ book.title }}</h1>
+            
+            <div class="mb-3">
+                {% for author in book.authors.all %}
+                    <a href="{% url 'catalogue:author_detail' author.id %}" class="text-decoration-none">
+                        <span class="badge bg-secondary">{{ author.first_name }} {{ author.last_name }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+            
+            <!-- Author & Rating -->
+            <div class="mb-3">
+                {% for author in book.authors.all %}
+                    <a href="{% url 'catalogue:author_detail' author.id %}" class="text-decoration-none">
+                        <span class="badge bg-secondary">{{ author.first_name }} {{ author.last_name }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+            
+            <!-- Rating -->
+            <div class="mb-3">
+                <span class="rating" style="color: #ffc107; font-size: 1.2rem;">
+                    {% for i in "12345" %}
+                        {% if i|add:0 <= average_rating %}
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span class="ms-2 text-muted" style="font-size: 1rem;">{{ average_rating|floatformat:1 }}/5 ({{ reviews.count }} avis)</span>
+                </span>
+            </div>
+
+            <!-- Associated Media -->
+            <div class="mb-4">
+                {% if book.audiobook or book.video_materials.exists or book.podcasts.exists %}
+                <h5 class="mb-3 border-bottom pb-2">Contenus associés</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% if book.audiobook %}
+                        <a href="{% url 'catalogue:audiobook_detail' book.id %}" class="btn btn-outline-info">
+                            <i class="fas fa-headphones"></i> Audiobook disponible
+                        </a>
+                    {% endif %}
+
+                    {% for video in book.video_materials.all %}
+                        {% if video.is_published %}
+                        <a href="{% url 'catalogue:video_detail' video.id %}" class="btn btn-outline-danger">
+                            <i class="fas fa-video"></i> {{ video.title|truncatechars:30 }}
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for podcast in book.podcasts.all %}
+                        {% if podcast.is_active %}
+                        <a href="{% url 'catalogue:podcast_detail' podcast.id %}" class="btn btn-outline-success">
+                            <i class="fas fa-microphone"></i> {{ podcast.title|truncatechars:30 }}
+                        </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Description -->
+            <h3 class="mt-4">Description</h3>
+            <p>{{ book.description }}</p>
+            
+            <!-- Reading Sessions -->
+            {% if user.is_authenticated and is_purchased %}
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Vos sessions de lecture</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if reading_sessions %}
+                            <ul class="list-group">
+                                {% for session in reading_sessions %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Session {{ forloop.counter }}</strong><br>
+                                            <small class="text-muted">
+                                                Page {{ session.current_page }} sur {{ book.pages_count }}<br>
+                                                Durée: {{ session.duration }} minutes
+                                            </small>
+                                        </div>
+                                        <span class="badge bg-primary">{{ session.created_at|date:"d/m/y H:i" }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">Aucune session encore. Commencez à lire!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Reviews Section -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Avis des lecteurs ({{ reviews.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if can_review %}
+                        <form method="post" action="{% url 'catalogue:add_review' book.id %}" class="mb-4">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {{ review_form.rating.label_tag }}
+                                {{ review_form.rating }}
+                            </div>
+                            <div class="mb-3">
+                                {{ review_form.comment.label_tag }}
+                                {{ review_form.comment }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Publier mon avis
+                            </button>
+                        </form>
+                        <hr>
+                    {% elif user.is_authenticated %}
+                        <div class="alert alert-info">Vous devez avoir lu ce livre pour laisser un avis.</div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <a href="{% url 'users:login' %}?next={{ request.path }}">Connectez-vous</a> pour laisser un avis.
+                        </div>
+                    {% endif %}
+                    
+                    {% for review in reviews %}
+                        <div class="book-review">
+                            <div class="d-flex justify-content-between">
+                                <strong>{{ review.user.first_name|default:review.user.username }}</strong>
+                                <small class="text-muted">{{ review.created_at|date:"d/m/Y" }}</small>
+                            </div>
+                            <div class="rating small mb-2" style="color: #ffc107;">
+                                {% for i in "12345" %}
+                                    {% if i|add:0 <= review.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p class="mb-0">{{ review.comment|linebreaksbr }}</p>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted">Aucun avis pour le moment. Soyez le premier !</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Section -->
+    {% include 'catalogue/components/recommendations.html' %}
+</div>
+
+<!-- Modal Lecteur de Livre -->
+<div class="modal fade" id="readerModal" tabindex="-1" size="xl">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ book.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="book-reader">
+                    <div class="reader-controls">
+                        <div>
+                            <button onclick="previousPage()"><i class="fas fa-chevron-left"></i></button>
+                            <span class="page-info">Page <span id="currentPage">1</span> sur {{ book.pages_count }}</span>
+                            <button onclick="nextPage()"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div>
+                            <button onclick="zoomIn()"><i class="fas fa-search-plus"></i></button>
+                            <button onclick="zoomOut()"><i class="fas fa-search-minus"></i></button>
+                            <button onclick="toggleFullscreen()"><i class="fas fa-expand"></i></button>
+                        </div>
+                    </div>
+                    <div id="pdfContainer" style="height: calc(100vh - 150px); overflow: auto;">
+                        <canvas id="pdfCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"></script>
+
+<script>
+    let currentPage = 1;
+    let totalPages = {{ book.pages_count|default:0 }};
+    let pdfDoc = null;
+    let scale = 1.5;
+    
+    function readBook() {
+        // Rediriger vers le nouveau lecteur moderne
+        window.location.href = "{% url 'catalogue:read_book' book.id %}";
+    }
+    
+    function renderPage(pageNumber) {
+        currentPage = pageNumber;
+        document.getElementById('currentPage').textContent = pageNumber;
+        
+        if (!pdfDoc) return;
+        
+        pdfDoc.getPage(pageNumber).then(function(page) {
+            const viewport = page.getViewport({ scale: scale });
+            const canvas = document.getElementById('pdfCanvas');
+            const context = canvas.getContext('2d');
+            
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            
+            page.render({ canvasContext: context, viewport: viewport });
+        });
+    }
+    
+    function nextPage() {
+        if (currentPage < totalPages) {
+            renderPage(currentPage + 1);
+        }
+    }
+    
+    function previousPage() {
+        if (currentPage > 1) {
+            renderPage(currentPage - 1);
+        }
+    }
+    
+    function zoomIn() {
+        scale += 0.2;
+        renderPage(currentPage);
+    }
+    
+    function zoomOut() {
+        if (scale > 0.5) {
+            scale -= 0.2;
+            renderPage(currentPage);
+        }
+    }
+    
+    function toggleFullscreen() {
+        const container = document.getElementById('pdfContainer');
+        container.requestFullscreen();
+    }
+    
+    function purchaseBook(bookId, bookTitle, bookAuthor, bookPrice) {
+        // Ouvrir le modal de paiement avec les informations du livre
+        if (window.openPaymentModal) {
+            openPaymentModal(bookId, bookTitle, bookAuthor, bookPrice);
+        } else {
+            // Show payment modal instead of confirm
+            document.getElementById('payment-book-id').value = bookId;
+            const modal = new bootstrap.Modal(document.getElementById('payment-modal'));
+            modal.show();
+        }
+    }
+</script>
+
+<!-- Include Payment Modal Component -->
+{% include 'payment/pure_payment_modal.html' %}
+
+<!-- Recommendations JavaScript -->
+<script src="/static/js/recommendations.js"></script>
+
+{% endblock %}

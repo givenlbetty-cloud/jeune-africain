@@ -1,0 +1,225 @@
+<!-- PWA Install Card Component -->
+<!-- Include this in your base template -->
+
+<div id="pwa-install-card" class="pwa-install-card" style="display: none;">
+    <div class="container-fluid">
+        <div class="alert alert-info mb-0 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center flex-grow-1">
+                <i class="fas fa-download me-3" style="font-size: 1.5rem;"></i>
+                <div>
+                    <strong>Install BNC App</strong>
+                    <p class="mb-0 small text-secondary">
+                        Get the BNC library on your home screen. Read offline anytime, anywhere!
+                    </p>
+                </div>
+            </div>
+            <div class="ms-3">
+                <button id="pwa-install-button" class="btn btn-sm btn-primary">
+                    <i class="fas fa-arrow-down me-2"></i>Install
+                </button>
+                <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .pwa-install-card {
+        background-color: var(--primary-color);
+        color: white;
+        position: relative;
+        overflow: hidden;
+        /* Clean look */
+    }
+
+    /* Animation removed for cleaner look */
+    
+    .pwa-install-card .alert {
+        background: transparent;
+        border: none;
+        color: white;
+    }
+    
+    .pwa-install-card .text-secondary {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+    
+    .pwa-install-card .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    
+    .pwa-install-card .btn-primary {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+        font-weight: 700;
+    }
+    
+    .pwa-install-card .btn-primary:hover {
+        background: rgba(255,255,255,0.9);
+    }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+    }
+
+    .pwa-install-card .alert {
+        border: none;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+    }
+
+    .pwa-install-card .text-secondary {
+        color: rgba(255, 255, 255, 0.8) !important;
+    }
+
+    .pwa-install-card .btn-close {
+        filter: brightness(1.5);
+    }
+
+    /* PWA Status Indicator */
+    .pwa-status-indicator {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        z-index: 1000;
+    }
+
+    .pwa-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .pwa-status-badge.online {
+        color: #26a65b;
+    }
+
+    .pwa-status-badge.offline {
+        color: #e74c3c;
+    }
+
+    .pwa-status-badge.installed {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: blink 2s ease-in-out infinite;
+    }
+
+    .status-dot.offline {
+        animation: none;
+    }
+
+    @keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+        .pwa-status-badge {
+            background: #2d2d2d;
+            color: #ecf0f1;
+        }
+
+        .pwa-status-badge.online {
+            color: #52c77f;
+        }
+
+        .pwa-status-badge.offline {
+            color: #ff6b6b;
+        }
+    }
+</style>
+
+<!-- PWA Status Indicator -->
+<div class="pwa-status-indicator">
+    <div id="pwa-status-badge" class="pwa-status-badge online">
+        <span class="status-dot"></span>
+        <span id="pwa-status-text">Online</span>
+    </div>
+</div>
+
+<script>
+    /**
+     * PWA Status Indicator
+     */
+    class PWAStatusIndicator {
+        constructor() {
+            this.badge = document.getElementById('pwa-status-badge');
+            this.text = document.getElementById('pwa-status-text');
+            this.statusDot = this.badge?.querySelector('.status-dot');
+            this.init();
+        }
+
+        init() {
+            window.addEventListener('online', () => this.updateStatus('online'));
+            window.addEventListener('offline', () => this.updateStatus('offline'));
+
+            // Check if PWA is installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                this.markAsInstalled();
+            }
+
+            // Initial status
+            this.updateStatus(navigator.onLine ? 'online' : 'offline');
+        }
+
+        updateStatus(status) {
+            if (!this.badge) return;
+
+            this.badge.classList.remove('online', 'offline');
+            this.badge.classList.add(status);
+
+            const texts = {
+                online: '<i class="fas fa-wifi me-2"></i>Online',
+                offline: '<i class="fas fa-wifi-off me-2"></i>Offline',
+            };
+
+            this.text.innerHTML = texts[status] || texts.online;
+
+            // Update status dot
+            if (status === 'offline') {
+                this.statusDot?.classList.add('offline');
+            } else {
+                this.statusDot?.classList.remove('offline');
+            }
+
+            console.log('[PWA] Status updated:', status);
+        }
+
+        markAsInstalled() {
+            if (!this.badge) return;
+
+            this.badge.classList.add('installed');
+            this.badge.innerHTML = '<i class="fas fa-check-circle me-2"></i>BNC App';
+        }
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            window.pwaStatusIndicator = new PWAStatusIndicator();
+        });
+    } else {
+        window.pwaStatusIndicator = new PWAStatusIndicator();
+    }
+</script>

@@ -1,0 +1,98 @@
+<!-- SUPER SIMPLE PAYMENT MODAL -->
+<div class="modal fade" id="paymentModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">💳 Paiement</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="alert alert-info mb-4">
+                    <h6 id="bookTitle">Titre</h6>
+                    <p id="bookPrice">Prix</p>
+                </div>
+                
+                <label class="form-label fw-bold">Méthode de paiement :</label>
+                <select id="paymentMethod" class="form-select mb-3">
+                    <option value="">-- Sélectionnez --</option>
+                    <option value="orange">📱 Orange Money RDC</option>
+                    <option value="mpesa">📱 M-Pesa</option>
+                    <option value="airtel">📱 Airtel Money</option>
+                </select>
+                
+                <div id="phoneField" style="display:none;">
+                    <label for="phoneNumber" class="form-label">Numéro téléphone :</label>
+                    <input type="tel" id="phoneNumber" class="form-control" placeholder="+243 812 345 678">
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="payBtn">Payer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const methodSelect = document.getElementById('paymentMethod');
+    const phoneField = document.getElementById('phoneField');
+    const payBtn = document.getElementById('payBtn');
+    let currentBookId = '';
+    
+    // Afficher/masquer le champ téléphone
+    if (methodSelect) {
+        methodSelect.addEventListener('change', function() {
+            if (this.value === 'orange' || this.value === 'mpesa' || this.value === 'airtel') {
+                phoneField.style.display = 'block';
+            } else {
+                phoneField.style.display = 'none';
+            }
+        });
+    }
+    
+    // Gérer le clic sur le bouton Payer
+    if (payBtn) {
+        payBtn.addEventListener('click', function() {
+            const method = document.getElementById('paymentMethod').value;
+            const phone = document.getElementById('phoneNumber').value || '';
+            
+            if (!method) {
+                alert('Veuillez sélectionner une méthode');
+                return;
+            }
+            
+            if ((method === 'orange' || method === 'mpesa' || method === 'airtel') && !phone) {
+                alert('Veuillez entrer votre numéro');
+                return;
+            }
+            
+            alert('✅ Paiement en cours...\nLivre: ' + method);
+        });
+    }
+});
+
+// Fonction pour ouvrir le modal
+function openPaymentModal(bookId, title, author, price) {
+    if (!bookId) {
+        alert('Erreur: ID du livre manquant');
+        return;
+    }
+    
+    document.getElementById('bookTitle').textContent = title;
+    document.getElementById('bookPrice').textContent = price + ' FC';
+    document.getElementById('paymentMethod').value = '';
+    document.getElementById('phoneField').style.display = 'none';
+    document.getElementById('phoneNumber').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    modal.show();
+}
+
+// Fonction pour acheter (appelée par le bouton Acheter)
+function purchaseBook(bookId, bookTitle, bookAuthor, bookPrice) {
+    openPaymentModal(bookId, bookTitle, bookAuthor, bookPrice);
+}
+</script>

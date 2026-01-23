@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .stat-card .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .section h2 {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .icon {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Statistiques d'Activité</h1>
+
+        <!-- KPI Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Activités Récentes (7j)</div>
+                <div class="value">{{ recent_activities }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Sessions de Lecture</div>
+                <div class="value">{{ reading_sessions }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Sessions Complétées</div>
+                <div class="value">{{ completed_sessions }}</div>
+            </div>
+        </div>
+
+        <!-- Activités par Type -->
+        <div class="section">
+            <h2>📊 Activités par Type</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type d'Activité</th>
+                        <th>Nombre</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities_by_type %}
+                    <tr>
+                        <td>
+                            <span class="icon">
+                                {% if activity.activity_type == 'read' %}📖
+                                {% elif activity.activity_type == 'download' %}📥
+                                {% elif activity.activity_type == 'rate' %}⭐
+                                {% elif activity.activity_type == 'comment' %}💬
+                                {% elif activity.activity_type == 'share' %}🔗
+                                {% elif activity.activity_type == 'bookmark' %}🔖
+                                {% else %}📌
+                                {% endif %}
+                            </span>
+                            <strong>{{ activity.activity_type }}</strong>
+                        </td>
+                        <td>{{ activity.count }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">Aucune activité</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Livres les Plus Populaires -->
+        <div class="section">
+            <h2>⭐ Livres les Plus Populaires</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre du Livre</th>
+                        <th>Activités</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in popular_books %}
+                    <tr>
+                        <td>{{ book.book__title }}</td>
+                        <td><strong>{{ book.count }}</strong></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2">Aucun livre</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

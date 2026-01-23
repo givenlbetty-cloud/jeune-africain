@@ -1,0 +1,217 @@
+<!-- Free Preview Banner -->
+<div id="preview-limit-banner" class="alert alert-warning alert-dismissible fade show" role="alert" style="display:none;">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <strong id="preview-title">📖 Prévisualisation Gratuite</strong>
+      <p id="preview-message" class="mb-0 mt-1">
+        Vous lisez la <strong id="current-page">1</strong> sur <strong id="preview-limit">20</strong> pages gratuites
+      </p>
+      <div class="progress mt-2" style="height: 6px;">
+        <div id="preview-progress" class="progress-bar bg-warning" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    </div>
+    <div>
+      <button 
+        type="button" 
+        class="btn btn-primary btn-lg"
+        onclick="showPaymentModal()"
+      >
+        💳 Acheter le livre
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview Limit Reached Modal -->
+<div id="preview-limit-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="previewLimitLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="previewLimitLabel">
+          📖 Limite de prévisualisation atteinte
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body text-center py-4">
+        <div class="mb-4">
+          <i class="fas fa-eye-slash" style="font-size: 3rem; color: #ffc107;"></i>
+        </div>
+        
+        <h4>Vous avez atteint le limite de prévisualisation</h4>
+        
+        <div class="my-4 p-4 bg-light rounded">
+          <p class="mb-0">
+            <strong id="preview-stats-message">
+              Vous avez lu 20 pages sur 384 (5% du livre)
+            </strong>
+          </p>
+        </div>
+        
+        <p class="text-muted mb-4">
+          Achetez ce livre pour continuer la lecture et accéder au contenu complet.
+        </p>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-title">📚 Nombre de pages</h6>
+                <p class="fs-5 fw-bold text-primary">
+                  <span id="preview-total-pages">384</span> pages
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-title">💰 Prix</h6>
+                <p class="fs-5 fw-bold text-success">
+                  <span id="preview-book-price">500</span> FC
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          data-bs-dismiss="modal"
+        >
+          Continuer la lecture (pages 1-20)
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-success btn-lg"
+          onclick="showPaymentModal(); bootstrap.Modal.getInstance(document.getElementById('preview-limit-modal'))?.hide();"
+        >
+          💳 Acheter maintenant
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #preview-limit-banner {
+    border-left: 5px solid #ffc107;
+    background-color: #fff8dc;
+    border-radius: 0.5rem;
+  }
+
+  #preview-limit-banner .progress {
+    max-width: 200px;
+  }
+
+  #preview-limit-banner button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+</style>
+
+<script>
+// Check if user can read full book and show preview limit if needed
+async function initializePreviewSystem(bookId) {
+  try {
+    const response = await fetch(`/api/book/${bookId}/can-read/`);
+    const data = await response.json();
+
+    if (data.success) {
+      const canReadFull = data.can_read_full;
+      const maxPage = data.max_page;
+
+      if (!canReadFull && maxPage) {
+        // Show preview banner
+        document.getElementById('preview-limit-banner').style.display = 'block';
+        document.getElementById('preview-limit').textContent = maxPage;
+        
+        // Store max page for page access checks
+        window.maxPreviewPage = maxPage;
+      }
+
+      // Store book ID for payment modal
+      document.getElementById('payment-book-id').value = bookId;
+    }
+  } catch (error) {
+    console.error('Preview system error:', error);
+  }
+}
+
+// Get preview page statistics
+async function getPreviewStats(bookId) {
+  try {
+    const response = await fetch(`/api/book/${bookId}/preview-pages/`);
+    const data = await response.json();
+
+    if (data.success) {
+      return {
+        freePages: data.free_pages_count,
+        totalPages: data.total_pages,
+        percentage: data.preview_percentage
+      };
+    }
+  } catch (error) {
+    console.error('Error getting preview stats:', error);
+    return null;
+  }
+}
+
+// Check if user can access a specific page
+async function checkPageAccess(bookId, pageNumber) {
+  try {
+    const response = await fetch(`/api/book/${bookId}/page/${pageNumber}/access/`);
+    const data = await response.json();
+
+    if (data.success) {
+      if (!data.can_access) {
+        showPreviewLimitModal(bookId);
+      }
+      return data.can_access;
+    }
+  } catch (error) {
+    console.error('Error checking page access:', error);
+    return true; // Allow access on error
+  }
+}
+
+// Update preview progress bar
+function updatePreviewProgress(currentPage, maxPage) {
+  const percentage = (currentPage / maxPage) * 100;
+  document.getElementById('current-page').textContent = currentPage;
+  document.getElementById('preview-progress').style.width = percentage + '%';
+}
+
+// Show preview limit modal
+async function showPreviewLimitModal(bookId) {
+  const stats = await getPreviewStats(bookId);
+  
+  if (stats) {
+    document.getElementById('preview-stats-message').textContent = 
+      `Vous avez lu ${stats.freePages} pages sur ${stats.totalPages} (${stats.percentage.toFixed(1)}% du livre)`;
+    document.getElementById('preview-total-pages').textContent = stats.totalPages;
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('preview-limit-modal'));
+  modal.show();
+}
+
+// Show payment modal
+function showPaymentModal() {
+  const modal = new bootstrap.Modal(document.getElementById('payment-modal'));
+  modal.show();
+}
+
+// Hook into PDF viewer to check page access
+function onPageChange(pageNumber, bookId) {
+  // Update preview progress
+  const maxPage = window.maxPreviewPage || 999;
+  updatePreviewProgress(pageNumber, maxPage);
+
+  // Check if user can access this page
+  checkPageAccess(bookId, pageNumber);
+}
+</script>

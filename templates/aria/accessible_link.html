@@ -1,0 +1,8 @@
+<a 
+    href="{{ url }}"
+    class="{{ classes }}"
+    {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}
+    {% if aria_current %}aria-current="{{ aria_current }}"{% endif %}
+    {% if new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}>
+    {{ text }}
+</a>

@@ -666,7 +666,7 @@ curl -H "Authorization: Token $TOKEN" \
 - Exemple: `2025-12-05T09:48:25.603472Z`
 
 💱 **Devise:**
-- Par défaut: **XOF** (Franc CFA Ouest Africain)
+- Par défaut: **CDF** (Franc Congolais)
 
 ---
 

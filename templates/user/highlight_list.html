@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block title %}Mes Surlignages - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Mes Surlignages</h1>
+
+    {% if highlights %}
+        {% for book_title, highlights_in_book in highlights|group_by:"book.title" %}
+            <h3 class="mt-4">{{ book_title }}</h3>
+            <div class="list-group">
+                {% for highlight in highlights_in_book %}
+                    <a href="{% url 'catalogue:book_detail' highlight.book.id %}" class="list-group-item list-group-item-action">
+                        <p class="mb-1">"...{{ highlight.text|truncatewords:20 }}..."</p>
+                        <small class="text-muted">Page {{ highlight.page_number }} - Ajouté le {{ highlight.created_at|date:"d/m/Y" }}</small>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Vous n'avez encore rien surligné.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

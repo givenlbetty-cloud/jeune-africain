@@ -1,0 +1,9 @@
+<button 
+    class="btn {{ classes }}" 
+    type="{{ button_type }}"
+    {% if aria_label %}aria-label="{{ aria_label }}"{% endif %}
+    {% if aria_describedby %}aria-describedby="{{ aria_describedby }}"{% endif %}
+    {% if disabled %}disabled aria-disabled="true"{% endif %}>
+    {% if icon %}<i class="icon-{{ icon }}" aria-hidden="true"></i>{% endif %}
+    {{ text }}
+</button>

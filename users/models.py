@@ -67,7 +67,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     ]
     
     # Identifiants
-    email = models.EmailField(_("Email"), unique=True, max_length=255)
+    email = models.EmailField(_("Email"), unique=True, max_length=255, null=True, blank=True)
     username = models.CharField(_("Nom d'utilisateur"), max_length=150, unique=True)
     first_name = models.CharField(_("Prénom"), max_length=150, blank=True)
     last_name = models.CharField(_("Nom"), max_length=150, blank=True)
@@ -100,10 +100,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(
         _("Téléphone"),
         validators=[phone_regex],
-        max_length=17,
-        blank=True,
-        null=True
+        max_length=20, # Augmenté pour sécurité + format international
+        unique=True,   # CRITIQUE pour l'authentification par téléphone
+        error_messages={
+            'unique': _("Ce numéro de téléphone est déjà associé à un compte."),
+        },
+        null=True,     # Nullable pour les anciens comptes email-only
+        blank=True
     )
+    is_phone_verified = models.BooleanField(_("Téléphone vérifié"), default=False)
+    
+    # OTP Sécurité (Code à usage unique)
+    otp_code = models.CharField(_("Code OTP"), max_length=6, null=True, blank=True)
+    otp_created_at = models.DateTimeField(_("Date création OTP"), null=True, blank=True)
+    otp_attempts = models.IntegerField(_("Tentatives OTP"), default=0)
     
     # Adresse
     address = models.CharField(_("Adresse"), max_length=255, blank=True)
@@ -121,6 +131,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         _("Fin d'abonnement"),
         null=True,
         blank=True
+    )
+    
+    # Préférences
+    preferred_language = models.CharField(
+        _("Langue préférée"),
+        max_length=5,
+        default='fr',
+        choices=[
+            ('fr', _('Français')),
+            ('en', _('English')),
+            ('ar', _('العربية')),
+        ]
     )
     
     # Horodatage

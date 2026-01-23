@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connexion Mobile - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        background: linear-gradient(rgba(75, 44, 146, 0.4), rgba(75, 44, 146, 0.6)),
+                    url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        width: 100%;
+        max-width: 450px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    
+    .login-card-header {
+        background: var(--primary-color);
+        color: white;
+        padding: 30px;
+        border-radius: 0;
+        text-align: center;
+    }
+    
+    .login-card-header h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    .login-card-header p {
+        margin-bottom: 0; 
+        opacity: 0.9;
+    }
+    
+    .login-card-body {
+        padding: 40px;
+    }
+
+    .form-control-lg {
+        height: 50px;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-card-header">
+            <h2><i class="fas fa-mobile-alt me-2"></i>Connexion</h2>
+            <p>Accédez à votre bibliothèque via WhatsApp</p>
+        </div>
+        
+        <div class="login-card-body">
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'users:login_phone' %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="phone" class="form-label fw-bold">Numéro de téléphone</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-light"><i class="fab fa-whatsapp text-success"></i></span>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="+243..." required autofocus>
+                    </div>
+                    <div class="form-text">Entrez votre numéro avec l'indicatif (ex: +243...)</div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                    Recevoir le code
+                </button>
+            </form>
+
+            <div class="d-flex align-items-center my-3">
+                <hr class="flex-grow-1">
+                <span class="mx-2 text-muted small">OU</span>
+                <hr class="flex-grow-1">
+            </div>
+
+            <!-- OAuth Buttons -->
+             <div class="mb-3">
+                {% include 'auth/oauth_buttons.html' %}
+             </div>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'users:login' %}" class="text-decoration-none">
+                    <i class="fas fa-envelope me-1"></i> Utiliser email & mot de passe
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block title %}Mes Notes - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Mes Notes de Lecture</h1>
+
+    {% if notes %}
+        {% for book_title, notes_in_book in notes|group_by:"book.title" %}
+            <h3 class="mt-4">{{ book_title }}</h3>
+            <div class="list-group">
+                {% for note in notes_in_book %}
+                    <a href="{% url 'catalogue:book_detail' note.book.id %}" class="list-group-item list-group-item-action">
+                        <p class="mb-1">{{ note.text|truncatewords:20 }}</p>
+                        {% if note.highlight %}
+                            <small class="text-muted">Liée au surlignage : "...{{ note.highlight.text|truncatewords:10 }}..."</small><br>
+                        {% endif %}
+                        <small class="text-muted">Ajoutée le {{ note.created_at|date:"d/m/Y" }}</small>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Vous n'avez encore pris aucune note.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

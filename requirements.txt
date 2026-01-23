@@ -3,9 +3,18 @@ diff-match-patch==20241021
 Django==6.0
 django-import-export==4.3.14
 django-jazzmin==3.0.1
+django-allauth==0.64.0
 pillow==12.0.0
 python-decouple==3.8
 setuptools==80.9.0
 sqlparse==0.5.4
 tablib==3.9.0
 wheel==0.45.1
+# OAuth and security dependencies
+PyJWT==2.8.1
+cryptography==41.0.7
+requests==2.31.0
+oauthlib==3.2.2
+google-auth-oauthlib==1.1.0
+cloudinary
+django-cloudinary-storage

@@ -1,0 +1,179 @@
+{% comment %}
+Widget affichant les recommandations personnalisées
+{% endcomment %}
+
+<div class="card">
+    <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-white">
+                <i class="fas fa-sparkles"></i> Pour Vous
+            </h5>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#preferencesModal">
+                <i class="fas fa-cog"></i> Préférences
+            </button>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <!-- Type de recommandation -->
+        <div class="btn-group mb-3 flex-wrap" role="group">
+            <input type="radio" class="btn-check" name="recType" id="recPersonalized" value="personalized" checked>
+            <label class="btn btn-outline-primary btn-sm" for="recPersonalized">Personnalisé</label>
+            
+            <input type="radio" class="btn-check" name="recType" id="recCollaborative" value="collaborative">
+            <label class="btn btn-outline-primary btn-sm" for="recCollaborative">Collaboratif</label>
+            
+            <input type="radio" class="btn-check" name="recType" id="recContentBased" value="content-based">
+            <label class="btn btn-outline-primary btn-sm" for="recContentBased">Contenu</label>
+            
+            <input type="radio" class="btn-check" name="recType" id="recTrending" value="trending">
+            <label class="btn btn-outline-primary btn-sm" for="recTrending">Tendance</label>
+        </div>
+        
+        <!-- Grid de recommandations -->
+        <div id="recommendationsGrid" class="row g-3">
+            <div class="col-12 text-center text-muted py-5">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Calcul de vos recommandations...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeRadios = document.querySelectorAll('input[name="recType"]');
+    
+    // Charger au démarrage
+    loadRecommendations('personalized');
+    
+    // Charger au changement de type
+    typeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            loadRecommendations(this.value);
+        });
+    });
+    
+    function loadRecommendations(type) {
+        const container = document.getElementById('recommendationsGrid');
+        container.innerHTML = '<div class="col-12 text-center text-muted py-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+        
+        const endpoint = type === 'personalized' ? 
+            `/api/recommendations/personalized/` : 
+            `/api/recommendations/${type}/`;
+        
+        fetch(endpoint)
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results.length > 0) {
+                    container.innerHTML = data.results.map(rec => {
+                        const book = rec.book;
+                        const score = rec.score ? (rec.score / 100 * 100).toFixed(0) : 'N/A';
+                        
+                        return `
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 recommendation-card" data-book-id="${book.id}">
+                                    ${book.cover ? 
+                                        `<img src="${book.cover}" class="card-img-top" alt="${book.title}" style="height: 250px; object-fit: cover;">` :
+                                        `<div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                            <i class="fas fa-book fa-3x text-muted"></i>
+                                        </div>`
+                                    }
+                                    
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">${book.title}</h5>
+                                        
+                                        ${book.authors ? 
+                                            `<p class="card-text small text-muted">${book.authors.slice(0, 3).join(', ')}</p>` : ''
+                                        }
+                                        
+                                        <div class="mb-3">
+                                            <small class="text-muted">Pertinence</small>
+                                            <div class="progress" style="height: 5px;">
+                                                <div class="progress-bar bg-success" style="width: ${score}%;"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <a href="/fr/books/book/${book.id}/" class="btn btn-outline-primary btn-sm mt-auto mb-2">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                        
+                                        <div class="engagement-buttons d-flex gap-1 mt-2">
+                                            <button class="btn btn-sm btn-outline-secondary mark-viewed" 
+                                                    data-rec-id="${rec.id}">
+                                                <i class="fas fa-eye-slash"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger mark-liked" 
+                                                    data-rec-id="${rec.id}">
+                                                <i class="far fa-heart"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success mark-purchased" 
+                                                    data-rec-id="${rec.id}">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // Attacher les événements aux boutons d'engagement
+                    attachEngagementHandlers();
+                } else {
+                    container.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucune recommandation disponible</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="col-12 text-danger text-center py-5">Erreur de chargement</div>';
+            });
+    }
+    
+    function attachEngagementHandlers() {
+        // Mark viewed
+        document.querySelectorAll('.mark-viewed').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const recId = this.dataset.recId;
+                updateEngagement(recId, 'is_viewed');
+            });
+        });
+        
+        // Mark liked
+        document.querySelectorAll('.mark-liked').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const recId = this.dataset.recId;
+                updateEngagement(recId, 'is_liked');
+                this.classList.toggle('btn-danger');
+            });
+        });
+        
+        // Mark purchased
+        document.querySelectorAll('.mark-purchased').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const recId = this.dataset.recId;
+                updateEngagement(recId, 'is_purchased');
+                this.classList.toggle('btn-success');
+            });
+        });
+    }
+    
+    function updateEngagement(recId, field) {
+        const data = { [field]: true };
+        
+        fetch(`/api/user-recommendations/${recId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            console.log('✅ Engagement updated');
+        })
+        .catch(error => console.error('Error:', error));
+    }
+});
+</script>

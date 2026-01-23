@@ -1,0 +1,124 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Votre Livre Est Prêt" %}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px 20px;
+            color: #333;
+        }
+        .book-card {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+        }
+        .book-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+            color: #667eea;
+        }
+        .book-author {
+            color: #666;
+            margin: 0 0 15px 0;
+        }
+        .read-button {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+        }
+        .download-info {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>📚 {% trans "Votre Livre Est Prêt!" %}</h1>
+        </div>
+        
+        <div class="content">
+            <p>{% blocktrans with name=user.first_name %}Bonjour {{ name }},{% endblocktrans %}</p>
+            
+            <p>{% trans "Bonne nouvelle! Le livre que vous aviez commandé est maintenant disponible et prêt à être lu." %}</p>
+            
+            <div class="book-card">
+                <p class="book-title">{{ book.title }}</p>
+                <p class="book-author">{% trans "par" %} {{ book.authors.all|join:", " }}</p>
+                
+                <p>{% trans "Format:" %} 
+                    {% if book.format %}{{ book.format }}{% else %}PDF{% endif %}
+                </p>
+                <p>{% trans "Taille:" %} 
+                    {% if book.size %}{{ book.size }} MB{% else %}~5 MB{% endif %}
+                </p>
+            </div>
+            
+            <div class="download-info">
+                <strong>💾 {% trans "Téléchargement:" %}</strong><br>
+                {% trans "Vous pouvez maintenant télécharger ce livre à partir de votre bibliothèque personnelle ou le lire directement en ligne." %}
+            </div>
+            
+            <a href="{{ library_url }}" class="read-button">
+                {% trans "Accéder à Ma Bibliothèque" %}
+            </a>
+            
+            <p>{% trans "Vous avez accès illimité à ce livre. Vous pouvez le télécharger plusieurs fois et le lire sur tous vos appareils." %}</p>
+            
+            <p>{% trans "Retrouvez d'autres livres similaires en explorant nos recommandations personnalisées." %}</p>
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} BNC Digital Library</p>
+            <p>
+                <a href="{{ site_url }}/library/" style="color: #667eea; text-decoration: none;">
+                    {% trans "Ma Bibliothèque" %}
+                </a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

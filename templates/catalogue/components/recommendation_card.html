@@ -1,0 +1,75 @@
+{% comment %}
+Composant de recommandation individual avec boutons d'engagement
+Utilisé dans les listes de recommandations
+{% endcomment %}
+
+<div class="col-md-6 col-lg-4 mb-4">
+    <div class="card h-100 recommendation-card" data-book-id="{{ book.id }}">
+        {% if book.cover %}
+        <img src="{{ book.cover.url }}" class="card-img-top" alt="{{ book.title }}" style="height: 250px; object-fit: cover;">
+        {% else %}
+        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+            <i class="fas fa-book fa-3x text-muted"></i>
+        </div>
+        {% endif %}
+        
+        <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ book.title }}</h5>
+            
+            {% if book.author_names %}
+            <p class="card-text small text-muted">
+                {% for author in book.author_names %}
+                    {{ author }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+            {% endif %}
+            
+            {% comment %} Score de recommandation {% endcomment %}
+            {% if recommendation_score %}
+            <div class="mb-3">
+                <small class="text-muted">Pertinence</small>
+                <div class="progress" style="height: 5px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ recommendation_score }}%;" 
+                         aria-valuenow="{{ recommendation_score }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% comment %} Tags {% endcomment %}
+            {% if book.tags.all %}
+            <div class="mb-2">
+                {% for tag in book.tags.all|slice:":3" %}
+                <span class="badge bg-light text-dark small me-1">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <a href="{% url 'catalogue:book-detail' book.id %}" class="btn btn-outline-primary btn-sm mt-auto mb-2">
+                <i class="fas fa-eye"></i> Voir le livre
+            </a>
+            
+            {% comment %} Boutons d'engagement {% endcomment %}
+            <div class="engagement-buttons d-flex gap-1 mt-2">
+                <button class="btn btn-sm btn-outline-secondary mark-viewed" 
+                        data-recommendation-id="{{ recommendation_id }}"
+                        title="Marquer comme vu">
+                    <i class="fas fa-eye-slash"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger mark-liked" 
+                        data-recommendation-id="{{ recommendation_id }}"
+                        title="J'aime">
+                    <i class="far fa-heart"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success mark-purchased" 
+                        data-recommendation-id="{{ recommendation_id }}"
+                        title="Acheté">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

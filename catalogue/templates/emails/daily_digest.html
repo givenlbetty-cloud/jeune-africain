@@ -1,0 +1,454 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{% get_current_language %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Votre Digest Quotidien" %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px 20px;
+        }
+
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .book-item {
+            background-color: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        .book-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .book-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .book-author {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .book-description {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            max-height: 60px;
+            overflow: hidden;
+        }
+
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .rating {
+            color: #f39c12;
+        }
+
+        .view-button {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .view-button:hover {
+            background-color: #764ba2;
+            text-decoration: none;
+        }
+
+        .category-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .trending-badge {
+            display: inline-block;
+            background-color: #f39c12;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .new-badge {
+            display: inline-block;
+            background-color: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background-color: #f0f4ff;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e0e0ff;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .cta-section {
+            background-color: #f0f4ff;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+
+        .preferences-link {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .preferences-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer {
+            background-color: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .social-links {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .social-links a {
+            display: inline-block;
+            margin: 0 8px;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 30px 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .book-item {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- En-tête -->
+        <div class="header">
+            <h1>📚 {% trans "Votre Digest Quotidien" %}</h1>
+            <p>{% trans "Découvrez ce qui se passe aujourd'hui dans votre bibliothèque" %}</p>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="content">
+            <!-- Salutation personnalisée -->
+            <div class="greeting">
+                <p>{% blocktrans with name=user.first_name %}Bonjour {{ name }},{% endblocktrans %}</p>
+                <p style="margin-top: 10px; color: #666;">{% trans "Voici votre résumé quotidien de la BNC Digital Library. Explorez les nouvelles sorties, tendances et recommandations exclusives." %}</p>
+            </div>
+
+            <!-- Statistiques -->
+            {% if stats %}
+            <div class="stats-container">
+                <div class="stat-box">
+                    <div class="stat-number">{{ stats.books_added }}</div>
+                    <div class="stat-label">{% trans "Nouveaux livres" %}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">{{ stats.featured_count }}</div>
+                    <div class="stat-label">{% trans "À la une" %}</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Section: Nouveautés -->
+            {% if new_releases %}
+            <div class="section">
+                <h2 class="section-title">🆕 {% trans "Nouveautés du Jour" %}</h2>
+                
+                {% for book in new_releases %}
+                <div class="book-item">
+                    <div class="book-title">
+                        {{ book.title }}
+                        <span class="new-badge">{% trans "NOUVEAU" %}</span>
+                    </div>
+                    <div class="book-author">{% trans "par" %} {{ book.author }}</div>
+                    {% if book.description %}
+                    <div class="book-description">{{ book.description|truncatewords:20 }}</div>
+                    {% endif %}
+                    <div class="book-meta">
+                        <span>{% trans "Catégorie" %}: {{ book.category }}</span>
+                        {% if book.rating %}
+                        <span class="rating">⭐ {{ book.rating }}/5</span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ site_url }}/book/{{ book.id }}/" class="view-button">{% trans "Voir le livre" %}</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Section: Tendances -->
+            {% if trending_books %}
+            <div class="section">
+                <h2 class="section-title">🔥 {% trans "Tendances Actuelles" %}</h2>
+                
+                {% for book in trending_books %}
+                <div class="book-item">
+                    <div class="book-title">
+                        {{ book.title }}
+                        <span class="trending-badge">{% trans "TENDANCE" %}</span>
+                    </div>
+                    <div class="book-author">{% trans "par" %} {{ book.author }}</div>
+                    {% if book.description %}
+                    <div class="book-description">{{ book.description|truncatewords:20 }}</div>
+                    {% endif %}
+                    <div class="book-meta">
+                        <span>💬 {{ book.download_count }} {% trans "téléchargements" %}</span>
+                        {% if book.rating %}
+                        <span class="rating">⭐ {{ book.rating }}/5</span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ site_url }}/book/{{ book.id }}/" class="view-button">{% trans "Voir le livre" %}</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Section: Recommandations personnalisées -->
+            {% if recommendations %}
+            <div class="section">
+                <h2 class="section-title">💡 {% trans "Recommandé pour vous" %}</h2>
+                
+                {% for book in recommendations %}
+                <div class="book-item">
+                    <div class="book-title">{{ book.title }}</div>
+                    <div class="book-author">{% trans "par" %} {{ book.author }}</div>
+                    {% if book.description %}
+                    <div class="book-description">{{ book.description|truncatewords:20 }}</div>
+                    {% endif %}
+                    <div class="book-meta">
+                        <span>{% trans "Correspondance" %}: {{ book.match_score }}%</span>
+                        {% if book.rating %}
+                        <span class="rating">⭐ {{ book.rating }}/5</span>
+                        {% endif %}
+                    </div>
+                    <a href="{{ site_url }}/book/{{ book.id }}/" class="view-button">{% trans "Lire la suite" %}</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Section: Mises à jour catégories -->
+            {% if category_updates %}
+            <div class="section">
+                <h2 class="section-title">📂 {% trans "Mises à Jour par Catégorie" %}</h2>
+                
+                {% for category, count in category_updates.items %}
+                <div class="category-section">
+                    <div class="category-title">{{ category }}</div>
+                    <p style="font-size: 13px; color: #666;">
+                        {% blocktrans count counter=count %}
+                        {{ counter }} nouveau livre
+                        {% plural %}
+                        {{ counter }} nouveaux livres
+                        {% endblocktrans %}
+                    </p>
+                    <a href="{{ site_url }}/category/{{ category|slugify }}/" style="color: #667eea; font-size: 12px; text-decoration: none;">
+                        {% trans "Explorer la catégorie" %} →
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Appel à l'action principal -->
+            <div class="cta-section">
+                <h3 style="color: #333; margin-bottom: 10px;">{% trans "Explorer votre bibliothèque" %}</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                    {% trans "Découvrez des milliers de livres dans votre collection" %}
+                </p>
+                <a href="{{ site_url }}/library/" class="cta-button">{% trans "Accéder à la Bibliothèque" %}</a>
+            </div>
+
+            <!-- Lien préférences -->
+            <div class="preferences-link">
+                {% trans "Vous ne voulez plus recevoir ces emails?" %}
+                <a href="{{ site_url }}/settings/email-preferences/">{% trans "Gérer mes préférences" %}</a>
+            </div>
+        </div>
+
+        <!-- Pied de page -->
+        <div class="footer">
+            <p>
+                {% trans "BNC Digital Library™ | Votre source de lecture numérique" %}
+            </p>
+            
+            <div class="social-links">
+                <a href="{{ site_url }}/contact/">{% trans "Contact" %}</a> |
+                <a href="{{ site_url }}/privacy/">{% trans "Confidentialité" %}</a> |
+                <a href="{{ site_url }}/terms/">{% trans "Conditions" %}</a>
+            </div>
+
+            <p style="margin-top: 15px; font-size: 11px; color: #ccc;">
+                © 2025 BNC Digital Library. {% trans "Tous droits réservés." %}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

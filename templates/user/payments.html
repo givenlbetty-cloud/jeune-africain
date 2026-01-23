@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Paiements - BNC{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Historique des Paiements</h1>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total dépensé</h6>
+                            <h3 class="text-primary">{{ total_spent|floatformat:0 }} FC</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total paiements</h6>
+                            <h3 class="text-primary">{{ payments.paginator.count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if payments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Livre</th>
+                                <th>Montant</th>
+                                <th>Méthode</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'catalogue:book_detail' payment.book.id %}">
+                                            {{ payment.book.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ payment.amount }} {{ payment.currency }}</td>
+                                    <td>{{ payment.get_payment_method_display }}</td>
+                                    <td>
+                                        {% if payment.payment_status == 'COMPLETED' %}
+                                            <span class="badge bg-success">Complété</span>
+                                        {% elif payment.payment_status == 'PENDING' %}
+                                            <span class="badge bg-warning">En attente</span>
+                                        {% elif payment.payment_status == 'FAILED' %}
+                                            <span class="badge bg-danger">Échoué</span>
+                                        {% elif payment.payment_status == 'REFUNDED' %}
+                                            <span class="badge bg-info">Remboursé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment.created_at|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if payments.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">Première</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payments.previous_page_number }}">Précédente</a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">Page {{ payments.number }}</span>
+                        </li>
+                        
+                        {% if payments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payments.next_page_number }}">Suivante</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ payments.paginator.num_pages }}">Dernière</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Aucun paiement effectué.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Bienvenue sur BNC Digital Library" %}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 40px 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .button {
+            display: inline-block;
+            background-color: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 4px;
+            text-decoration: none;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f9f9f9;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+        }
+        .feature-list {
+            margin: 20px 0;
+        }
+        .feature-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>{% trans "Bienvenue!" %}</h1>
+            <p>{% trans "BNC Digital Library" %}</p>
+        </div>
+        
+        <div class="content">
+            <p>{% blocktrans with name=user.first_name %}Bonjour {{ name }},{% endblocktrans %}</p>
+            
+            <p>{% trans "Merci de vous être inscrit sur BNC Digital Library! Nous sommes heureux de vous compter parmi nos utilisateurs." %}</p>
+            
+            <p>{% trans "Votre compte est maintenant actif et prêt à être utilisé. Vous pouvez commencer à explorer notre vaste collection de livres numériques." %}</p>
+            
+            <div class="feature-list">
+                <p><strong>{% trans "Voici ce que vous pouvez faire maintenant:" %}</strong></p>
+                <div class="feature-item">
+                    📚 {% trans "Parcourir notre collection de plus de 10 000 livres" %}
+                </div>
+                <div class="feature-item">
+                    ⭐ {% trans "Évaluer et ajouter des livres à vos favoris" %}
+                </div>
+                <div class="feature-item">
+                    🎯 {% trans "Recevoir des recommandations personnalisées" %}
+                </div>
+                <div class="feature-item">
+                    📖 {% trans "Lire en ligne avec notre lecteur intégré" %}
+                </div>
+                <div class="feature-item">
+                    💬 {% trans "Participer à des forums de discussion" %}
+                </div>
+                <div class="feature-item">
+                    🔄 {% trans "Synchroniser vos progrès de lecture sur tous vos appareils" %}
+                </div>
+            </div>
+            
+            <a href="{{ activation_url }}" class="button">{% trans "Complétez Votre Profil" %}</a>
+            
+            <p>{% trans "Si vous avez des questions, n'hésitez pas à nous contacter au support@bnc-library.com" %}</p>
+            
+            <p>{% trans "Bonne lecture!" %}<br>
+            <strong>{% trans "L'équipe BNC" %}</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+            <p>
+                <a href="{{ site_url }}/unsubscribe/" style="color: #667eea; text-decoration: none;">{% trans "Se désinscrire" %}</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+
+{% block subject %}
+{% trans "Bienvenue à BNC Digital Library" %}
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="logo">📚 BNC Digital Library</div>
+</div>
+
+<div class="content">
+    <h1>{% trans "Bienvenue," %} {{ user.first_name }}!</h1>
+
+    <p>{% trans "Nous sommes ravis de vous accueillir dans notre communauté de lecteurs." %}</p>
+
+    <div class="alert alert-success">
+        <strong>{% trans "Compte activé avec succès!" %}</strong>
+        <p>{% trans "Votre compte est maintenant prêt à être utilisé." %}</p>
+    </div>
+
+    <h2>{% trans "Commencez votre exploration" %}</h2>
+    
+    <p>{% trans "Découvrez:" %}</p>
+    <ul>
+        <li>{% trans "Plus de 50,000 livres en français et anglais" %}</li>
+        <li>{% trans "Recommandations personnalisées basées sur vos préférences" %}</li>
+        <li>{% trans "Discussions avec d'autres lecteurs" %}</li>
+        <li>{% trans "Événements et webinaires exclusifs" %}</li>
+        <li>{% trans "Accès offline à vos livres préférés" %}</li>
+    </ul>
+
+    <a href="{{ welcome_url }}" class="button">
+        {% trans "Accédez à votre compte" %}
+    </a>
+
+    <h2>{% trans "Conseils pour bien démarrer" %}</h2>
+    
+    <ol>
+        <li>
+            <strong>{% trans "Complétez votre profil" %}</strong>
+            <p>{% trans "Ajoutez une photo et décrivez vos genres de livres préférés." %}</p>
+        </li>
+        <li>
+            <strong>{% trans "Explorez les recommandations" %}</strong>
+            <p>{% trans "Notre système IA propose des livres adaptés à vos goûts." %}</p>
+        </li>
+        <li>
+            <strong>{% trans "Rejoignez les clubs de lecture" %}</strong>
+            <p>{% trans "Participez à des discussions sur vos livres préférés." %}</p>
+        </li>
+        <li>
+            <strong>{% trans "Téléchargez l'app mobile" %}</strong>
+            <p>{% trans "Accédez à votre bibliothèque n'importe où, même sans internet." %}</p>
+        </li>
+    </ol>
+
+    <h2>{% trans "Questions?" %}</h2>
+    <p>{% trans "Consultez notre" %} <a href="{{ help_url }}">{% trans "centre d'aide" %}</a> {% trans "ou contactez" %} <a href="mailto:support@bnc.digital">support@bnc.digital</a>.</p>
+</div>
+
+<div class="footer">
+    <p>{% trans "BNC Digital Library - Votre univers de lecture illimité" %}</p>
+    <p>© 2025 BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+</div>
+
+{% endblock %}

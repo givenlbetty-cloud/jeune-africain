@@ -1,0 +1,108 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+
+{% block subject %}
+{% trans "Votre digest hebdomadaire de lecture - BNC Digital Library" %}
+{% endblock %}
+
+{% block content %}
+<div class="header">
+    <div class="logo">📚 BNC Digital Library</div>
+</div>
+
+<div class="content">
+    <h1>{% trans "Votre résumé de lecture - Semaine du" %} {{ week_start|date:"d M Y" }}</h1>
+
+    <p>{% trans "Bonjour" %} {{ user.first_name }},</p>
+
+    <p>{% trans "Voici un résumé de votre activité de lecteur cette semaine sur BNC Digital Library." %}</p>
+
+    <h2>📊 {% trans "Statistiques de cette semaine" %}</h2>
+
+    <div class="alert alert-success">
+        <strong>{{ reading_time }} {% trans "minutes" %}</strong> {% trans "de lecture" %}<br>
+        <strong>{{ books_read }}</strong> {% trans "livre(s) terminé(s)" %}<br>
+        <strong>{{ discussions_count }}</strong> {% trans "discussion(s) créée(s)" %}<br>
+        <strong>{{ likes_given }}</strong> {% trans "appreciation(s) donnée(s)" %}
+    </div>
+
+    {% if highlighted_books %}
+    <h2>⭐ {% trans "Vos meilleurs livres cette semaine" %}</h2>
+
+    {% for book in highlighted_books %}
+    <div class="recommendation">
+        <div class="recommendation-title">{{ book.title }}</div>
+        <div class="recommendation-author">{{ book.author }}</div>
+        <p>{% trans "Vous avez lu" %} {{ book.pages_read }} {% trans "pages" %}</p>
+        <span class="score">⭐ {{ book.user_rating }}/5</span>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if trending_discussions %}
+    <h2>💬 {% trans "Discussions populaires" %}</h2>
+
+    <ul>
+        {% for discussion in trending_discussions %}
+        <li>
+            <a href="{{ discussion.url }}">{{ discussion.title }}</a>
+            <br>
+            <small>{{ discussion.comment_count }} {% trans "commentaires" %}</small>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if new_friends %}
+    <h2>👥 {% trans "Nouveaux lecteurs actifs" %}</h2>
+
+    <p>{% trans "Des lecteurs qui partagent vos intérêts ont rejoint la communauté:" %}</p>
+
+    <ul>
+        {% for friend in new_friends %}
+        <li>{{ friend.first_name }} - {% trans "Loves" %} {{ friend.favorite_genre }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div style="margin: 30px 0; padding: 20px; background-color: #ecf0f1; border-radius: 4px;">
+        <h3>🎯 {% trans "Défi de la semaine prochaine" %}</h3>
+        <p>{{ challenge_text }}</p>
+        <a href="{{ challenge_url }}" class="button">
+            {% trans "Relever le défi" %}
+        </a>
+    </div>
+
+    <h2>{% trans "Vos prochains événements" %}</h2>
+
+    <ul>
+        {% for event in upcoming_events %}
+        <li>
+            <strong>{{ event.title }}</strong><br>
+            {{ event.date|date:"d/m/Y H:i" }} - {{ event.location }}
+        </li>
+        {% empty %}
+        <li>{% trans "Aucun événement prévu. Consultez notre calendrier!" %}</li>
+        {% endfor %}
+    </ul>
+
+    <p style="margin-top: 30px;">
+        <a href="{{ library_url }}" class="button">
+            {% trans "Retour à votre bibliothèque" %}
+        </a>
+    </p>
+</div>
+
+<div class="footer">
+    <p>
+        {% trans "Fréquence des emails:" %}
+        <a href="{{ email_settings_url }}">{% trans "Modifier les préférences" %}</a>
+    </p>
+    <p>© 2025 BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+    <p>
+        <a href="{{ privacy_url }}">{% trans "Politique de confidentialité" %}</a> |
+        <a href="{{ terms_url }}">{% trans "Conditions d'utilisation" %}</a>
+    </p>
+</div>
+
+{% endblock %}

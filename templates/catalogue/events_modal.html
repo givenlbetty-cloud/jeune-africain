@@ -1,0 +1,324 @@
+<!-- Events Registration Modal -->
+<div id="events-registration-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="eventsRegistrationLabel">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="eventsRegistrationLabel">
+          📅 S'inscrire à cet événement
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Event Details Summary -->
+        <div class="card mb-4 border-primary border-2">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-8">
+                <h6 class="text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                  <i class="fas fa-calendar"></i> Type d'événement
+                </h6>
+                <p id="event-type" class="fs-6 fw-bold mb-3">
+                  <!-- Dynamically filled -->
+                </p>
+
+                <h6 class="text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                  <i class="fas fa-heading"></i> Titre
+                </h6>
+                <p id="event-title" class="fs-6 fw-bold mb-3">
+                  <!-- Dynamically filled -->
+                </p>
+
+                <h6 class="text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                  <i class="fas fa-align-left"></i> Description
+                </h6>
+                <p id="event-description" class="mb-3">
+                  <!-- Dynamically filled -->
+                </p>
+              </div>
+
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded mb-3">
+                  <h6 class="text-muted mb-2" style="font-size: 0.85rem; text-transform: uppercase;">
+                    Participants
+                  </h6>
+                  <p class="fs-5 fw-bold text-primary mb-0">
+                    <span id="event-registrations">0</span> / <span id="event-capacity">∞</span>
+                  </p>
+                </div>
+
+                <div class="bg-light p-3 rounded">
+                  <h6 class="text-muted mb-2" style="font-size: 0.85rem; text-transform: uppercase;">
+                    Statut
+                  </h6>
+                  <p id="event-status" class="mb-0">
+                    <span class="badge bg-success">À venir</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date & Time -->
+            <hr class="my-3">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <h6 class="text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                  📍 Date & Heure
+                </h6>
+                <p class="mb-0">
+                  <strong id="event-date-time">TBD</strong>
+                </p>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-muted" style="font-size: 0.85rem; text-transform: uppercase;">
+                  📍 Lieu
+                </h6>
+                <p class="mb-0">
+                  <strong id="event-location">À déterminer</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Status -->
+        <div id="registration-status" style="display: none;">
+          <div class="alert alert-info">
+            <i class="fas fa-check-circle"></i>
+            <strong>Vous êtes déjà inscrit à cet événement</strong>
+          </div>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="form-check mb-3">
+          <input 
+            class="form-check-input" 
+            type="checkbox" 
+            id="event-terms" 
+            required
+          >
+          <label class="form-check-label" for="event-terms">
+            Je confirme mon inscription à cet événement et accepte de recevoir des mises à jour par email
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          data-bs-dismiss="modal"
+        >
+          Fermer
+        </button>
+        <button 
+          id="event-action-btn"
+          type="button" 
+          class="btn btn-primary btn-lg"
+          onclick="submitEventRegistration()"
+        >
+          <i class="fas fa-check"></i> S'inscrire
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .event-badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+  }
+
+  .event-capacity {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  #events-registration-modal .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+</style>
+
+<script>
+// Store current event ID
+let currentEventId = null;
+
+// Open event registration modal
+async function openEventRegistrationModal(eventId) {
+  currentEventId = eventId;
+  
+  try {
+    const response = await fetch(`/api/events/${eventId}/`);
+    const event = await response.json();
+
+    if (!event.success) {
+      alert('Erreur lors du chargement de l\'événement');
+      return;
+    }
+
+    const eventData = event.event;
+
+    // Fill modal with event data
+    document.getElementById('event-type').textContent = getEventTypeBadge(eventData.event_type);
+    document.getElementById('event-title').textContent = eventData.title;
+    document.getElementById('event-description').textContent = eventData.description;
+    document.getElementById('event-registrations').textContent = eventData.registrations_count;
+    document.getElementById('event-capacity').textContent = eventData.max_capacity || '∞';
+    
+    // Format date and time
+    const eventDate = new Date(eventData.start_date);
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    document.getElementById('event-date-time').textContent = 
+      eventDate.toLocaleDateString('fr-FR', options);
+    
+    document.getElementById('event-location').textContent = eventData.location || 'À déterminer';
+
+    // Check if user is already registered
+    await checkEventRegistration(eventId);
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('events-registration-modal'));
+    modal.show();
+  } catch (error) {
+    console.error('Error loading event:', error);
+    alert('Erreur lors du chargement de l\'événement');
+  }
+}
+
+// Get badge HTML for event type
+function getEventTypeBadge(eventType) {
+  const badges = {
+    'NEW_BOOK': '<span class="badge bg-info">📕 Nouveau Livre</span>',
+    'WORKSHOP': '<span class="badge bg-warning">🎓 Atelier</span>',
+    'CONFERENCE': '<span class="badge bg-danger">🎤 Conférence</span>',
+    'ANNOUNCEMENT': '<span class="badge bg-secondary">📢 Annonce</span>',
+    'LOCAL_EVENT': '<span class="badge bg-success">📍 Événement Local</span>'
+  };
+  return badges[eventType] || '<span class="badge bg-light">Événement</span>';
+}
+
+// Check if user is registered for this event
+async function checkEventRegistration(eventId) {
+  try {
+    const response = await fetch(`/api/my-events/`);
+    const data = await response.json();
+
+    if (data.success) {
+      const isRegistered = data.registrations.some(reg => reg.event_id === eventId);
+
+      const statusDiv = document.getElementById('registration-status');
+      const actionBtn = document.getElementById('event-action-btn');
+      const termsCheckbox = document.getElementById('event-terms');
+
+      if (isRegistered) {
+        statusDiv.style.display = 'block';
+        actionBtn.textContent = '✗ Se désinscrire';
+        actionBtn.className = 'btn btn-danger btn-lg';
+        termsCheckbox.style.display = 'none';
+      } else {
+        statusDiv.style.display = 'none';
+        actionBtn.textContent = '✓ S\'inscrire';
+        actionBtn.className = 'btn btn-primary btn-lg';
+        termsCheckbox.style.display = 'block';
+        termsCheckbox.checked = false;
+      }
+    }
+  } catch (error) {
+    console.error('Error checking registration:', error);
+  }
+}
+
+// Submit event registration or unregistration
+async function submitEventRegistration() {
+  if (!currentEventId) {
+    alert('Erreur: ID d\'événement manquant');
+    return;
+  }
+
+  // Check if user is already registered
+  const statusDiv = document.getElementById('registration-status');
+  const isRegistered = statusDiv.style.display !== 'none';
+
+  // Get method based on status
+  const method = isRegistered ? 'DELETE' : 'POST';
+  const action = isRegistered ? 'unregister' : 'register';
+
+  try {
+    const response = await fetch(`/api/events/${currentEventId}/${action}/`, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({})
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Show success message
+      showSuccessAlert(
+        isRegistered ? 
+          'Vous vous êtes désinscrit de l\'événement' : 
+          'Vous vous êtes inscrit à l\'événement'
+      );
+
+      // Close modal after 1.5 seconds
+      setTimeout(() => {
+        bootstrap.Modal.getInstance(document.getElementById('events-registration-modal'))?.hide();
+      }, 1500);
+
+      // Reload page to update button status
+      setTimeout(() => {
+        location.reload();
+      }, 2000);
+    } else {
+      alert('Erreur: ' + (data.error || 'Impossible de traiter votre demande'));
+    }
+  } catch (error) {
+    console.error('Error submitting registration:', error);
+    alert('Erreur lors de votre inscription. Veuillez réessayer.');
+  }
+}
+
+// Show success alert
+function showSuccessAlert(message) {
+  const alertDiv = document.createElement('div');
+  alertDiv.className = 'alert alert-success alert-dismissible fade show';
+  alertDiv.innerHTML = `
+    <i class="fas fa-check-circle"></i> ${message}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  `;
+  
+  const body = document.querySelector('#events-registration-modal .modal-body');
+  if (body) {
+    body.insertBefore(alertDiv, body.firstChild);
+  }
+}
+
+// Get CSRF token from cookies
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>

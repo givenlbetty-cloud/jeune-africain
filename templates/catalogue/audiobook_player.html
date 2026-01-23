@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Écouter {{ book.title }} - BNC{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-md-3 bg-light p-4">
+            <div class="card shadow-sm">
+                {% if book.cover_url %}
+                <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="card-img-top">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text text-muted">{{ book.author.name }}</p>
+                    <hr>
+                    <h6>Chapitres</h6>
+                    <div class="list-group list-group-sm">
+                        {% for chapter in chapters %}
+                        <button type="button" class="list-group-item list-group-item-action text-start" data-chapter="{{ chapter.id }}">
+                            {{ chapter.chapter_number }}. {{ chapter.title|truncatewords:5 }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9 p-4">
+            <h1>{{ book.title }}</h1>
+            <p class="text-muted">{{ book.author.name }}</p>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <audio controls class="w-100" style="height: 50px;" id="audioPlayer">
+                        <source src="" type="audio/mpeg">
+                        Votre navigateur ne supporte pas l'élément audio.
+                    </audio>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5>À propos du livre</h5>
+                    <p>{{ book.description|truncatewords:100 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('[data-chapter]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Charger le chapitre
+            const chapterId = this.dataset.chapter;
+            console.log('Chargement du chapitre:', chapterId);
+        });
+    });
+</script>
+{% endblock %}

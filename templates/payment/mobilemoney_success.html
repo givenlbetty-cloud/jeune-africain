@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Paiement réussi!{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 40px 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: bounceIn 0.6s ease-out;
+    }
+
+    @keyframes bounceIn {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.1);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .success-header h1 {
+        color: #2e7d32;
+        font-size: 28px;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+
+    .success-header p {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    .book-info-box {
+        padding: 25px;
+        background: #f0f4f8;
+        border-radius: 8px;
+        margin-bottom: 30px;
+    }
+
+    .book-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .transaction-details {
+        padding: 20px;
+        background: #e8f5e9;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        font-size: 14px;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        color: #666;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+
+    .features-list {
+        text-align: left;
+        margin-bottom: 30px;
+    }
+
+    .feature-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .feature-icon {
+        color: #2e7d32;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 12px;
+        flex-direction: column;
+    }
+
+    .btn {
+        padding: 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: #2c7d3d;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #235a30;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(44, 125, 61, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover {
+        background: #eee;
+        border-color: #999;
+    }
+
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        opacity: 1;
+        animation: fall 3s ease-out forwards;
+        pointer-events: none;
+    }
+
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotateZ(360deg);
+            opacity: 0;
+        }
+    }
+
+    .receipt {
+        padding: 15px;
+        background: #fafafa;
+        border: 1px dashed #ddd;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        color: #666;
+        font-family: monospace;
+    }
+
+    .receipt-header {
+        text-align: center;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    @media (max-width: 600px) {
+        .success-container {
+            margin: 20px;
+            padding: 25px 20px;
+        }
+
+        .success-icon {
+            font-size: 60px;
+        }
+
+        .success-header h1 {
+            font-size: 24px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="success-container">
+        <!-- Icône de succès -->
+        <div class="success-icon">✅</div>
+
+        <!-- En-tête -->
+        <div class="success-header">
+            <h1>Paiement réussi!</h1>
+            <p>Votre livre est maintenant accessible</p>
+        </div>
+
+        <!-- Livre acheté -->
+        <div class="book-info-box">
+            <div class="book-title">{{ book.title }}</div>
+            <p style="color: #666; margin: 0;">Par {{ book.author_display }}</p>
+        </div>
+
+        <!-- Reçu -->
+        <div class="receipt">
+            <div class="receipt-header">═══════════════════════════════</div>
+            <div style="text-align: center; margin-bottom: 8px;">
+                <strong>REÇU DE TRANSACTION</strong>
+            </div>
+            <div class="receipt-header">═══════════════════════════════</div>
+            <div style="margin: 8px 0; display: flex; justify-content: space-between;">
+                <span>Montant:</span>
+                <span>${{ payment.amount }}</span>
+            </div>
+            <div style="margin: 8px 0; display: flex; justify-content: space-between;">
+                <span>Référence:</span>
+                <span>{{ payment.transaction_id }}</span>
+            </div>
+            <div style="margin: 8px 0; display: flex; justify-content: space-between;">
+                <span>Réseau:</span>
+                <span>{{ network|title }}</span>
+            </div>
+            <div style="margin: 8px 0; display: flex; justify-content: space-between;">
+                <span>Date:</span>
+                <span>{{ payment.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="receipt-header">═══════════════════════════════</div>
+        </div>
+
+        <!-- Ce que vous pouvez faire -->
+        <div class="features-list">
+            <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Lire le livre en ligne ou hors ligne</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Accès illimité sur tous vos appareils</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Télécharger le PDF complet</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Créer des notes et des favoris</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✓</span>
+                <span>Partager avec vos amis</span>
+            </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="button-group">
+            <a href="/fr/books/{{ book.id }}/" class="btn btn-primary">
+                📖 Lire le livre maintenant
+            </a>
+            <a href="/fr/books/" class="btn btn-secondary">
+                ← Parcourir d'autres livres
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Effets de confettis
+function createConfetti() {
+    const confettiCount = 50;
+    const colors = ['#2c7d3d', '#4caf50', '#81c784', '#c8e6c9', '#a5d6a7'];
+    
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animation = `fall ${2 + Math.random() * 1}s ease-out forwards`;
+        confetti.style.delay = Math.random() * 0.5 + 's';
+        document.body.appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3500);
+    }
+}
+
+// Créer les confettis au chargement
+createConfetti();
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+        .content { background: #f8f9fa; padding: 20px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #28a745; color: white; padding: 10px 25px; border-radius: 4px; text-decoration: none; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Account Linked Successfully</h1>
+        </div>
+        <div class="content">
+            <p>Hi {{ user.first_name|default:user.username }},</p>
+            <p>Your {{ provider }} account has been successfully linked to your BNC account!</p>
+            <p>You can now use {{ provider }} to log in to your account.</p>
+            <center><a href="{{ manage_url }}" class="button">Manage Accounts</a></center>
+            <p>You can manage your connected accounts anytime from your account settings.</p>
+            <p>The BNC Team</p>
+        </div>
+    </div>
+</body>
+</html>
