@@ -1597,7 +1597,7 @@ class Vote(models.Model):
         ]
         constraints = [
             models.CheckConstraint(
-                condition=(
+                check=(
                     (models.Q(comment__isnull=True) & models.Q(discussion__isnull=False)) |
                     (models.Q(comment__isnull=False) & models.Q(discussion__isnull=True))
                 ),

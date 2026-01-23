@@ -402,7 +402,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="vote",
             constraint=models.CheckConstraint(
-                condition=models.Q(
+                check=models.Q(
                     models.Q(("comment__isnull", True), ("discussion__isnull", False)),
                     models.Q(("comment__isnull", False), ("discussion__isnull", True)),
                     _connector="OR",
