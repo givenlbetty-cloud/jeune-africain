@@ -201,20 +201,18 @@ if (BASE_DIR / "static").exists():
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Storage configuration
+STATIC_FILES_BACKEND = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+if DEBUG:
+    STATIC_FILES_BACKEND = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": STATIC_FILES_BACKEND,
     },
 }
-
-# Legacy storage settings for compatibility
-if not DEBUG:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-else:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Media files (Cloudinary)
 CLOUDINARY_STORAGE = {
@@ -222,7 +220,6 @@ CLOUDINARY_STORAGE = {
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
     'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
