@@ -512,7 +512,8 @@
                 {% else %}
                 <i class="fas fa-book me-2"></i>
                 {% endif %}
-                {{ site_config.site_name|default:"Bibliothèque Numérique Calures" }}
+                <span class="d-none d-sm-inline">{{ site_config.site_name|default:"Bibliothèque Numérique Calures" }}</span>
+                <span class="d-inline d-sm-none">BNC</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav">
