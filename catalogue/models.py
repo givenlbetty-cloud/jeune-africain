@@ -325,12 +325,19 @@ class Book(models.Model):
         return not self.is_paid or self.price == 0
 
     def get_file_url(self):
-        """Retourner l'URL du fichier PDF ou EPUB."""
+        """
+        Retourner l'URL du fichier PDF ou EPUB.
+        Force HTTPS pour éviter les erreurs de contenu mixte.
+        """
+        url = None
         if self.pdf_file:
-            return self.pdf_file.url
+            url = self.pdf_file.url
         elif self.epub_file:
-            return self.epub_file.url
-        return None
+            url = self.epub_file.url
+            
+        if url and url.startswith("http://"):
+            url = url.replace("http://", "https://", 1)
+        return url
 
     def save(self, *args, **kwargs):
         """Auto-calculate pages if PDF is present and pages_count is missing."""
