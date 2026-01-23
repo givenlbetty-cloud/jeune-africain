@@ -19,9 +19,10 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "*"]
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
+    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}")
 
 # CSRF & Security Configuration
-CSRF_TRUSTED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS.extend([
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://0.0.0.0:8000",
