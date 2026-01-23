@@ -348,6 +348,9 @@ class Book(models.Model):
                     self.pdf_file.open()
                     doc = fitz.open(stream=self.pdf_file.read(), filetype="pdf")
                     self.pages_count = len(doc)
+                    # CRITICAL: Reset file pointer after reading, otherwise upload will fails with "Empty file"
+                    if hasattr(self.pdf_file, 'seek'):
+                        self.pdf_file.seek(0)
             except Exception as e:
                 # Log error silently or to console, do not block save
                 print(f"Error calculating page count: {e}")
