@@ -30,21 +30,35 @@ def extract_pdf_cover_on_save(sender, instance, created, **kwargs):
         return
     
     try:
-        # Obtenir le chemin du fichier PDF
-        pdf_path = instance.pdf_file.path
-        
-        # Vérifier que le fichier existe
-        if not os.path.exists(pdf_path):
-            return
-        
-        # Ouvrir le PDF
-        doc = fitz.open(pdf_path)
+        # MODIFICATION : Compatible avec le stockage distant (Cloudinary, S3)
+        # Au lieu d'utiliser .path qui plante avec Cloudinary, on lit le stream
+        if hasattr(instance.pdf_file, 'open'):
+            instance.pdf_file.open('rb')
+            pdf_content = instance.pdf_file.read()
+            # Remettre le pointeur au début après lecture (bonne pratique)
+            if hasattr(instance.pdf_file, 'seek'):
+                instance.pdf_file.seek(0)
+            
+            # Ouvrir le PDF depuis la mémoire
+            try:
+                doc = fitz.open(stream=pdf_content, filetype="pdf")
+            except Exception as e:
+                # Si fitz échoue à ouvrir le stream, on abandonne
+                print(f"Erreur Fitz sur stream: {e}")
+                return
+        else:
+            # Fallback pour filesystem local standard si .open() manque
+            pdf_path = instance.pdf_file.path
+            if not os.path.exists(pdf_path):
+                return
+            doc = fitz.open(pdf_path)
         
         if len(doc) == 0:
             doc.close()
             return
         
         # Extraire la première page
+
         page = doc[0]
         
         # Rendre la page en image (300x450 = ratio couverture standard)
