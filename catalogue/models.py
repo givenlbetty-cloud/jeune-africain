@@ -291,8 +291,8 @@ class Book(models.Model):
     rating_count = models.PositiveIntegerField(_("Nombre d'évaluations"), default=0)
     
     # Relations
-    authors = models.ManyToManyField(Author, through="AuthorBook", related_name="books")
-    libraries = models.ManyToManyField(Library, through="LibraryBook", related_name="books")
+    authors = models.ManyToManyField(Author, through="AuthorBook", related_name="books", blank=True)
+    libraries = models.ManyToManyField(Library, through="LibraryBook", related_name="books", blank=True)
     
     # Statut
     is_published = models.BooleanField(_("Publié"), default=False)
@@ -331,6 +331,21 @@ class Book(models.Model):
         elif self.epub_file:
             return self.epub_file.url
         return None
+
+    def save(self, *args, **kwargs):
+        """Auto-calculate pages if PDF is present and pages_count is missing."""
+        if self.pdf_file and not self.pages_count:
+            try:
+                import fitz  # PyMuPDF
+                if hasattr(self.pdf_file, 'open'):
+                    self.pdf_file.open()
+                    doc = fitz.open(stream=self.pdf_file.read(), filetype="pdf")
+                    self.pages_count = len(doc)
+            except Exception as e:
+                # Log error silently or to console, do not block save
+                print(f"Error calculating page count: {e}")
+        
+        super().save(*args, **kwargs)
     
     def clean(self):
         """Valider la longueur des noms de fichiers."""
