@@ -1,0 +1,17 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>Importer plusieurs livres (PDF)</h1>
+<p>Sélectionnez plusieurs fichiers PDF. Le titre, l'ISBN et la description seront générés automatiquement.</p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div style="margin: 20px 0;">
+        <label for="pdf_files" style="font-size: 1.2em; font-weight: bold;">Choisir les fichiers PDF :</label><br><br>
+        <input type="file" name="pdf_files" id="pdf_files" multiple accept=".pdf" style="padding: 10px; border: 1px solid #ccc;">
+    </div>
+    
+    <div class="submit-row">
+        <input type="submit" value="Importer les livres" class="default" style="font-size: 1.2em; padding: 10px 20px;">
+    </div>
+</form>
+{% endblock %}

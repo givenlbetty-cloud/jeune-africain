@@ -3,9 +3,10 @@ Configuration Django Admin SIMPLIFIÉE pour utilisateurs non-techniques.
 Focus sur les actions essentielles uniquement.
 """
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.html import format_html, mark_safe
-from django.urls import reverse
+from django.urls import reverse, path
+from django.shortcuts import render, redirect
 from django.db.models import Count
 from .models import (
     Book, Author, Library, Payment, Event, 
@@ -118,6 +119,59 @@ class BookAdmin(admin.ModelAdmin):
             )
         return "—"
     get_cover_preview.short_description = "Couverture"
+
+    # =========================================================
+    # BULK IMPORT (Import multiple)
+    # =========================================================
+    change_list_template = "admin/catalogue/book/change_list.html"
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            path('bulk-import/', self.admin_site.admin_view(self.bulk_import_view), name='book_bulk_import'),
+        ]
+        return my_urls + urls
+
+    def bulk_import_view(self, request):
+        if request.method == 'POST':
+            files = request.FILES.getlist('pdf_files')
+            if files:
+                count = 0
+                for f in files:
+                    try:
+                        # Création du livre (les métadonnées seront auto-générées par save())
+                        # Note: On passe le fichier directement.
+                        book = Book(
+                            pdf_file=f,
+                            is_published=True  # Force published
+                        )
+                        book.save()
+                        count += 1
+                    except Exception as e:
+                        messages.error(request, f"Erreur lors de l'import de {f.name}: {str(e)}")
+                
+                if count > 0:
+                    messages.success(request, f"{count} livres importés avec succès !")
+                return redirect('admin:catalogue_book_changelist')
+            else:
+                messages.warning(request, "Aucun fichier sélectionné.")
+        
+        context = dict(
+           self.admin_site.each_context(request),
+        )
+        return render(request, "admin/catalogue/book/bulk_import.html", context)
+
+    actions = ['make_published', 'make_unpublished']
+
+    @admin.action(description="Publier les livres sélectionnés")
+    def make_published(self, request, queryset):
+        queryset.update(is_published=True)
+        self.message_user(request, "Livres publiés avec succès.")
+
+    @admin.action(description="Dépublier les livres sélectionnés")
+    def make_unpublished(self, request, queryset):
+        queryset.update(is_published=False)
+        self.message_user(request, "Livres dépubliés avec succès.")
 
 
 @admin.register(Author)

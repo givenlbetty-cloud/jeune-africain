@@ -65,12 +65,14 @@ def catalogue(request):
     books = books.order_by(sort_by)
     
     # Pagination
-    paginator = Paginator(books, 12)
+    paginator = Paginator(books, 24)
     page_number = request.GET.get('page', 1)
-    books_page = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
     
     context = {
-        'books': books_page,
+        'books': page_obj,
+        'page_obj': page_obj,
+        'is_paginated': page_obj.has_other_pages(),
         'genres': Book.GENRE_CHOICES,
         'languages': Book.LANGUAGE_CHOICES,
         'selected_genres': selected_genres,

@@ -295,7 +295,7 @@ class Book(models.Model):
     libraries = models.ManyToManyField(Library, through="LibraryBook", related_name="books", blank=True)
     
     # Statut
-    is_published = models.BooleanField(_("Publié"), default=False)
+    is_published = models.BooleanField(_("Publié"), default=True)
     created_at = models.DateTimeField(_("Créé"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Modifié"), auto_now=True)
     
@@ -312,6 +312,14 @@ class Book(models.Model):
     
     def __str__(self):
         return self.title
+
+    @property
+    def author(self):
+        """Retourne le premier auteur ou 'Inconnu' pour l'affichage template."""
+        first_author = self.authors.first()
+        if first_author:
+            return f"{first_author.first_name} {first_author.last_name}"
+        return "Auteur inconnu"
     
     def get_final_price(self):
         """Calculer le prix après réduction."""
@@ -340,6 +348,33 @@ class Book(models.Model):
         return url
 
     def save(self, *args, **kwargs):
+        """
+        Auto-completes metadata if missing:
+        - Title from filename
+        - ISBN (generated)
+        - Description (default)
+        - Page count (calculated)
+        """
+        # 1. Remplir le titre avec le nom du fichier si vide
+        if not self.title and self.pdf_file:
+            filename = os.path.basename(self.pdf_file.name)
+            # Enlever l'extension
+            base_name = os.path.splitext(filename)[0]
+            # Remplacer les tirets/underscores par des espaces
+            clean_name = base_name.replace('_', ' ').replace('-', ' ')
+            self.title = clean_name.capitalize()[:255]
+
+        # 2. Générer un ISBN si vide
+        if not self.isbn:
+            # Générer un ISBN temporaire basé sur le timestamp et UUID
+            import time
+            unique_id = str(uuid.uuid4().int)[:10]
+            self.isbn = f"AUTO-{unique_id}"
+
+        # 3. Description par défaut
+        if not self.description:
+            self.description = f"Livre importé automatiquement le {timezone.now().strftime('%Y-%m-%d')}."
+
         """Auto-calculate pages if PDF is present and pages_count is missing."""
         if self.pdf_file and not self.pages_count:
             try:
