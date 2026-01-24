@@ -316,9 +316,10 @@ class Book(models.Model):
     @property
     def author(self):
         """Retourne le premier auteur ou 'Inconnu' pour l'affichage template."""
-        first_author = self.authors.first()
-        if first_author:
-            return f"{first_author.first_name} {first_author.last_name}"
+        # Use .all() to leverage prefetch_related cache if available
+        authors = self.authors.all()
+        if authors:
+            return f"{authors[0].first_name} {authors[0].last_name}"
         return "Auteur inconnu"
     
     def get_final_price(self):

@@ -30,7 +30,7 @@ def home(request):
 
 def catalogue(request):
     """Afficher le catalogue avec filtres et recherche"""
-    books = Book.objects.filter(is_published=True)
+    books = Book.objects.filter(is_published=True).prefetch_related('authors')
     
     # Recherche
     search_query = request.GET.get('search', '')
