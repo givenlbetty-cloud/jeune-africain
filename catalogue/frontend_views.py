@@ -97,11 +97,10 @@ def event_detail_view(request, event_id):
 
 def catalogue_view(request):
     """Vue du catalogue avec filtres."""
-    # Les livres doivent être publiés ET avoir au moins un auteur
+    # Les livres publiés, avec OU SANS auteur
     books = Book.objects.filter(
-        is_published=True,
-        authors__isnull=False
-    ).distinct().select_related()
+        is_published=True
+    ).prefetch_related('authors').distinct()
     
     # Filtres
     search = request.GET.get('search', '')
