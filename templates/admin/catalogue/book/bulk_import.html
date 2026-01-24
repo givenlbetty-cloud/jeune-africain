@@ -1,17 +1,173 @@
 {% extends "admin/base_site.html" %}
 {% block content %}
-<h1>Importer plusieurs livres (PDF)</h1>
-<p>Sélectionnez plusieurs fichiers PDF. Le titre, l'ISBN et la description seront générés automatiquement.</p>
+<style>
+    .upload-progress-container {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: none;
+    }
+    .progress-bar-bg {
+        background: #e0e0e0; 
+        height: 25px; 
+        width: 100%; 
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .progress-bar-fill {
+        background: #4caf50; 
+        height: 100%; 
+        width: 0%; 
+        transition: width 0.3s;
+        text-align: center;
+        color: white;
+        line-height: 25px;
+        font-weight: bold;
+    }
+    .results-log {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        padding: 10px;
+        background: white;
+        margin-top: 10px;
+        list-style: none;
+    }
+    .status-ok { color: green; }
+    .status-error { color: red; }
+</style>
 
-<form method="post" enctype="multipart/form-data">
+<h1>Importer plusieurs livres (PDF)</h1>
+<p>Sélectionnez plusieurs fichiers PDF. Ils seront importés <strong>un par un</strong> pour éviter les erreurs de timeout ou de taille (413 Payload Too Large).</p>
+
+<div id="upload-status" class="upload-progress-container">
+    <div class="progress-bar-bg">
+        <div id="progress-bar" class="progress-bar-fill">0%</div>
+    </div>
+    <div id="current-status-text" style="font-weight: bold; margin-bottom: 5px;">En attente...</div>
+    <ul id="results-list" class="results-log"></ul>
+</div>
+
+<form id="bulk-import-form" method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div style="margin: 20px 0;">
         <label for="pdf_files" style="font-size: 1.2em; font-weight: bold;">Choisir les fichiers PDF :</label><br><br>
-        <input type="file" name="pdf_files" id="pdf_files" multiple accept=".pdf" style="padding: 10px; border: 1px solid #ccc;">
+        <input type="file" name="pdf_files" id="pdf_files" multiple accept=".pdf" style="padding: 10px; border: 1px solid #ccc; width: 100%;">
+        <p class="help">Vous pouvez sélectionner plusieurs fichiers à la fois. Ils seront mis en file d'attente.</p>
     </div>
     
     <div class="submit-row">
         <input type="submit" value="Importer les livres" class="default" style="font-size: 1.2em; padding: 10px 20px;">
     </div>
 </form>
+
+<script>
+document.getElementById('bulk-import-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('pdf_files');
+    const files = Array.from(fileInput.files);
+    
+    if (files.length === 0) {
+        alert("Veuillez sélectionner au moins un fichier.");
+        return;
+    }
+
+    // UI Setup
+    const statusDiv = document.getElementById('upload-status');
+    const progressBar = document.getElementById('progress-bar');
+    const statusText = document.getElementById('current-status-text');
+    const resultsList = document.getElementById('results-list');
+    const submitBtn = document.querySelector('input[type="submit"]');
+
+    statusDiv.style.display = 'block';
+    submitBtn.disabled = true;
+    submitBtn.value = "N'interrompez pas l'importation...";
+    resultsList.innerHTML = '';
+    
+    let successCount = 0;
+    let errorCount = 0;
+
+    // Sequential Upload
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const percent = Math.round(((i) / files.length) * 100);
+        
+        // Update UI
+        statusText.innerText = `Traitement de ${i + 1}/${files.length}: ${file.name}...`;
+        progressBar.style.width = `${percent}%`;
+        progressBar.innerText = `${percent}%`;
+
+        // Prepare Data
+        const formData = new FormData();
+        formData.append('pdf_files', file); // Send one file at a time
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+        try {
+            // Upload
+            const response = await fetch(window.location.href + '?ajax=1', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            // Handle Response
+            if (response.ok) {
+                const data = await response.json();
+                // Check internal status from our API
+                const result = data.results && data.results[0];
+                
+                if (result && result.status === 'success') {
+                     successCount++;
+                     addLog(`✅ ${file.name} - Importé avec succès`, 'status-ok');
+                } else {
+                     errorCount++;
+                     const msg = result ? result.message : 'Erreur inconnue';
+                     addLog(`❌ ${file.name} - Erreur: ${msg}`, 'status-error');
+                }
+            } else {
+                // HTTP Error (like 413 or 500)
+                errorCount++;
+                addLog(`❌ ${file.name} - Erreur Serveur (${response.status})`, 'status-error');
+            }
+
+        } catch (err) {
+            // Network Error
+            errorCount++;
+            addLog(`❌ ${file.name} - Erreur Réseau`, 'status-error');
+            console.error(err);
+        }
+        
+        // Short pause
+        await new Promise(r => setTimeout(r, 100));
+    }
+
+    // Finalize
+    progressBar.style.width = '100%';
+    progressBar.innerText = '100%';
+    statusText.innerText = `Opération terminée ! ${successCount} succès, ${errorCount} échecs.`;
+    
+    if (errorCount === 0) {
+        submitBtn.value = "Redirection...";
+        setTimeout(() => {
+             window.location.href = "{% url 'admin:catalogue_book_changelist' %}";
+        }, 1500);
+    } else {
+        submitBtn.disabled = false;
+        submitBtn.value = "Importer d'autres fichiers";
+    }
+
+    function addLog(text, className) {
+        const li = document.createElement('li');
+        li.innerText = text;
+        if (className) li.classList.add(className);
+        resultsList.appendChild(li);
+        resultsList.scrollTop = resultsList.scrollHeight;
+    }
+});
+</script>
 {% endblock %}

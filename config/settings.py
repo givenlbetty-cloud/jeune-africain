@@ -227,6 +227,10 @@ CLOUDINARY_STORAGE = {
     'SECURE': True,  # Force HTTPS
 }
 
+# Upload Limits (Increased for bulk processing)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB (default 2.5MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB (default 2.5MB)
+
 # Configuration Cloudinary directe (global)
 import cloudinary
 cloudinary.config(

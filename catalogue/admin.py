@@ -7,6 +7,7 @@ from django.contrib import admin, messages
 from django.utils.html import format_html, mark_safe
 from django.urls import reverse, path
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.db.models import Count
 from .models import (
     Book, Author, Library, Payment, Event, 
@@ -135,8 +136,11 @@ class BookAdmin(admin.ModelAdmin):
     def bulk_import_view(self, request):
         if request.method == 'POST':
             files = request.FILES.getlist('pdf_files')
+            is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+
             if files:
                 count = 0
+                results = []
                 for f in files:
                     try:
                         # Création du livre (les métadonnées seront auto-générées par save())
@@ -147,13 +151,22 @@ class BookAdmin(admin.ModelAdmin):
                         )
                         book.save()
                         count += 1
+                        results.append({'file': f.name, 'status': 'success'})
                     except Exception as e:
-                        messages.error(request, f"Erreur lors de l'import de {f.name}: {str(e)}")
+                        error_msg = str(e)
+                        results.append({'file': f.name, 'status': 'error', 'message': error_msg})
+                        if not is_ajax:
+                            messages.error(request, f"Erreur lors de l'import de {f.name}: {error_msg}")
                 
+                if is_ajax:
+                    return JsonResponse({'saved': count, 'results': results})
+
                 if count > 0:
                     messages.success(request, f"{count} livres importés avec succès !")
                 return redirect('admin:catalogue_book_changelist')
             else:
+                if is_ajax:
+                    return JsonResponse({'error': 'Aucun fichier reçu'}, status=400)
                 messages.warning(request, "Aucun fichier sélectionné.")
         
         context = dict(
