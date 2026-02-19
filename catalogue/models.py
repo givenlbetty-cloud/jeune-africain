@@ -2383,6 +2383,37 @@ class SiteConfiguration(models.Model):
         default="Découvrez les publications exclusives de Calures Éditions. Une bibliothèque numérique souveraine offrant des milliers de livres, formations vidéo et podcasts pour l'excellence africaine.",
         help_text="Le texte court sous le titre."
     )
+    text_of_the_week = models.TextField(
+        _("Texte de la semaine"),
+        default="L'éducation est l'arme la plus puissante qu'on puisse utiliser pour changer le monde.",
+        help_text="Le texte affiché dans la barre de navigation."
+    )
+    
+    # Textes de Mission et À Propos
+    mission_title = models.CharField(
+        _("Titre de la mission"),
+        max_length=255,
+        default="Notre Mission",
+        blank=True
+    )
+    mission_text = models.TextField(
+        _("Texte de mission"),
+        blank=True,
+        default="Notre mission est de rendre la connaissance accessible à tous...",
+        help_text="Le texte décrivant la mission du site."
+    )
+
+    about_title = models.CharField(
+        _("Titre de la page À propos"),
+        max_length=255,
+        default="À Propos de Nous",
+        blank=True
+    )
+    about_text = models.TextField(
+        _("Texte de la page À propos"),
+        blank=True,
+        help_text="Le contenu détaillé de la page À propos."
+    )
     
     # Pied de page
     footer_text = models.CharField(
