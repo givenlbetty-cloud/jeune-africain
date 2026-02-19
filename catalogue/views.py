@@ -86,20 +86,22 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
         if request.user.is_authenticated:
             # Recommandations personnalisées basées sur l'historique
             recommended_books = get_user_recommendations(request.user, limit=limit)
+            results = [{'book': book} for book in BookDetailSerializer(recommended_books, many=True).data]
             return Response({
                 'type': 'personalized',
-                'books': BookDetailSerializer(recommended_books, many=True).data,
-                'count': len(recommended_books)
+                'results': results,
+                'count': len(results)
             })
         else:
             # Livres tendance pour les utilisateurs anonymes
             trending_books = Book.objects.filter(
                 is_published=True
             ).order_by('-rating', '-rating_count')[:limit]
+            results = [{'book': book} for book in BookDetailSerializer(trending_books, many=True).data]
             return Response({
                 'type': 'trending',
-                'books': BookDetailSerializer(trending_books, many=True).data,
-                'count': trending_books.count()
+                'results': results,
+                'count': len(results)
             })
     
     @action(detail=False, methods=['get'], permission_classes=[AllowAny])
@@ -123,11 +125,12 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
         
         book_ids = [r['book_id'] for r in recent_reads]
         books = Book.objects.filter(id__in=book_ids)
+        results = [{'book': book} for book in BookDetailSerializer(books, many=True).data]
         
         return Response({
             'type': 'trending',
             'period_days': days,
-            'books': BookDetailSerializer(books, many=True).data,
+            'results': results,
             'count': len(book_ids)
         })
     
@@ -147,10 +150,12 @@ class BookViewSet(viewsets.ReadOnlyModelViewSet):
             rating_count__gte=5  # Au moins 5 évaluations
         ).order_by('-rating', '-rating_count')[:limit]
         
+        results = [{'book': book} for book in BookDetailSerializer(best_books, many=True).data]
+        
         return Response({
             'type': 'best_rated',
             'minimum_rating': min_rating,
-            'books': BookDetailSerializer(best_books, many=True).data,
+            'results': results,
             'count': best_books.count()
         })
 

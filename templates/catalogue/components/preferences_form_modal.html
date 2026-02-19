@@ -70,11 +70,11 @@ Soumis via AJAX à /api/preferences/
                                 🇫🇷 Français
                             </label>
                             <div class="d-flex align-items-center">
-                                <input type="range" class="form-range" id="frenchWeight" name="french_preference" 
+                                <input type="range" class="form-range language-preference" id="frenchWeight" name="french_preference" 
                                        min="0" max="1" step="0.1" 
                                        value="{{ user_preferences.french_preference|default:0.5 }}">
-                                <span class="ms-2 badge bg-primary" id="frenchPercentage">
-                                    <script>document.write(Math.round({{ user_preferences.french_preference|default:0.5 }} * 100));</script>%
+                                <span class="ms-2 badge bg-primary" id="frenchPercentage" data-value="{{ user_preferences.french_preference|default:0.5 }}">
+                                    50%
                                 </span>
                             </div>
                         </div>
@@ -84,11 +84,11 @@ Soumis via AJAX à /api/preferences/
                                 🇬🇧 Anglais
                             </label>
                             <div class="d-flex align-items-center">
-                                <input type="range" class="form-range" id="englishWeight" name="english_preference" 
+                                <input type="range" class="form-range language-preference" id="englishWeight" name="english_preference" 
                                        min="0" max="1" step="0.1"
                                        value="{{ user_preferences.english_preference|default:0.5 }}">
-                                <span class="ms-2 badge bg-success" id="englishPercentage">
-                                    <script>document.write(Math.round({{ user_preferences.english_preference|default:0.5 }} * 100));</script>%
+                                <span class="ms-2 badge bg-success" id="englishPercentage" data-value="{{ user_preferences.english_preference|default:0.5 }}">
+                                    50%
                                 </span>
                             </div>
                         </div>
@@ -98,11 +98,11 @@ Soumis via AJAX à /api/preferences/
                                 🇸🇦 Arabe
                             </label>
                             <div class="d-flex align-items-center">
-                                <input type="range" class="form-range" id="arabicWeight" name="arabic_preference" 
+                                <input type="range" class="form-range language-preference" id="arabicWeight" name="arabic_preference" 
                                        min="0" max="1" step="0.1"
                                        value="{{ user_preferences.arabic_preference|default:0.0 }}">
-                                <span class="ms-2 badge bg-warning text-dark" id="arabicPercentage">
-                                    <script>document.write(Math.round({{ user_preferences.arabic_preference|default:0.0 }} * 100));</script>%
+                                <span class="ms-2 badge bg-warning text-dark" id="arabicPercentage" data-value="{{ user_preferences.arabic_preference|default:0.0 }}">
+                                    0%
                                 </span>
                             </div>
                         </div>
@@ -135,16 +135,35 @@ Soumis via AJAX à /api/preferences/
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const preferencesForm = document.getElementById('preferencesForm');
+    if (!preferencesForm) return;
+    
+    // Initialiser les pourcentages depuis les values
+    const updatePercentage = (inputId, badgeId) => {
+        const input = document.getElementById(inputId);
+        const badge = document.getElementById(badgeId);
+        if (input && badge) {
+            badge.textContent = Math.round(input.value * 100) + '%';
+        }
+    };
+    
+    // Initialize on page load
+    updatePercentage('frenchWeight', 'frenchPercentage');
+    updatePercentage('englishWeight', 'englishPercentage');
+    updatePercentage('arabicWeight', 'arabicPercentage');
     
     // Mise à jour des pourcentages en temps réel
-    document.getElementById('frenchWeight').addEventListener('input', function() {
-        document.getElementById('frenchPercentage').textContent = Math.round(this.value * 100) + '%';
-    });
-    document.getElementById('englishWeight').addEventListener('input', function() {
-        document.getElementById('englishPercentage').textContent = Math.round(this.value * 100) + '%';
-    });
-    document.getElementById('arabicWeight').addEventListener('input', function() {
-        document.getElementById('arabicPercentage').textContent = Math.round(this.value * 100) + '%';
+    document.querySelectorAll('.language-preference').forEach(input => {
+        input.addEventListener('input', function() {
+            const badgeId = {
+                'frenchWeight': 'frenchPercentage',
+                'englishWeight': 'englishPercentage',
+                'arabicWeight': 'arabicPercentage'
+            }[this.id];
+            
+            if (badgeId) {
+                updatePercentage(this.id, badgeId);
+            }
+        });
     });
     
     // Soumission du formulaire
@@ -156,9 +175,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const data = {
             preferred_categories: Array.from(document.getElementById('categoriesSelect').selectedOptions).map(o => o.value),
             preferred_authors: Array.from(document.getElementById('authorsSelect').selectedOptions).map(o => o.value),
-            french_preference: parseFloat(formData.get('french_preference')),
-            english_preference: parseFloat(formData.get('english_preference')),
-            arabic_preference: parseFloat(formData.get('arabic_preference'))
+            french_preference: parseFloat(document.getElementById('frenchWeight').value),
+            english_preference: parseFloat(document.getElementById('englishWeight').value),
+            arabic_preference: parseFloat(document.getElementById('arabicWeight').value)
         };
         
         // Envoyer à l'API

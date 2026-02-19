@@ -134,8 +134,12 @@ def catalogue_view(request):
         books = books.order_by('title')
     elif sort == 'price':
         books = books.order_by('price')
+    elif sort == '-price':
+        books = books.order_by('-price')
+    elif sort == 'rating':
+        books = books.order_by('rating')
     elif sort == '-rating':
-        books = books.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+        books = books.order_by('-rating', '-rating_count')
     elif sort == '-created_at' or sort == 'newest':
         books = books.order_by('-created_at')
         # Si tri par nouveauté, on inclut les annonces de futurs livres
@@ -144,6 +148,9 @@ def catalogue_view(request):
             is_published=True,
             date_start__gte=timezone.now()
         ).order_by('date_start')
+    else:
+        # Tri par défaut: plus récent
+        books = books.order_by('-created_at')
 
     # Genres avec labels pour le formulaire
     genres = Book.GENRE_CHOICES
@@ -322,15 +329,14 @@ def read_book_view(request, book_id):
     
     if book.is_paid:
         # Livre payant
-        if request.user.is_authenticated:
-            # Vérifier si l'utilisateur a acheté
-            has_payment = Payment.objects.filter(
-                user=request.user,
-                book=book,
-                status='COMPLETED'
-            ).exists()
+        # Vérifier si l'utilisateur a acheté
+        has_payment = Payment.objects.filter(
+            user=request.user,
+            book=book,
+            status='COMPLETED'
+        ).exists()
         
-        # Vérifier aperçu gratuit (disponible pour tous, même non authentifiés)
+        # Vérifier aperçu gratuit (autorisé si le livre a des pages gratuites)
         can_use_free_preview = book.free_pages_count > 0 and not has_payment
         
         # Refuser l'accès si pas de paiement ET pas d'aperçu gratuit
@@ -374,6 +380,7 @@ def read_book_view(request, book_id):
         'has_preview_access': has_preview_access,  # Aperçu gratuit seulement
         'has_payment': has_payment,
         'can_read_freely': can_read_freely,
+        'free_pages_count': book.free_pages_count if has_preview_access else 0,
         'max_preview_pages': book.free_pages_count if has_preview_access else None,
     }
     
@@ -850,7 +857,7 @@ def recommendations_dashboard(request):
     Affiche le dashboard complet des recommandations.
     Avec statistiques utilisateur et contexte pour les formulaires.
     """
-    from catalogue.models import BookRating, UserPreference, UserRecommendation
+    from catalogue.models import BookRating, UserPreference, UserRecommendation, ReadingSession, Favorite
     from django.db.models import Count, Avg
     
     user = request.user
@@ -858,23 +865,23 @@ def recommendations_dashboard(request):
     # Récupérer ou créer les préférences utilisateur
     preferences, created = UserPreference.objects.get_or_create(user=user)
     
-    # Statistiques utilisateur
+    # Statistiques utilisateur - CORRIGÉ
     rating_stats = BookRating.objects.filter(user=user).aggregate(
         total_ratings=Count('id'),
         avg_rating=Avg('rating')
     )
     
+    # Compter les livres lus via ReadingSession (CORRECT)
+    books_read_count = ReadingSession.objects.filter(user=user).values('book').distinct().count()
+    
+    # Compter les favoris via le modèle Favorite (CORRECT)
+    liked_count = Favorite.objects.filter(user=user).count()
+    
+    # Statistiques de recommandation
     recommendation_stats = UserRecommendation.objects.filter(user=user).aggregate(
-        liked_count=Count('id', filter=Q(is_liked=True)),
         viewed_count=Count('id', filter=Q(is_viewed=True)),
         purchased_count=Count('id', filter=Q(is_purchased=True))
     )
-    
-    # Lecture stats
-    books_read_count = UserRecommendation.objects.filter(
-        user=user,
-        is_read=True
-    ).count()
     
     # Contexte
     context = {
@@ -882,7 +889,7 @@ def recommendations_dashboard(request):
             'books_read': books_read_count,
             'total_ratings': rating_stats['total_ratings'] or 0,
             'avg_rating': rating_stats['avg_rating'] or 0,
-            'liked_count': recommendation_stats['liked_count'] or 0,
+            'liked_count': liked_count,
             'viewed_count': recommendation_stats['viewed_count'] or 0,
             'purchased_count': recommendation_stats['purchased_count'] or 0,
         },

@@ -254,16 +254,24 @@ def profile_view(request):
 
 @login_required(login_url='users:login')
 def my_library_view(request):
-    """Vue de la bibliothèque personnelle (livres achetés)."""
+    """Vue de la bibliothèque personnelle (livres achetés + livres gratuits ajoutés)."""
     from django.core.paginator import Paginator
+    from catalogue.models import Favorite
     
-    # Récupérer les livres achetés
+    # Récupérer les livres achetés (payants)
     purchased_book_ids = Payment.objects.filter(
         user=request.user,
         status='COMPLETED'
     ).values_list('book', flat=True)
     
-    queryset = Book.objects.filter(id__in=purchased_book_ids).order_by('title')
+    # Récupérer les livres gratuits ajoutés aux favoris/bibliothèque
+    favorite_book_ids = Favorite.objects.filter(user=request.user).values_list('book', flat=True)
+    
+    # Combiner les deux listes
+    from django.db.models import Q
+    queryset = Book.objects.filter(
+        Q(id__in=purchased_book_ids) | Q(id__in=favorite_book_ids)
+    ).distinct().order_by('title')
     
     # Pagination
     paginator = Paginator(queryset, 12)
@@ -272,7 +280,8 @@ def my_library_view(request):
     
     context = {
         'books': books,
-        'total_purchases': queryset.count(),
+        'total_purchases': len(purchased_book_ids),
+        'total_library_items': queryset.count(),
     }
     return render(request, 'user/library.html', context)
 
