@@ -11,7 +11,7 @@
             {% for favorite in favorites %}
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
-                        <img src="{{ favorite.book.cover_image.url }}" class="card-img-top" alt="Couverture de {{ favorite.book.title }}" style="height: 300px; object-fit: cover;">
+                        <img src="{% if favorite.book.cover %}{{ favorite.book.cover.url }}{% else %}/static/images/placeholder-book.png{% endif %}" class="card-img-top" alt="Couverture de {{ favorite.book.title }}" style="height: 300px; object-fit: cover;">
                         <div class="card-body">
                             <h5 class="card-title">{{ favorite.book.title }}</h5>
                             <p class="card-text">

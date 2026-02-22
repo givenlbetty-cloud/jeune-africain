@@ -136,6 +136,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.i18n",  # i18n context processor
                 "catalogue.context_processors.site_configuration",
+                "catalogue.context_processors.featured_books",  # CORRECTION #4
+                "catalogue.context_processors.site_categories",  # Navigation
             ],
         },
     },

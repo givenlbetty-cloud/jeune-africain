@@ -1,0 +1,163 @@
+/* BNC - Styles pour optimisations et fonctionnalités additionnelles */
+/* Corrections #5 (scroll-to-top), #6 (screenshots), #9 (performance) */
+
+/* ============================================
+   CORRECTION #5: Bouton Scroll To Top
+   ============================================ */
+
+#scroll-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+#scroll-top-btn.show {
+    opacity: 1;
+    visibility: visible;
+    animation: slideUp 0.3s ease;
+}
+
+#scroll-top-btn.d-none {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+#scroll-top-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+#scroll-top-btn:active {
+    transform: translateY(-1px);
+}
+
+/* Animation d'apparition */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   CORRECTION #6: Bouton Screenshot
+   ============================================ */
+
+#screenshot-btn {
+    transition: all 0.3s ease;
+}
+
+#screenshot-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+#screenshot-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#screenshot-btn .spinner-border {
+    margin-right: 0.5rem;
+}
+
+/* ============================================
+   CORRECTION #9: Performance - Lazy Loading
+   ============================================ */
+
+/* Images avec lazy loading */
+img[data-src] {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+img[data-src].loaded {
+    opacity: 1;
+}
+
+/* Éléments avec lazy loading */
+[data-lazy-load] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+[data-lazy-load].loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Placeholders pour images en chargement */
+.img-placeholder {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    min-height: 200px;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    #scroll-top-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    /* Redimensionner les boutons sur mobile */
+    #screenshot-btn {
+        font-size: 0.875rem;
+    }
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] #scroll-top-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-bs-theme="dark"] #scroll-top-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-bs-theme="dark"] .img-placeholder {
+    background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%);
+    background-size: 200% 100%;
+    animation: loading-dark 1.5s infinite;
+}
+
+@keyframes loading-dark {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}

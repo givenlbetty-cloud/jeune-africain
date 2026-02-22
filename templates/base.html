@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Global CSS -->
     <link rel="stylesheet" href="/static/css/global.css">
+    <!-- CORRECTION #5, #6, #9: Styles d'optimisations -->
+    <link rel="stylesheet" href="/static/css/optimizations.css">
+    <!-- CORRECTION UI: Modernisation design & responsive -->
+    <link rel="stylesheet" href="/static/css/modernisation-ui.css">
     
     <style>
         :root {
@@ -692,10 +696,14 @@
                         <i class="fas fa-copyright"></i> 2025 BNC - Bibliothèque Numérique Calures. Tous droits réservés.
                     </p>
                 </div>
-                <div class="col-md-6 text-md-end">
+                <div class="col-md-6 text-md-end d-flex justify-content-md-end align-items-center">
                     <p style="font-size: 0.9rem; margin-bottom: 0;">
                         Développé avec <i class="fas fa-heart text-danger"></i> par BNC Team
                     </p>
+                    <!-- CORRECTION #5: Bouton scroll-to-top -->
+                    <button id="scroll-top-btn" class="btn btn-sm btn-light ms-3 d-none" title="Retour en haut">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -840,6 +848,10 @@
     <!-- PWA Support Scripts -->
     <script src="/static/js/pwa-install.js"></script>
     <script src="/static/js/offline-sync.js"></script>
+    
+    <!-- CORRECTION #6 & #9: Script d'optimisations et fonctionnalités -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="/static/js/bnc-optimizations.js"></script>
     
     {% block extra_js %}{% endblock %}
 </body>

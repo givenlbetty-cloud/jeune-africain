@@ -4,7 +4,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
-from django.db.models import Avg, Q
+from django.views.decorators.cache import cache_page  # CORRECTION #9: Performance
+from django.db.models import Avg, Q, Prefetch
+from django.db.models.functions import Coalesce  # Import correct pour Coalesce
 from django.contrib import messages
 from django.utils import timezone
 import json
@@ -17,6 +19,8 @@ from catalogue.models import (
 from .forms import ReviewForm
 
 
+# CORRECTION #9: Performance - Cache durant 5 minutes pour les vues statiques
+@cache_page(60 * 5)
 def events_view(request):
     """Vue pour afficher les événements, annonces, ateliers."""
     # Récupérer les événements publiés, triés par date
@@ -95,6 +99,8 @@ def event_detail_view(request, event_id):
     return render(request, 'catalogue/event_detail.html', context)
 
 
+# CORRECTION #9: Performance - Caching 5 min pour le catalogue
+@cache_page(60 * 5)
 def catalogue_view(request):
     """Vue du catalogue avec filtres."""
     # Les livres publiés, avec OU SANS auteur
@@ -175,31 +181,33 @@ def book_detail_view(request, book_id):
     """Vue détail d'un livre."""
     book = get_object_or_404(Book, id=book_id, is_published=True)
     
-    # Vérifier si l'utilisateur a accès à ce livre
+    # CORRECTION #1: Logique d'accès corrigée
+    # Les livres GRATUITS sont accessibles à tous (avec ou sans authentification)
+    # Les livres PAYANTS ne sont accessibles que si achetés
+    
     has_access = False
     reading_session = None
     
-    if request.user.is_authenticated:
-        # Vérifier si le livre est gratuit
-        if not book.is_paid:
-            has_access = True
-        else:
-            # Vérifier si l'utilisateur a acheté le livre
-            payment = Payment.objects.filter(
-                user=request.user,
-                book=book,
-                status='COMPLETED'
-            ).exists()
-            has_access = payment
-        
-        # Récupérer ou créer une session de lecture
-        if has_access:
-            from django.utils import timezone
-            reading_session, created = ReadingSession.objects.get_or_create(
-                user=request.user,
-                book=book,
-                defaults={'current_page': 1, 'start_time': timezone.now()}
-            )
+    # 1️⃣ Les livres GRATUITS sont toujours accessibles
+    if not book.is_paid:
+        has_access = True
+    # 2️⃣ Les livres PAYANTS nécessitent une authentification ET un paiement
+    elif request.user.is_authenticated:
+        payment = Payment.objects.filter(
+            user=request.user,
+            book=book,
+            status='COMPLETED'
+        ).exists()
+        has_access = payment
+    
+    # Créer session de lecture si l'utilisateur est authentifié ET a accès
+    if request.user.is_authenticated and has_access:
+        from django.utils import timezone
+        reading_session, created = ReadingSession.objects.get_or_create(
+            user=request.user,
+            book=book,
+            defaults={'current_page': 1, 'start_time': timezone.now()}
+        )
     
     # Récupérer les auteurs, les critiques et le formulaire
     authors = book.authors.all()
