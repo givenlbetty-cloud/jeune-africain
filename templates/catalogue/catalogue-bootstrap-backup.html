@@ -1,0 +1,669 @@
+{% extends 'base.html' %}
+
+{% block title %}Catalogue - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .catalogue-hero {
+        background: white;
+        color: var(--text-primary);
+        padding: 60px 0 40px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .catalogue-hero::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 40%;
+        height: 100%;
+        background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80');
+        background-size: cover;
+        background-position: center left;
+        opacity: 0.1;
+        mask-image: linear-gradient(to right, transparent, black);
+        -webkit-mask-image: linear-gradient(to right, transparent, black);
+        pointer-events: none;
+    }
+    
+    .catalogue-hero h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+        color: var(--primary-color);
+    }
+    
+    .search-bar {
+        background: white;
+        border-radius: 50px;
+        padding: 6px;
+        display: flex;
+        gap: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0,0,0,0.08);
+        margin-top: 25px;
+        max-width: 700px;
+    }
+    
+    .search-bar input {
+        border: none;
+        flex: 1;
+        padding: 14px 24px;
+        font-size: 1.05rem;
+        border-radius: 50px;
+        background: transparent;
+    }
+    
+    .search-bar input:focus {
+        outline: none;
+        background: transparent;
+    }
+    
+    .search-bar button {
+        background: var(--primary-color) !important;
+        border: none !important;
+        padding: 12px 32px !important;
+        border-radius: 40px !important;
+        color: white !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.3);
+    }
+    
+    .search-bar button:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 15px rgba(var(--primary-rgb), 0.4) !important;
+    }
+    
+    .filters-sidebar {
+        position: sticky;
+        top: 100px;
+    }
+    
+    .filter-card {
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        background: white;
+    }
+    
+    [data-bs-theme="dark"] .filter-card {
+        background: var(--bg-white);
+    }
+    
+    .filter-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        padding: 14px;
+        font-weight: 700;
+        border: none;
+    }
+    
+    .filter-card .card-body {
+        padding: 16px;
+    }
+    
+    .filter-group {
+        margin-bottom: 20px;
+    }
+    
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .filter-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 0.95rem;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-check {
+        margin-bottom: 10px;
+    }
+    
+    .form-check-input {
+        border-color: var(--border-color);
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    .form-check-input:checked {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-color: var(--primary-color);
+    }
+    
+    .form-check-label {
+        cursor: pointer;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        padding-left: 8px;
+    }
+    
+    /* Collapse styles for filters */
+    @media (max-width: 991px) {
+        .collapse-lg {
+            display: none !important;
+        }
+        
+        .collapse-lg.show {
+            display: block !important;
+        }
+    }
+    
+    @media (min-width: 992px) {
+        .collapse-lg {
+            display: block !important;
+        }
+    }
+    
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 24px;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @media (max-width: 1200px) {
+        .book-grid {
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .book-grid {
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+        
+        .catalogue-hero {
+            padding: 30px 0 20px;
+        }
+        
+        .catalogue-hero h1 {
+            font-size: 2rem;
+        }
+        
+        .filters-sidebar {
+            margin-bottom: 30px;
+            position: static;
+        }
+    }
+    
+    .book-card-advanced {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px;
+        background: white;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    [data-bs-theme="dark"] .book-card-advanced {
+        background: var(--bg-white);
+    }
+    
+    .book-card-advanced:hover {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        transform: translateY(-8px);
+    }
+    
+    .book-image-container {
+        position: relative;
+        overflow: hidden;
+        height: 200px; /* Reduced from 280px */
+        background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+    }
+    
+    .book-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    
+    .book-card-advanced:hover .book-image-container img {
+        transform: scale(1.1) rotate(1deg);
+    }
+    
+    .book-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, var(--accent-color), #ff7b2a);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .book-free-badge {
+        background: linear-gradient(135deg, var(--success-color), #1e8449);
+    }
+    
+    .book-details {
+        padding: 10px; /* Reduced from 16px */
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .book-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: 0.9rem; /* Reduced from 1rem */
+        margin-bottom: 4px;
+        line-height: 1.3;
+        /* min-height removed */
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    [data-bs-theme="dark"] .book-title {
+        color: var(--secondary-color);
+    }
+    
+    .book-author {
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .book-rating {
+        color: var(--warning-color);
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .book-price {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--accent-color);
+        margin-bottom: 8px;
+    }
+    
+    .book-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: auto;
+    }
+    
+    .book-btn {
+        flex: 1;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .book-btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+    }
+    
+    .book-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(26, 77, 62, 0.3);
+    }
+    
+    .book-btn-secondary {
+        background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+    
+    .book-btn-secondary:hover {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border-color: transparent;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+    
+    .no-results i {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .pagination {
+        justify-content: center;
+        margin-top: 40px;
+        gap: 8px;
+    }
+    
+    .pagination .page-link {
+        border: 1px solid var(--border-color);
+        color: var(--primary-color);
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        padding: 8px 12px;
+    }
+    
+    .pagination .page-link:hover {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        border-color: var(--primary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="catalogue-hero">
+    <div class="container">
+        <h1><i class="fas fa-book-open"></i> Découvrez Notre Catalogue</h1>
+        <p class="lead mb-0">Explorez des milliers de livres de qualité en plusieurs langues</p>
+        
+        <!-- Search Bar -->
+        <form method="get" class="search-bar">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Rechercher par titre, auteur..." 
+                value="{{ request.GET.search|default:'' }}"
+            >
+            <button type="submit" class="btn">
+                <i class="fas fa-search"></i> Rechercher
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container my-5">
+    <div class="row">
+        <!-- Filters Offcanvas -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
+            <div class="offcanvas-header bg-light border-bottom">
+                <h5 class="offcanvas-title fw-bold text-primary" id="filtersOffcanvasLabel"><i class="fas fa-filter me-2"></i> Filtres & Tri</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-4">
+                <div class="filters-sidebar">
+                    <!-- Tri Filter -->
+                    <div class="filter-card">
+                        <div class="card-header">
+                            <i class="fas fa-sort"></i> Tri
+                        </div>
+                        <div class="card-body">
+                            <form method="get">
+                                <select class="form-select" name="sort" onchange="this.form.submit();">
+                                    <option value="">Par défaut</option>
+                                    <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Titre A-Z</option>
+                                    <option value="-created_at" {% if request.GET.sort == '-created_at' or request.GET.sort == 'newest' %}selected{% endif %}>Récents en premier</option>
+                                    <option value="price" {% if request.GET.sort == 'price' %}selected{% endif %}>Prix: bas au haut</option>
+                                    <option value="-rating" {% if request.GET.sort == '-rating' %}selected{% endif %}>Mieux notés</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Genre Filter -->
+                    <div class="filter-card">
+                        <div class="card-header">
+                            <i class="fas fa-tag"></i> Genre
+                        </div>
+                        <div class="card-body">
+                            <form method="get">
+                                {% for genre, label in genres %}
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            id="genre_{{ forloop.counter }}" 
+                                            name="genre" 
+                                            value="{{ genre }}"
+                                            {% if genre in selected_genres %}checked{% endif %}
+                                        >
+                                        <label class="form-check-label" for="genre_{{ forloop.counter }}">
+                                            {{ label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Type Filter -->
+                    <div class="filter-card">
+                        <div class="card-header">
+                            <i class="fas fa-coins"></i> Type
+                        </div>
+                        <div class="card-body">
+                            <form method="get">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="free" 
+                                           name="type" value="free" {% if 'free' in selected_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="free">
+                                        <i class="fas fa-gift"></i> Gratuit
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="paid" 
+                                           name="type" value="paid" {% if 'paid' in selected_types %}checked{% endif %}>
+                                    <label class="form-check-label" for="paid">
+                                        <i class="fas fa-dollar-sign"></i> Payant
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Language Filter -->
+                    <div class="filter-card">
+                        <div class="card-header">
+                            <i class="fas fa-globe"></i> Langue
+                        </div>
+                        <div class="card-body">
+                            <form method="get">
+                                {% for lang, label in languages %}
+                                <div class="form-check">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        id="lang_{{ forloop.counter }}" 
+                                        name="language" 
+                                        value="{{ lang }}"
+                                        {% if lang in selected_languages %}checked{% endif %}
+                                    >
+                                    <label class="form-check-label" for="lang_{{ forloop.counter }}">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Books Grid -->
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                 <button class="btn btn-primary shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+                    <i class="fas fa-filter me-2"></i> Filtres & Tri
+                </button>
+                
+                {% if books %}
+                <h5 class="mb-0 text-muted">
+                    <strong class="text-primary">{{ books|length }}</strong> résultats
+                </h5>
+                {% endif %}
+            </div>
+
+            {% if upcoming_announcements %}
+                <div class="mb-5 fadeIn">
+                    <h4 class="mb-4 text-primary border-bottom pb-2"><i class="fas fa-bullhorn me-2"></i> Annonces & À Venir</h4>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        {% for event in upcoming_announcements %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm border-0 hover-lift">
+                                {% if event.image %}
+                                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 180px; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                    <i class="fas fa-calendar-alt fa-3x text-secondary opacity-50"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-warning text-dark">{{ event.get_event_type_display }}</span>
+                                        <small class="text-muted">{{ event.date_start|date:"d M" }}</small>
+                                    </div>
+                                    <h5 class="card-title fw-bold text-dark">{{ event.title }}</h5>
+                                    <p class="card-text text-muted small mb-3">{{ event.description|striptags|truncatewords:15 }}</p>
+                                    <a href="{% url 'catalogue:event_detail' event.id %}" class="btn btn-outline-primary btn-sm w-100 stretched-link">Détails</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if books %}
+                <div class="book-grid">
+                    {% for book in books %}
+                    <div class="book-card-advanced">
+                        <!-- Image -->
+                        <div class="book-image-container">
+                            {% if book.cover %}
+                                <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                            {% else %}
+                                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary-color), var(--primary-light));">
+                                    <i class="fas fa-book" style="font-size: 3rem; color: white; opacity: 0.5;"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Badge -->
+                            {% if book.is_free %}
+                                <div class="book-badge book-free-badge">Gratuit</div>
+                            {% else %}
+                                <div class="book-badge">Payant</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="book-details">
+                            <div class="book-title">{{ book.title }}</div>
+                            <div class="book-author">par {{ book.author }}</div>
+                            
+                            {% if book.rating %}
+                                <div class="book-rating">
+                                    {% for i in "x"|rjust:"5" %}
+                                        <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                    {{ book.rating }}/5
+                                </div>
+                            {% endif %}
+                            
+                            <div class="book-price">
+                                {% if book.is_free %}
+                                    Gratuit
+                                {% else %}
+                                    {{ book.price|floatformat:0 }} FC
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Actions -->
+                            <div class="book-actions">
+                                <a href="{% url 'catalogue:book_detail' book.id %}" class="book-btn book-btn-primary">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                                {% if user.is_authenticated %}
+                                    <form method="post" action="{% url 'catalogue:toggle_favorite' book.id %}" style="flex: 1;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="book-btn book-btn-secondary" style="width: 100%;">
+                                            <i class="fas fa-heart{% if book.id in favorites %} fa-solid{% else %} fa-regular{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-5">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">Premier</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Dernier</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <h4>Aucun livre trouvé</h4>
+                    <p>Essayez de modifier vos critères de recherche</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

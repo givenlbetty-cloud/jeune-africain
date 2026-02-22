@@ -1,0 +1,155 @@
+{% extends 'base-jw-redesigned.html' %}
+
+{% block title %}Catalogue - {{ site_config.site_name|default:"BNC" }}{% endblock %}
+
+{% block content %}
+<main style="background-color: var(--bg-secondary); padding: var(--spacing-2xl) 0;">
+    <div class="container">
+        <!-- Header -->
+        <div style="margin-bottom: var(--spacing-3xl);">
+            <h1 style="font-size: 2rem; font-weight: 600; margin-bottom: var(--spacing-md);">Catalogue de Livres</h1>
+            <p style="color: var(--text-secondary); font-size: 1.0625rem;">
+                Découvrez {{ books_count }} livres disponibles dans notre bibliothèque
+            </p>
+        </div>
+
+        <!-- Filters & Search -->
+        <div style="background-color: var(--bg-primary); border-radius: var(--radius-lg); padding: var(--spacing-2xl); margin-bottom: var(--spacing-2xl); box-shadow: var(--shadow-sm);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+                <!-- Search -->
+                <div style="grid-column: 1 / -1;">
+                    <form method="get" style="display: flex; gap: var(--spacing-md);">
+                        <input type="text" name="search" placeholder="Chercher un livre, auteur..." 
+                            style="flex: 1; padding: var(--spacing-md) var(--spacing-lg); border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;"
+                            value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Category Filter -->
+                <select name="category" onchange="this.form.submit()" 
+                    style="padding: var(--spacing-md) var(--spacing-lg); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    <option value="">Toutes les catégories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if request.GET.category|slugify == category.id|slugify %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <!-- Sort Filter -->
+                <select name="sort" onchange="this.form.submit()" 
+                    style="padding: var(--spacing-md) var(--spacing-lg); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                    <option value="">Tri par défaut</option>
+                    <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Plus récents</option>
+                    <option value="popular" {% if request.GET.sort == 'popular' %}selected{% endif %}>Plus populaires</option>
+                    <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Titre (A-Z)</option>
+                    <option value="author" {% if request.GET.sort == 'author' %}selected{% endif %}>Auteur (A-Z)</option>
+                </select>
+            </div>
+
+            <!-- Active Filters Display -->
+            {% if request.GET.search or request.GET.category or request.GET.sort %}
+            <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap;">
+                {% if request.GET.search %}
+                <span style="background-color: var(--bg-tertiary); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); font-size: 0.875rem;">
+                    Recherche: <strong>{{ request.GET.search }}</strong>
+                    <a href="?" style="margin-left: var(--spacing-sm); color: var(--color-primary); text-decoration: none;">✕</a>
+                </span>
+                {% endif %}
+                {% if request.GET.category %}
+                <span style="background-color: var(--bg-tertiary); padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-md); font-size: 0.875rem;">
+                    Catégorie: <strong>{{ request.GET.category }}</strong>
+                    <a href="?" style="margin-left: var(--spacing-sm); color: var(--color-primary); text-decoration: none;">✕</a>
+                </span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Books Grid -->
+        {% if books %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--spacing-xl); margin-bottom: var(--spacing-3xl);">
+            {% for book in books %}
+            <a href="{% url 'catalogue:book_detail' book.slug %}" style="text-decoration: none;">
+                <div class="book-card">
+                    <!-- Image -->
+                    <div style="overflow: hidden; background-color: var(--bg-tertiary); aspect-ratio: 2/3;">
+                        {% if book.cover %}
+                        <img src="{{ book.cover.url }}" alt="{{ book.title }}" 
+                            style="width: 100%; height: 100%; object-fit: cover; transition: transform var(--transition-base);">
+                        {% else %}
+                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light)); color: white; font-size: 3rem;">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Content -->
+                    <div class="book-card-body">
+                        <h3 class="book-card-title">{{ book.title }}</h3>
+                        <p class="book-card-author">{{ book.author.name }}</p>
+                        
+                        <!-- Meta Info -->
+                        <div class="book-card-meta">
+                            {% if book.is_paid %}
+                            <span style="color: var(--color-success); font-weight: 600;">Premium</span>
+                            {% else %}
+                            <span style="color: var(--color-info); font-weight: 600;">Gratuit</span>
+                            {% endif %}
+                            
+                            {% if book.rating %}
+                            <span class="book-card-rating">
+                                <i class="fas fa-star"></i>
+                                {{ book.rating|floatformat:1 }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div style="display: flex; justify-content: center; gap: var(--spacing-md); margin-bottom: var(--spacing-3xl);">
+            {% if page_obj.has_previous %}
+            <a href="?page=1" class="btn btn-tertiary">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-tertiary">Précédent</a>
+            {% endif %}
+
+            <!-- Page numbers -->
+            <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
+                <span style="color: var(--text-secondary);">
+                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                </span>
+            </div>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="btn btn-tertiary">Suivant</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-tertiary">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div style="text-align: center; padding: var(--spacing-4xl) var(--spacing-xl);">
+            <i class="fas fa-inbox" style="font-size: 4rem; color: var(--text-tertiary); margin-bottom: var(--spacing-lg);"></i>
+            <h2 style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">Aucun livre trouvé</h2>
+            <p style="color: var(--text-tertiary); margin-bottom: var(--spacing-2xl);">
+                Essayez avec d'autres critères de recherche ou consultez d'autres catégories.
+            </p>
+            <a href="{% url 'catalogue:catalogue' %}" class="btn btn-primary">Voir tous les livres</a>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

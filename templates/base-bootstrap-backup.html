@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="{{ site_config.site_name|default:'Bibliothèque Numérique Calures' }} - Accédez à des milliers de livres numériques avec synchronisation hors ligne">
+    <title>{% block title %}{{ site_config.site_name|default:'Bibliothèque Numérique Calures' }}{% endblock %}</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/icon-192x192.png">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="/static/css/global.css">
+    <!-- CORRECTION #5, #6, #9: Styles d'optimisations -->
+    <link rel="stylesheet" href="/static/css/optimizations.css">
+    <!-- CORRECTION UI: Modernisation design & responsive -->
+    <link rel="stylesheet" href="/static/css/modernisation-ui.css">
+    
+    <style>
+        :root {
+            /* Palette de style JW Library */
+            --primary-color: #4b2c92;
+            --primary-light: #6a4fbc;
+            --primary-dark: #321966;
+            --secondary-color: #ffffff;
+            --accent-color: #00897b;
+            --success-color: #2e7d32;
+            --danger-color: #c62828;
+            --warning-color: #f9a825;
+            --info-color: #1976d2;
+            
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --bg-light: #f5f5f5;
+            --bg-white: #ffffff;
+            --border-color: #e0e0e0;
+        }
+        
+        [data-bs-theme="dark"] {
+            --text-primary: #f5f5f5;
+            --text-secondary: #bdbdbd;
+            --bg-light: #121212;
+            --bg-white: #1e1e1e;
+            --border-color: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', -apple-system, system-ui, sans-serif;
+            color: var(--text-primary);
+            background-color: var(--bg-light);
+            /* Subtle background pattern */
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+                url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            line-height: 1.5;
+        }
+        
+        /* ============= NAVBAR ============= */
+        nav.navbar {
+            background-color: var(--primary-color);
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: none;
+            padding: 0.75rem 0;
+        }
+        
+        nav.navbar.scrolled {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #ffffff !important;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .navbar-brand i {
+            font-size: 1.6rem;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            transition: opacity 0.2s ease;
+            font-weight: 500;
+            font-size: 0.95rem;
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 0.8rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(20deg);
+        }
+        
+        /* ============= BUTTONS ============= */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 0.6rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 77, 62, 0.3);
+            background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            border: none;
+            color: var(--primary-color);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #c49563;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* ============= CARDS ============= */
+        .card {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+        
+        .card-header {
+            background-color: transparent;
+            border-bottom: 2px solid var(--border-color);
+            padding: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* ============= HERO SECTION ============= */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="1200" height="600" fill="url(%23grid)" /></svg>');
+            opacity: 0.5;
+        }
+        
+        .hero-section h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -1px;
+        }
+        
+        .hero-section p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+            font-weight: 300;
+        }
+        
+        /* ============= SECTION STYLES ============= */
+        section {
+            padding: 60px 0;
+        }
+        
+        section h2 {
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 20px;
+        }
+        
+        section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-color));
+            border-radius: 2px;
+        }
+        
+        /* ============= BOOK CARDS ============= */
+        .book-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .book-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .book-card:hover img {
+            transform: scale(1.08);
+        }
+        
+        .book-card .card-body {
+            padding: 1.25rem;
+        }
+        
+        .book-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+        
+        .book-author {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .book-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            margin-bottom: 0;
+        }
+        
+        .book-rating {
+            color: var(--warning-color);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        /* ============= BADGES ============= */
+        .badge {
+            font-weight: 600;
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        .badge-primary {
+            background-color: var(--primary-color);
+        }
+        
+        .badge-success {
+            background-color: var(--success-color);
+        }
+        
+        /* ============= FOOTER ============= */
+        footer {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: rgba(255, 255, 255, 0.9);
+            padding: 60px 0 20px;
+            margin-top: 80px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        footer h5 {
+            color: var(--secondary-color);
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        footer a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+        }
+        
+        footer a:hover {
+            color: var(--secondary-color);
+        }
+        
+        footer .list-unstyled li {
+            margin-bottom: 10px;
+        }
+        
+        /* ============= FORMS ============= */
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--bg-white);
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(26, 77, 62, 0.1);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        /* ============= ALERTS ============= */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: #2471a3;
+            border-left-color: #3498db;
+        }
+        
+        .alert-success {
+            background-color: rgba(38, 166, 91, 0.1);
+            color: #1e8449;
+            border-left-color: #26a65b;
+        }
+        
+        .alert-warning {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: #9a6321;
+            border-left-color: #f39c12;
+        }
+        
+        .alert-danger {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: #a93226;
+            border-left-color: #e74c3c;
+        }
+        
+        /* ============= RESPONSIVE ============= */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 60px 0;
+            }
+            
+            .hero-section h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero-section p {
+                font-size: 1.1rem;
+            }
+            
+            section {
+                padding: 40px 0;
+            }
+            
+            .navbar-brand {
+                font-size: 1.3rem;
+            }
+            
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 0.5rem 0 !important;
+            }
+        }
+        
+        /* ============= SCROLLBAR CUSTOM ============= */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-light);
+        }
+        
+        /* ============= ANIMATIONS ============= */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* ============= UTILITIES ============= */
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .text-secondary {
+            color: var(--secondary-color) !important;
+        }
+        
+        .border-top-accent {
+            border-top: 3px solid var(--secondary-color);
+        }
+        
+        .shadow-sm-hover {
+            transition: box-shadow 0.3s ease;
+        }
+        
+        .shadow-sm-hover:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid">
+            <!-- Logo/Brand -->
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                {% if site_config.logo %}
+                <img src="{{ site_config.logo.url }}" alt="Logo" style="height: 40px; margin-right: 10px;">
+                {% else %}
+                <i class="fas fa-book me-2"></i>
+                {% endif %}
+                <!-- Nom du site : affiché uniquement si pas de logo, ou à côté du logo si souhaité -->
+                <span class="d-none d-md-inline ms-1">{{ site_config.site_name|default:"BNC" }}</span>
+                <span class="d-inline d-md-none ms-1">BNC</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Liens principaux (gauche) -->
+                <ul class="navbar-nav me-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" href="{% url 'catalogue:catalogue' %}">
+                            Catalogue
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link fw-bold" href="{% url 'catalogue:catalogue' %}?sort=newest">
+                            Nouveautés
+                        </a>
+                    </li>
+                    
+                    <!-- Médias (Restored) -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="mediaDropdown" role="button" data-bs-toggle="dropdown">
+                            Médiathèque
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="mediaDropdown">
+                            <li><a class="dropdown-item" href="{% url 'catalogue:audiobooks_list' %}">Audiobooks</a></li>
+                            <li><a class="dropdown-item" href="{% url 'catalogue:videos_list' %}">Vidéos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'catalogue:podcasts_list' %}">Podcasts</a></li>
+                        </ul>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                    <li class="nav-item ms-lg-2 me-lg-3">
+                        <a class="btn btn-light btn-sm fw-bold text-primary" href="{% url 'users:my_library' %}" style="border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            Ma Bibliothèque
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item border-start-lg border-secondary mx-lg-2 ps-lg-2 d-none d-lg-block" style="opacity: 0.2; height: 24px;"></li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'catalogue:forum_home' %}">
+                            Forum
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">
+                            À propos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'catalogue:events_list' %}">
+                            Événements
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Texte de la semaine (Haut à droite) -->
+                <div class="d-none d-xl-block me-4 text-end" style="max-width: 250px; line-height: 1.1;">
+                    <small class="text-secondary d-block fw-bold text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.5px;">Texte de la semaine</small>
+                    <span class="text-white fst-italic" style="font-size: 0.75rem; font-family: 'Georgia', serif; opacity: 0.9;">
+                        "{{ site_config.text_of_the_week|default:"L'éducation est l'arme la plus puissante qu'on puisse utiliser pour changer le monde."|truncatechars:100 }}"
+                    </span>
+                </div>
+
+                <!-- Espace utilisateur + Authentification (droite) -->
+                <ul class="navbar-nav ms-auto align-items-center">
+                    {% if user.is_authenticated %}
+                        
+                        <!-- Profil/Compte -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                {% else %}
+                                    <span class="fas fa-user-circle fa-lg"></span>
+                                {% endif %}
+                                <span class="ms-1">{{ user.first_name|default:user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:my_library' %}">Ma bibliothèque</a></li>
+                                <li><a class="dropdown-item" href="{% url 'catalogue:payment_history' %}">Historique paiements</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">Déconnexion</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Authentification (non connecté) -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:login' %}"><i class="fas fa-sign-in-alt"></i> Connexion</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-secondary ms-2" href="{% url 'users:signup' %}"><i class="fas fa-user-plus"></i> S'inscrire</a>
+                        </li>
+                    {% endif %}
+
+                    <!-- Thème (dernière priorité) -->
+                    <li class="nav-item ms-2">
+                        <button class="theme-toggle" id="themeToggle" title="Basculer le mode sombre">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PWA Install Prompt -->
+    {% include 'components/pwa-install.html' %}
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md-3 mb-4 mb-md-0">
+                    <h5><i class="fas fa-book"></i> À propos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Qui sommes-nous</a></li>
+                        <li><a href="#">Notre mission</a></li>
+                        <li><a href="#">Contactez-nous</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4 mb-md-0">
+                    <h5><i class="fas fa-link"></i> Liens</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'catalogue:catalogue' %}">Catalogue</a></li>
+                        <li><a href="{% url 'catalogue:events_list' %}">Événements</a></li>
+                        <li><a href="#">Auteurs</a></li>
+                        <li><a href="#">Éditeurs</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-4 mb-md-0">
+                    <h5><i class="fas fa-lock"></i> Légal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#">Conditions d'utilisation</a></li>
+                        <li><a href="#">Politique de confidentialité</a></li>
+                        <li><a href="#">Cookies</a></li>
+                        <li><a href="#">Mentions légales</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5><i class="fas fa-share-alt"></i> Nous suivre</h5>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-white" style="font-size: 1.3rem;"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-white" style="font-size: 1.3rem;"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-white" style="font-size: 1.3rem;"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-white" style="font-size: 1.3rem;"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr style="border-color: rgba(255,255,255,0.2);">
+            <div class="row">
+                <div class="col-md-6">
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">
+                        <i class="fas fa-copyright"></i> 2025 BNC - Bibliothèque Numérique Calures. Tous droits réservés.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end d-flex justify-content-md-end align-items-center">
+                    <p style="font-size: 0.9rem; margin-bottom: 0;">
+                        Développé avec <i class="fas fa-heart text-danger"></i> par BNC Team
+                    </p>
+                    <!-- CORRECTION #5: Bouton scroll-to-top -->
+                    <button id="scroll-top-btn" class="btn btn-sm btn-light ms-3 d-none" title="Retour en haut">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Dark Mode Toggle
+        const htmlElement = document.documentElement;
+        const themeToggle = document.getElementById('themeToggle');
+        
+        // Charger le thème sauvegardé
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-bs-theme', savedTheme);
+        updateThemeIcon();
+        
+        function updateThemeIcon() {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            themeToggle.innerHTML = currentTheme === 'dark' 
+                ? '<i class="fas fa-sun"></i>' 
+                : '<i class="fas fa-moon"></i>';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            htmlElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon();
+        });
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('nav.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Fade in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.card, .book-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+    
+    <!-- Notifications System -->
+    <script src="/static/js/notifications.js"></script>
+    
+    <!-- Bottom Mobile Navigation -->
+    <nav class="bottom-nav">
+        <div class="bottom-nav-inner">
+            <a href="{% url 'home' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+            </a>
+            
+            <a href="{% url 'catalogue:catalogue' %}" class="bottom-nav-item {% if 'catalogue' in request.resolver_match.app_names %}active{% endif %}">
+                <i class="fas fa-book"></i>
+                <span>Livres</span>
+            </a>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'users:my_library' %}" class="bottom-nav-item {% if 'my_library' == request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-bookmark"></i>
+                    <span>Mes Livres</span>
+                </a>
+                
+                <a href="{% url 'users:profile' %}" class="bottom-nav-item {% if 'profile' == request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Compte</span>
+                </a>
+            {% else %}
+                <a href="{% url 'users:login' %}" class="bottom-nav-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Connexion</span>
+                </a>
+            {% endif %}
+            
+             <a href="#" class="bottom-nav-item" onclick="alert('Menu non disponible dans la démo'); return false;">
+                <i class="fas fa-ellipsis-h"></i>
+                <span>Plus</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/js/service-worker.js')
+                    .then((registration) => {
+                        console.log('[ServiceWorker] Registered:', registration);
+                        
+                        // Check for updates periodically
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000); // Check every minute
+                    })
+                    .catch((error) => {
+                        console.log('[ServiceWorker] Registration failed:', error);
+                    });
+            });
+            
+            // Listen for controller change (update available)
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                refreshing = true;
+                window.location.reload();
+            });
+            
+            // Check for online/offline status
+            window.addEventListener('offline', () => {
+                Notify.toast('Mode hors ligne activé', 'warning');
+                console.log('[App] Offline mode activated');
+            });
+            
+            window.addEventListener('online', () => {
+                Notify.toast('Connexion rétablie - Synchronisation en cours', 'success');
+                console.log('[App] Online - Syncing data');
+            });
+        }
+    </script>
+    
+    <!-- PWA Support Scripts -->
+    <script src="/static/js/pwa-install.js"></script>
+    <script src="/static/js/offline-sync.js"></script>
+    
+    <!-- CORRECTION #6 & #9: Script d'optimisations et fonctionnalités -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="/static/js/bnc-optimizations.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
