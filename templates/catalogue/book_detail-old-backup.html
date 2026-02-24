@@ -1,0 +1,246 @@
+{% extends 'base-clean.html' %}
+
+{% block title %}{{ book.title }} - {{ book.author.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'catalogue:catalogue' %}">Catalogue</a></li>
+            <li class="breadcrumb-item active">{{ book.title }}</li>
+        </ol>
+    </nav>
+    
+    <!-- Main Content -->
+    <div class="row g-4 mb-5">
+        <!-- Left Column: Cover -->
+        <div class="col-md-4">
+            <div style="position: sticky; top: 100px;">
+                <!-- Book Cover -->
+                <div style="background: linear-gradient(135deg, #5B5FF1, #00D4FF); border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                    {% if book.cover %}
+                    <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="width: 100%; display: block;">
+                    {% else %}
+                    <div style="width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-book" style="font-size: 5rem; color: white; opacity: 0.5;"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                    {% if book.pdf_file %}
+                    <a href="{% url 'catalogue:read_pdf' book.slug %}" class="btn btn-primary-custom btn-lg">
+                        <i class="fas fa-book-open"></i> Lire le livre
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-heart"></i> Ajouter aux favoris
+                    </button>
+                    <button class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-share"></i> Partager
+                    </button>
+                </div>
+                
+                <!-- Stats -->
+                <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-top: 20px; text-align: center;">
+                    <div class="row">
+                        <div class="col">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #5B5FF1;">{{ book.views_count|default:"0" }}</div>
+                            <div style="font-size: 0.85rem; color: #999;">Lectures</div>
+                        </div>
+                        <div class="col">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #FF6B6B;">{{ book.favorites_count|default:"0" }}</div>
+                            <div style="font-size: 0.85rem; color: #999;">Favoris</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Details -->
+        <div class="col-md-8">
+            <h1 class="mb-3" style="font-size: 2.5rem;">{{ book.title }}</h1>
+            <p style="font-size: 1.2rem; color: #666; margin-bottom: 20px;">
+                Par <strong>{{ book.author.name }}</strong>
+            </p>
+            
+            <!-- Rating -->
+            {% if book.rating %}
+            <div class="mb-4">
+                <div class="stars" style="font-size: 1.3rem; margin-bottom: 10px;">
+                    {% for i in "12345" %}
+                    {% if forloop.counter <= book.rating %}
+                    <i class="fas fa-star"></i>
+                    {% else %}
+                    <i class="fas fa-star empty-star"></i>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <span style="font-weight: 700; font-size: 1.1rem;">{{ book.rating|floatformat:1 }}/5</span>
+                <span style="color: #999;">({{ book.reviews_count|default:"0" }} avis)</span>
+            </div>
+            {% endif %}
+            
+            <!-- Metadata -->
+            <div style="background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                <div class="row g-3">
+                    {% if book.publication_date %}
+                    <div class="col-md-6">
+                        <div style="font-size: 0.85rem; color: #999; font-weight: 600; text-transform: uppercase;">Publié</div>
+                        <div style="font-weight: 600; margin-top: 5px;">{{ book.publication_date|date:"d F Y" }}</div>
+                    </div>
+                    {% endif %}
+                    {% if book.category %}
+                    <div class="col-md-6">
+                        <div style="font-size: 0.85rem; color: #999; font-weight: 600; text-transform: uppercase;">Catégorie</div>
+                        <div style="margin-top: 5px;">
+                            <a href="{% url 'catalogue:catalogue' %}?category={{ book.category.id }}" class="badge" style="background: #5B5FF1; color: white; padding: 6px 12px; font-size: 0.95rem;">
+                                {{ book.category.name }}
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if book.language %}
+                    <div class="col-md-6">
+                        <div style="font-size: 0.85rem; color: #999; font-weight: 600; text-transform: uppercase;">Langue</div>
+                        <div style="font-weight: 600; margin-top: 5px;">{{ book.get_language_display }}</div>
+                    </div>
+                    {% endif %}
+                    {% if book.file_size %}
+                    <div class="col-md-6">
+                        <div style="font-size: 0.85rem; color: #999; font-weight: 600; text-transform: uppercase;">Taille</div>
+                        <div style="font-weight: 600; margin-top: 5px;">{{ book.file_size }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Description -->
+            {% if book.description %}
+            <div class="mb-5">
+                <h3 style="margin-bottom: 15px;">À propos de ce livre</h3>
+                <p style="line-height: 1.8; color: #555;">{{ book.description|linebreaks }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Author Section -->
+    {% if book.author %}
+    <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 30px; margin-bottom: 40px;">
+        <div class="row g-4">
+            {% if book.author.avatar %}
+            <div class="col-md-3 text-center">
+                <img src="{{ book.author.avatar.url }}" alt="{{ book.author.name }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #5B5FF1;">
+            </div>
+            {% endif %}
+            <div class="col-md-9">
+                <h3 style="margin-bottom: 15px;">À propos de l'auteur</h3>
+                <p>{{ book.author.bio|default:"Auteur passionné partageant ses œuvres avec le monde." }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Reviews Section -->
+    {% if reviews %}
+    <div class="mb-5">
+        <h3 class="mb-4">Avis des lecteurs</h3>
+        <div class="row g-4">
+            {% for review in reviews %}
+            <div class="col-md-6">
+                <div style="background: white; border-left: 4px solid #FFD700; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h6 class="mb-1">{{ review.user.get_full_name|default:review.user.username }}</h6>
+                            <div class="stars" style="font-size: 0.9rem;">
+                                {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star"></i>
+                                {% else %}
+                                <i class="fas fa-star empty-star"></i>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <small style="color: #999;">{{ review.created_at|date:"d M Y" }}</small>
+                    </div>
+                    <p style="color: #666; margin: 0;">{{ review.comment }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Add Review -->
+    {% if user.is_authenticated %}
+    <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 30px; margin-bottom: 40px;">
+        <h3 class="mb-4">Partager votre avis</h3>
+        <form method="post" action="{% url 'catalogue:add_review' book.slug %}">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label">Votre note</label>
+                <div class="mb-3">
+                    {% for i in "12345" %}
+                    <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}" class="d-none">
+                    <label for="star{{ i }}" class="me-2" style="cursor: pointer; font-size: 2rem; color: #ddd;">
+                        <i class="fas fa-star"></i>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Votre avis</label>
+                <textarea class="form-control" name="comment" rows="4" placeholder="Partagez votre expérience..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary-custom">
+                <i class="fas fa-comment"></i> Publier l'avis
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div style="background: #e3f2fd; border: 2px dashed #5B5FF1; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 40px;">
+        <i class="fas fa-user-circle" style="font-size: 3rem; color: #5B5FF1; margin-bottom: 20px; display: block;"></i>
+        <h4 class="mb-2">Connectez-vous pour partager un avis</h4>
+        <p class="text-secondary mb-3">Rejoignez notre communauté de lecteurs passionnés.</p>
+        <a href="{% url 'users:login' %}" class="btn btn-primary-custom">Se connecter</a>
+    </div>
+    {% endif %}
+    
+    <!-- Related Books -->
+    {% if related_books %}
+    <div class="mb-5">
+        <h3 class="mb-4">Livres similaires</h3>
+        <div class="row g-4">
+            {% for related_book in related_books %}
+            <div class="col-sm-6 col-lg-3">
+                <a href="{% url 'catalogue:book_detail' related_book.slug %}" style="text-decoration: none; color: inherit;">
+                    <div class="book-card">
+                        {% if related_book.cover %}
+                        <img src="{{ related_book.cover.url }}" alt="{{ related_book.title }}" class="card-img-top">
+                        {% else %}
+                        <div style="background: linear-gradient(135deg, #5B5FF1, #00D4FF); height: 250px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-book" style="font-size: 3rem; color: white; opacity: 0.5;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="p-3">
+                            <h5 class="book-card-title">{{ related_book.title }}</h5>
+                            <p class="book-card-author">{{ related_book.author.name }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

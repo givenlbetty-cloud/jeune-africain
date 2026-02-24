@@ -1,0 +1,152 @@
+{% extends 'base-clean.html' %}
+
+{% block title %}Catalogue - BNC{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<div class="hero">
+    <h1>Notre Catalogue</h1>
+    <p>Découvrez des milliers de livres dans notre bibliothèque numérique</p>
+</div>
+
+<div class="container">
+    <!-- Search & Filters -->
+    <div class="search-box">
+        <form method="get">
+            <div class="mb-3">
+                <div class="input-group input-group-lg">
+                    <input type="text" name="search" class="form-control" placeholder="Chercher un livre, auteur..." value="{{ request.GET.search }}">
+                    <button class="btn btn-primary-custom" type="submit">
+                        <i class="fas fa-search"></i> Chercher
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Catégorie</label>
+                    <select name="category" class="form-select">
+                        <option value="">Toutes les catégories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Tri</label>
+                    <select name="sort" class="form-select">
+                        <option value="">Recommandé</option>
+                        <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Plus récents</option>
+                        <option value="popular" {% if request.GET.sort == 'popular' %}selected{% endif %}>Populaires</option>
+                        <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Titre (A-Z)</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Langue</label>
+                    <select name="language" class="form-select">
+                        <option value="">Toutes les langues</option>
+                        <option value="fr">Français</option>
+                        <option value="en">Anglais</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary-custom">Appliquer</button>
+                <a href="{% url 'catalogue:catalogue' %}" class="btn btn-outline-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+    
+    {% if books %}
+    <!-- Books Grid -->
+    <div class="row g-4 mb-5">
+        {% for book in books %}
+        <div class="col-sm-6 col-lg-3">
+            <a href="{% url 'catalogue:book_detail' book.slug %}" style="text-decoration: none; color: inherit;">
+                <div class="book-card">
+                    {% if book.cover %}
+                    <img src="{{ book.cover.url }}" alt="{{ book.title }}" class="card-img-top">
+                    {% else %}
+                    <div style="background: linear-gradient(135deg, #5B5FF1, #00D4FF); height: 250px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-book" style="font-size: 3rem; color: white; opacity: 0.5;"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-3">
+                        {% if book.is_paid %}
+                        <span class="badge-premium">Premium</span>
+                        {% else %}
+                        <span class="badge-free">Gratuit</span>
+                        {% endif %}
+                        
+                        <h5 class="book-card-title mt-2">{{ book.title }}</h5>
+                        <p class="book-card-author">{{ book.author.name }}</p>
+                        
+                        {% if book.rating %}
+                        <div class="stars mb-2">
+                            {% for i in "12345" %}
+                            {% if forloop.counter <= book.rating %}
+                            <i class="fas fa-star"></i>
+                            {% else %}
+                            <i class="fas fa-star empty-star"></i>
+                            {% endif %}
+                            {% endfor %}
+                            <span class="ms-1" style="color: #666; font-size: 0.9rem;">{{ book.rating|floatformat:1 }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-primary-custom w-100">
+                                <i class="fas fa-book-open"></i> Lire
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <nav class="mb-5">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">Première</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+            </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Dernière</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <i class="fas fa-inbox" style="font-size: 4rem; color: #ccc; margin-bottom: 20px;"></i>
+        <h3>Aucun livre trouvé</h3>
+        <p class="text-secondary">Essayez avec d'autres critères de recherche.</p>
+        <a href="{% url 'catalogue:catalogue' %}" class="btn btn-primary-custom mt-3">Voir tous les livres</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
