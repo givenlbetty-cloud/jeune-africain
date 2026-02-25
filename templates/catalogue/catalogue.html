@@ -112,10 +112,10 @@
                         <div class="book-price">
                             {% if book.is_paid and book.price > 0 %}
                                 {% if book.discount_percentage > 0 %}
-                                    <span class="price-original">{{ book.price|floatformat:0 }} FCFA</span>
+                                    <span class="price-original">{{ book.price|floatformat:0 }} FC</span>
                                     <span style="font-size: 0.65rem; color: #EF4444; font-weight: 600;">-{{ book.discount_percentage }}%</span>
                                 {% else %}
-                                    <span class="price-main">{{ book.price|floatformat:0 }} FCFA</span>
+                                    <span class="price-main">{{ book.price|floatformat:0 }} FC</span>
                                 {% endif %}
                             {% else %}
                                 <span class="price-free">Gratuit</span>
