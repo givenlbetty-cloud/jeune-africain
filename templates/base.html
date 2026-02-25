@@ -242,7 +242,7 @@
         
         .book-cover {
             width: 100%;
-            height: 220px;
+            height: 160px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             position: relative;
             overflow: hidden;
@@ -293,7 +293,7 @@
         
         .book-info {
             flex: 1;
-            padding: 1rem;
+            padding: 0.6rem;
             display: flex;
             flex-direction: column;
         }
@@ -301,9 +301,9 @@
         .book-title {
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
-            line-height: 1.4;
-            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            line-height: 1.3;
+            margin-bottom: 0.3rem;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -312,9 +312,9 @@
         }
         
         .book-author {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--text-light);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.4rem;
             flex-grow: 1;
         }
         
@@ -322,8 +322,8 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+            font-size: 0.75rem;
         }
         
         .book-rating .stars {
@@ -336,17 +336,17 @@
         
         .book-action {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.3rem;
             margin-top: auto;
         }
         
         .book-action button,
         .book-action a {
             flex: 1;
-            padding: 0.5rem;
+            padding: 0.35rem;
             border: none;
             border-radius: var(--radius-md);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -461,8 +461,17 @@
             }
             
             .hero-premium {
-                padding: 2rem 1rem;
-                margin-bottom: 1.5rem;
+                padding: 1.5rem 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .hero-premium h1 {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .hero-premium p {
+                font-size: 0.9rem;
             }
             
             .navbar {
@@ -470,13 +479,41 @@
             }
             
             .navbar-brand-logo {
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             
             .nav-link {
-                font-size: 0.9rem;
-                margin: 0 0.25rem;
-                padding: 0.4rem 0.8rem !important;
+                font-size: 0.85rem;
+                margin: 0 0.15rem;
+                padding: 0.3rem 0.5rem !important;
+            }
+            
+            .book-cover {
+                height: 140px;
+            }
+            
+            .book-info {
+                padding: 0.5rem;
+            }
+            
+            .book-title {
+                font-size: 0.78rem;
+                line-height: 1.2;
+                margin-bottom: 0.2rem;
+            }
+            
+            .book-author {
+                font-size: 0.7rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .search-premium {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .container {
+                padding: 0.5rem;
             }
         }
         
