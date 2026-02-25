@@ -242,7 +242,7 @@
         
         .book-cover {
             width: 100%;
-            height: 160px;
+            height: 140px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             position: relative;
             overflow: hidden;
@@ -293,9 +293,50 @@
         
         .book-info {
             flex: 1;
-            padding: 0.6rem;
+            padding: 0.5rem;
             display: flex;
             flex-direction: column;
+            gap: 0.2rem;
+        }
+        
+        .book-description {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .book-price {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.2rem 0;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+        
+        .price-main {
+            color: var(--primary);
+        }
+        
+        .price-free {
+            color: var(--success);
+            font-weight: 700;
+        }
+        
+        .price-original {
+            text-decoration: line-through;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+        
+        .price-discount {
+            color: var(--danger);
+            font-weight: 700;
         }
         
         .book-title {
@@ -489,7 +530,7 @@
             }
             
             .book-cover {
-                height: 140px;
+                height: 120px;
             }
             
             .book-info {
@@ -503,8 +544,18 @@
             }
             
             .book-author {
-                font-size: 0.7rem;
-                margin-bottom: 0.3rem;
+                font-size: 0.65rem;
+                margin-bottom: 0.1rem;
+            }
+            
+            .book-price {
+                font-size: 0.75rem;
+                margin: 0.1rem 0;
+            }
+            
+            .book-description {
+                font-size: 0.65rem;
+                margin-bottom: 0.1rem;
             }
             
             .search-premium {
