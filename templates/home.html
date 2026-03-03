@@ -25,7 +25,118 @@
             </div>
         </div>
     </div>
-    
+
+    {% if citation %}
+    <!-- Bandeau citation hebdomadaire -->
+    <div id="citation-banner" class="citation-banner" style="display:none;">
+        <div class="citation-collapsed" id="citation-collapsed">
+            <i class="fas fa-quote-left" style="color: var(--primary); font-size: 0.8rem;"></i>
+            <span class="citation-teaser">{{ citation.texte|truncatechars:50 }}</span>
+            <i class="fas fa-chevron-down citation-chevron"></i>
+        </div>
+        <div class="citation-expanded" id="citation-expanded">
+            <button class="citation-close" id="citation-close" type="button" aria-label="Fermer">
+                <i class="fas fa-times"></i>
+            </button>
+            <i class="fas fa-quote-left citation-icon-big"></i>
+            <p class="citation-texte">{{ citation.texte }}</p>
+            {% if citation.auteur %}
+            <p class="citation-auteur">— {{ citation.auteur }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <style>
+    .citation-banner {
+        margin: 0 0 1rem 0;
+        border-radius: var(--radius-md, 10px);
+        overflow: hidden;
+        border: 1px solid rgba(91,95,241,0.2);
+        background: rgba(91,95,241,0.04);
+        cursor: pointer;
+        transition: box-shadow 0.25s;
+        position: relative;
+    }
+    [data-bs-theme="dark"] .citation-banner {
+        background: rgba(91,95,241,0.08);
+        border-color: rgba(123,127,255,0.25);
+    }
+    .citation-banner:hover { box-shadow: 0 2px 12px rgba(91,95,241,0.15); }
+    .citation-collapsed {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.82rem;
+        color: var(--text-muted, #6b7280);
+    }
+    .citation-teaser { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .citation-chevron { font-size: 0.7rem; transition: transform 0.25s; }
+    .citation-banner.open .citation-chevron { transform: rotate(180deg); }
+    .citation-expanded {
+        display: none;
+        padding: 1rem 1.1rem 0.9rem;
+        position: relative;
+    }
+    .citation-banner.open .citation-collapsed { border-bottom: 1px solid rgba(91,95,241,0.15); }
+    .citation-banner.open .citation-expanded { display: block; }
+    .citation-icon-big {
+        color: var(--primary, #5B5FF1);
+        font-size: 1.4rem;
+        opacity: 0.35;
+        display: block;
+        margin-bottom: 0.4rem;
+    }
+    .citation-texte {
+        font-style: italic;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin: 0 0 0.35rem;
+        color: var(--text, inherit);
+    }
+    .citation-auteur {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--primary, #5B5FF1);
+        margin: 0;
+    }
+    .citation-close {
+        position: absolute;
+        top: 0.55rem; right: 0.65rem;
+        background: none; border: none;
+        color: var(--text-muted, #9ca3af);
+        font-size: 0.75rem;
+        cursor: pointer;
+        padding: 0.25rem;
+        line-height: 1;
+    }
+    .citation-close:hover { color: var(--bs-danger, #dc3545); }
+    </style>
+    <script>
+    (function(){
+        var STORAGE_KEY = 'bnc_citation_dismissed';
+        var WEEK_KEY    = '{{ citation.id }}_' + (function(){
+            var d = new Date(); return d.getFullYear() * 100 + Math.ceil((d - new Date(d.getFullYear(),0,1)) / 604800000);
+        })();
+        if (localStorage.getItem(STORAGE_KEY) === WEEK_KEY) return; // déjà fermé cette semaine
+
+        var banner   = document.getElementById('citation-banner');
+        var collapsed = document.getElementById('citation-collapsed');
+        var closeBtn  = document.getElementById('citation-close');
+
+        banner.style.display = '';
+
+        collapsed.addEventListener('click', function(){
+            banner.classList.toggle('open');
+        });
+        closeBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            banner.style.display = 'none';
+            localStorage.setItem(STORAGE_KEY, WEEK_KEY);
+        });
+    })();
+    </script>
+    {% endif %}
+
     <!-- Featured Books Section -->
     <div class="mb-3">
         <h2 style="font-weight: 800; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem; font-size: 1.1rem;">

@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from import_export.admin import ImportExportModelAdmin
-from .models import CustomUser, StaffMember
+from .models import CustomUser, StaffMember, Citation
 
 
 # =============================================================
@@ -412,3 +412,24 @@ class StaffMemberAdmin(admin.ModelAdmin):
         ('Apparence',    {'fields': ('photo', 'initiales', 'competences')}),
         ('Paramètres',   {'fields': ('ordre', 'actif')}),
     )
+
+
+# =============================================================
+# ADMIN CITATION HEBDOMADAIRE
+# =============================================================
+
+@admin.register(Citation)
+class CitationAdmin(admin.ModelAdmin):
+    list_display  = ('auteur', 'texte_court', 'actif', 'created_at')
+    list_editable = ('actif',)
+    list_filter   = ('actif',)
+    search_fields = ('texte', 'auteur')
+    ordering      = ('id',)
+    fieldsets = (
+        ('Citation', {'fields': ('texte', 'auteur')}),
+        ('Visibilité', {'fields': ('actif',)}),
+    )
+
+    @admin.display(description='Texte (aperçu)')
+    def texte_court(self, obj):
+        return obj.texte[:80] + ('…' if len(obj.texte) > 80 else '')

@@ -241,3 +241,27 @@ class StaffMember(models.Model):
             return self.initiales.upper()
         parts = self.nom.split()
         return ''.join(p[0] for p in parts[:2]).upper()
+
+
+# =============================================================
+# CITATION HEBDOMADAIRE
+# =============================================================
+
+class Citation(models.Model):
+    """Citation affichée aléatoirement sur la page d'accueil, renouvelée chaque semaine."""
+    texte      = models.TextField('Texte de la citation')
+    auteur     = models.CharField('Auteur / Source', max_length=120, blank=True,
+                                  help_text='Ex : Victor Hugo, Proverbe africain…')
+    actif      = models.BooleanField('Active', default=True,
+                                     help_text='Seules les citations actives sont affichées.')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+        verbose_name = 'Citation'
+        verbose_name_plural = 'Citations'
+
+    def __str__(self):
+        extrait = self.texte[:60] + ('…' if len(self.texte) > 60 else '')
+        auteur = f' — {self.auteur}' if self.auteur else ''
+        return f'{extrait}{auteur}'

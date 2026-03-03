@@ -8,13 +8,25 @@ from django.db.models import Q
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from allauth.socialaccount.models import SocialAccount
-from .models import CustomUser, StaffMember
+from .models import CustomUser, StaffMember, Citation
 from datetime import datetime
+import random
 
 from users.forms import LoginForm, RegisterForm, UserProfileForm
 from users.otp_service import generate_otp, send_otp_via_whatsapp
 from catalogue.models import Book, ReadingSession, Payment, Favorite, Highlight, Note
 
+
+def get_citation_semaine():
+    """Retourne une citation pseudo-aléatoire stable pour toute la semaine."""
+    citations = list(Citation.objects.filter(actif=True))
+    if not citations:
+        return None
+    import datetime as dt
+    today = dt.date.today()
+    seed = today.year * 100 + today.isocalendar()[1]
+    rng = random.Random(seed)
+    return rng.choice(citations)
 
 
 def home(request):
@@ -24,6 +36,7 @@ def home(request):
         'featured_books': books,
         'total_books': Book.objects.filter(is_published=True).count(),
         'total_authors': Book.objects.filter(is_published=True).values('authorbook__author').distinct().count(),
+        'citation': get_citation_semaine(),
     }
     return render(request, 'home.html', context)
 
