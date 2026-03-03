@@ -54,6 +54,9 @@ urlpatterns += i18n_patterns(
     # Page À propos
     path("apropos/", TemplateView.as_view(template_name="about.html"), name='about'),
 
+    # Page Staff technique
+    path("staff/", TemplateView.as_view(template_name="staff.html"), name='staff'),
+
     # Offline page (fallback for service worker)
     path("offline/", lambda request: __import__('django.shortcuts', fromlist=['render']).render(request, 'offline.html'), name='offline'),
     

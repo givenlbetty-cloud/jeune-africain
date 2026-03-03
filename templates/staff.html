@@ -1,0 +1,237 @@
+{% extends 'base-premium.html' %}
+{% load static %}
+
+{% block title %}Staff Technique — BNC Bibliothèque Numérique Calures{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ===== HERO ===== */
+    .staff-hero {
+        background: linear-gradient(135deg, #1a1a2e 0%, var(--primary-dark) 50%, var(--primary) 100%);
+        color: white;
+        padding: 2.5rem 0 2rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .staff-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.04' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .staff-hero h1 { font-size: clamp(1.3rem, 4vw, 1.9rem); margin-bottom: 0.4rem; }
+    .staff-hero p  { font-size: 0.85rem; opacity: 0.85; max-width: 480px; margin: 0 auto; }
+
+    /* ===== BREADCRUMB ===== */
+    .staff-breadcrumb {
+        font-size: 0.75rem;
+        padding: 0.75rem 0;
+        color: var(--text-light);
+    }
+    .staff-breadcrumb a { color: var(--primary); text-decoration: none; }
+    .staff-breadcrumb a:hover { text-decoration: underline; }
+
+    /* ===== TEAM CARD ===== */
+    .team-card {
+        background: var(--light-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem 1.25rem;
+        text-align: center;
+        transition: transform 0.25s, box-shadow 0.25s;
+        height: 100%;
+    }
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    .team-avatar {
+        width: 72px; height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), #7B7FFF);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.6rem; color: white;
+        margin: 0 auto 1rem;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+    }
+    .team-name  { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.15rem; }
+    .team-role  { font-size: 0.72rem; color: var(--primary); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .team-bio   { font-size: 0.75rem; color: var(--text-light); line-height: 1.55; margin-bottom: 0.75rem; }
+    .team-badge {
+        display: inline-flex; align-items: center; gap: 0.25rem;
+        background: rgba(91, 95, 241, 0.1); color: var(--primary);
+        border-radius: 20px; padding: 0.2rem 0.55rem;
+        font-size: 0.65rem; font-weight: 600;
+        margin: 0.15rem;
+    }
+
+    /* ===== DEPT HEADER ===== */
+    .dept-header {
+        border-left: 4px solid var(--primary);
+        padding-left: 0.75rem;
+        margin: 2rem 0 1rem;
+    }
+    .dept-header h3 { font-size: 0.95rem; margin: 0; }
+    .dept-header p  { font-size: 0.75rem; color: var(--text-light); margin: 0; }
+
+    /* ===== DARK MODE ===== */
+    [data-bs-theme="dark"] .team-card {
+        background: #1e1e35;
+        border-color: #2d2d4a;
+    }
+    [data-bs-theme="dark"] .team-badge {
+        background: rgba(91, 95, 241, 0.2);
+    }
+    [data-bs-theme="dark"] .team-bio { color: #8888aa; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="staff-hero">
+    <div class="container position-relative">
+        <div style="width:60px;height:60px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 0.75rem;border:2px solid rgba(255,255,255,0.3);">
+            <i class="fas fa-users-cog"></i>
+        </div>
+        <h1>Staff Technique BNC</h1>
+        <p>Les personnes qui conçoivent, développent et font fonctionner la Bibliothèque Numérique Calures.</p>
+    </div>
+</div>
+
+<div class="container py-3">
+
+    <!-- BREADCRUMB -->
+    <div class="staff-breadcrumb">
+        <a href="{% url 'home' %}">Accueil</a>
+        <span class="mx-1">/</span>
+        <a href="{% url 'about' %}">À propos</a>
+        <span class="mx-1">/</span>
+        <span>Staff technique</span>
+    </div>
+
+    <!-- DIRECTION -->
+    <div class="dept-header">
+        <h3><i class="fas fa-star me-2" style="color:var(--primary)"></i>Direction & Fondateurs</h3>
+        <p>Vision, stratégie et pilotage du projet BNC.</p>
+    </div>
+    <div class="row g-3 mb-2">
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">DG</div>
+                <div class="team-name">Direction Générale</div>
+                <div class="team-role">Fondateur & CEO</div>
+                <p class="team-bio">Visionnaire à l'origine du projet BNC, responsable de la stratégie globale, des partenariats avec les éditeurs et du développement de Calures Éditions.</p>
+                <div>
+                    <span class="team-badge"><i class="fas fa-lightbulb"></i> Stratégie</span>
+                    <span class="team-badge"><i class="fas fa-handshake"></i> Partenariats</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">DP</div>
+                <div class="team-name">Direction des Projets</div>
+                <div class="team-role">Directeur de Publication</div>
+                <p class="team-bio">Supervision éditoriale, gestion des catalogues d'auteurs et coordination des sorties numériques sur la plateforme BNC.</p>
+                <div>
+                    <span class="team-badge"><i class="fas fa-book"></i> Édition</span>
+                    <span class="team-badge"><i class="fas fa-tasks"></i> Catalogue</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DÉVELOPPEMENT -->
+    <div class="dept-header">
+        <h3><i class="fas fa-code me-2" style="color:var(--primary)"></i>Équipe Technique & Développement</h3>
+        <p>Conception, développement et maintenance de la plateforme.</p>
+    </div>
+    <div class="row g-3 mb-2">
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">LT</div>
+                <div class="team-name">Lead Technique</div>
+                <div class="team-role">Architecte Logiciel</div>
+                <p class="team-bio">Architecture backend Django, API REST, sécurité des fichiers et intégration des systèmes de paiement mobile (Mobile Money, Stripe).</p>
+                <div>
+                    <span class="team-badge"><i class="fab fa-python"></i> Django</span>
+                    <span class="team-badge"><i class="fas fa-database"></i> PostgreSQL</span>
+                    <span class="team-badge"><i class="fas fa-lock"></i> Sécurité</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">FE</div>
+                <div class="team-name">Frontend Developer</div>
+                <div class="team-role">UI/UX & Intégration Web</div>
+                <p class="team-bio">Design de l'interface utilisateur, intégration responsive, lecteur PDF haute définition et optimisation de l'expérience mobile.</p>
+                <div>
+                    <span class="team-badge"><i class="fab fa-html5"></i> HTML/CSS</span>
+                    <span class="team-badge"><i class="fab fa-js"></i> JavaScript</span>
+                    <span class="team-badge"><i class="fas fa-mobile-alt"></i> PWA</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">DE</div>
+                <div class="team-name">DevOps & Infra</div>
+                <div class="team-role">Ingénieur Infrastructure</div>
+                <p class="team-bio">Déploiement cloud sur Render, gestion des bases de données PostgreSQL, monitoring, backups et continuité de service.</p>
+                <div>
+                    <span class="team-badge"><i class="fas fa-cloud"></i> Render</span>
+                    <span class="team-badge"><i class="fas fa-cogs"></i> CI/CD</span>
+                    <span class="team-badge"><i class="fas fa-shield-alt"></i> HTTPS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENU & COMMUNICATION -->
+    <div class="dept-header">
+        <h3><i class="fas fa-pen-nib me-2" style="color:var(--primary)"></i>Contenu & Communication</h3>
+        <p>Animation de la plateforme, gestion du catalogue et communication avec les auteurs.</p>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">CM</div>
+                <div class="team-name">Community Manager</div>
+                <div class="team-role">Animateur Communauté</div>
+                <p class="team-bio">Animation du forum, modération des avis lecteurs, gestion des réseaux sociaux et organisation des événements littéraires en ligne.</p>
+                <div>
+                    <span class="team-badge"><i class="fas fa-comments"></i> Forum</span>
+                    <span class="team-badge"><i class="fas fa-bullhorn"></i> Annonces</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="team-card">
+                <div class="team-avatar">GC</div>
+                <div class="team-name">Gestionnaire Catalogue</div>
+                <div class="team-role">Responsable Contenu</div>
+                <p class="team-bio">Mise en ligne des œuvres, vérification des métadonnées, gestion des couvertures et coordination avec les auteurs et éditeurs partenaires.</p>
+                <div>
+                    <span class="team-badge"><i class="fas fa-book-open"></i> Livres</span>
+                    <span class="team-badge"><i class="fas fa-headphones"></i> Audio</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA RETOUR À PROPOS -->
+    <div class="text-center py-3 mb-4">
+        <a href="{% url 'about' %}" class="btn btn-outline-secondary btn-sm me-2">
+            <i class="fas fa-arrow-left me-2"></i>Retour à propos
+        </a>
+        <a href="{% url 'catalogue:catalogue' %}" class="btn btn-premium btn-sm">
+            <i class="fas fa-book-open me-2"></i>Explorer le catalogue
+        </a>
+    </div>
+
+</div>
+{% endblock %}

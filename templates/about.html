@@ -1,203 +1,273 @@
-{% extends 'base.html' %}
+{% extends 'base-premium.html' %}
 {% load static %}
 
-{% block title %}À propos - BNC{% endblock %}
+{% block title %}À propos — BNC Bibliothèque Numérique Calures{% endblock %}
 
 {% block extra_css %}
 <style>
-    .hero-section {
-        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    /* ===== HERO ===== */
+    .about-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 60%, #2d3a8c 100%);
         color: white;
-        padding: 5rem 0;
-        margin-bottom: 3rem;
-    }
-    
-    .hero-icon {
-        font-size: 4rem;
-        background: rgba(255, 255, 255, 0.2);
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-    }
-
-    .feature-icon-box {
+        padding: 3rem 0 2.5rem;
         text-align: center;
-        padding: 2rem;
-        border-radius: 1rem;
-        background: white;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        height: 100%;
-        transition: transform 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.05);
-    }
-    
-    .feature-icon-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-
-    .feature-icon-circle {
-        width: 60px;
-        height: 60px;
-        background-color: var(--accent-light, #e3f2fd);
-        color: var(--primary-color);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin: 0 auto 1.5rem;
-    }
-
-    .highlight-card {
-        background: #f8f9fa;
-        border-radius: 15px;
-        border: none;
+        position: relative;
         overflow: hidden;
     }
-
-    .stats-item {
-        color: var(--primary-color);
-        font-weight: 700;
-        font-size: 2.5rem;
+    .about-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
+    .about-hero-icon {
+        width: 72px; height: 72px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem;
+        margin: 0 auto 1rem;
+        backdrop-filter: blur(8px);
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+    .about-hero h1 { font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 0.5rem; }
+    .about-hero p { font-size: 0.9rem; opacity: 0.88; max-width: 540px; margin: 0 auto; }
+
+    /* ===== SECTION CARDS ===== */
+    .about-section { padding: 2rem 0; }
+    .about-card {
+        background: var(--light-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        height: 100%;
+        transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .about-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    .about-card-icon {
+        width: 48px; height: 48px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, var(--primary), #7B7FFF);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    .about-card h5 { font-size: 0.95rem; margin-bottom: 0.4rem; }
+    .about-card p  { font-size: 0.78rem; color: var(--text-light); margin: 0; line-height: 1.5; }
+
+    /* ===== STAT STRIP ===== */
+    .stat-strip {
+        background: linear-gradient(135deg, var(--primary), #7B7FFF);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        color: white;
+        margin: 2rem 0;
+    }
+    .stat-item strong { font-size: clamp(1.4rem, 4vw, 2rem); display: block; font-family: 'Poppins', sans-serif; }
+    .stat-item span   { font-size: 0.72rem; opacity: 0.85; }
+
+    /* ===== VISION / MISSION ===== */
+    .vm-block {
+        background: var(--light-alt);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--primary);
+        border-radius: var(--radius-md);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+    }
+    .vm-block h4 { font-size: 0.95rem; color: var(--primary); margin-bottom: 0.4rem; }
+    .vm-block p  { font-size: 0.8rem; color: var(--text-light); margin: 0; line-height: 1.6; }
+
+    /* ===== TECH BADGES ===== */
+    .tech-badge {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        background: var(--light-alt); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 0.3rem 0.65rem;
+        font-size: 0.72rem; font-weight: 600;
+    }
+
+    /* ===== CTA STAFF ===== */
+    .staff-cta {
+        background: var(--light-alt);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+        margin-top: 2rem;
+    }
+    .staff-cta h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .staff-cta p  { font-size: 0.8rem; color: var(--text-light); margin-bottom: 1.25rem; }
+
+    /* ===== DARK MODE ===== */
+    [data-bs-theme="dark"] .about-card,
+    [data-bs-theme="dark"] .vm-block,
+    [data-bs-theme="dark"] .staff-cta,
+    [data-bs-theme="dark"] .tech-badge {
+        background: #1e1e35;
+        border-color: #2d2d4a;
+    }
+    [data-bs-theme="dark"] .about-card p,
+    [data-bs-theme="dark"] .vm-block p,
+    [data-bs-theme="dark"] .staff-cta p { color: #9090b8; }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- Hero Header -->
-<div class="hero-section text-center">
-    <div class="container">
-        <div class="hero-icon fade-in-up">
-            <i class="fas fa-book-reader"></i>
+<!-- HERO -->
+<div class="about-hero">
+    <div class="container position-relative">
+        <div class="about-hero-icon">
+            <i class="fas fa-book-open"></i>
         </div>
-        <h1 class="display-4 fw-bold mb-3 fade-in-up">Bibliothèque Numérique Calures</h1>
-        <p class="lead mb-0 fade-in-up" style="opacity: 0.9;">L'infrastructure numérique de l'excellence éducative par Calures Éditions.</p>
+        <h1>Bibliothèque Numérique Calures</h1>
+        <p>La plateforme de lecture numérique souveraine dédiée à la littérature et à la culture africaine.</p>
     </div>
 </div>
 
-<div class="container mb-5">
-    
-    <!-- Vision Section -->
-    <div class="row align-items-center mb-5 pb-5 border-bottom">
-        <div class="col-lg-6 mb-4 mb-lg-0">
-            <h2 class="display-6 fw-bold mb-4" style="color: var(--primary-color);">Notre Vision</h2>
-            <p class="lead text-muted">Offrir un accès universel aux savoirs et à la culture africaine tout en garantissant une rémunération juste aux créateurs.</p>
-            <p>BNC est une plateforme de lecture numérique souveraine conçue pour propulser la littérature africaine à l'ère du digital. Plus qu'une simple librairie en ligne, c'est un écosystème complet qui connecte auteurs, éditeurs et lecteurs à travers une expérience sécurisée, accessible et moderne.</p>
-            <p>BNC résout le défi de la distribution du livre en Afrique grâce à une technologie adaptée aux réalités locales, intégrant nativement les paiements mobiles et la lecture hors-ligne.</p>
-        </div>
-        <div class="col-lg-6 text-center">
-            <img src="{% static 'img/about-vision.svg' %}" onerror="this.src='https://placehold.co/600x400/e3f2fd/2196f3?text=Vision+BNC'" class="img-fluid rounded-3 shadow-lg" alt="Vision BNC">
-        </div>
-    </div>
+<div class="container py-3">
 
-    <!-- Key Features Grid -->
-    <div class="row g-4 mb-5">
-        <div class="col-12 text-center mb-4">
-            <h2 class="fw-bold">Nos Piliers Fondamentaux</h2>
-            <p class="text-muted">Une technologie pensée pour l'Afrique, sans compromis sur la qualité.</p>
+    <!-- VISION / MISSION -->
+    <div class="row g-3 about-section">
+        <div class="col-12">
+            <h2 class="mb-3" style="font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-light);">
+                <i class="fas fa-bullseye me-2" style="color:var(--primary)"></i>Vision &amp; Mission
+            </h2>
         </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="feature-icon-box">
-                <div class="feature-icon-circle">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h4>Lecture Sécurisée</h4>
-                <p class="text-muted small mt-3">Fichiers protégés contre le piratage. Consultation en streaming haute définition avec outils d'étude avancés (surlignage, notes).</p>
+        <div class="col-md-6">
+            <div class="vm-block">
+                <h4><i class="fas fa-eye me-2"></i>Notre Vision</h4>
+                <p>Offrir un accès universel aux savoirs et à la culture africaine, tout en garantissant une rémunération juste aux créateurs. BNC ambitionne de devenir la première bibliothèque numérique de référence du continent.</p>
             </div>
         </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="feature-icon-box">
-                <div class="feature-icon-circle">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <h4>Paiements Locaux</h4>
-                <p class="text-muted small mt-3">Inclusion financière totale avec Mobile Money (Orange, Airtel, M-Pesa) et Cartes Bancaires. Modèle à l'acte ou gratuit.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="feature-icon-box">
-                <div class="feature-icon-circle">
-                    <i class="fas fa-wifi-slash"></i>
-                </div>
-                <h4>Mode Hors-Ligne</h4>
-                <p class="text-muted small mt-3">Application PWA : lisez sans internet. Téléchargez vos livres légalement et synchronisez votre progression ultérieurement.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="feature-icon-box">
-                <div class="feature-icon-circle">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h4>IA & Découverte</h4>
-                <p class="text-muted small mt-3">Moteur de recommandation intelligent analysant les goûts pour proposer des suggestions personnalisées et pertinentes.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="feature-icon-box">
-                <div class="feature-icon-circle">
-                    <i class="fas fa-cogs"></i>
-                </div>
-                <h4>Administration 360°</h4>
-                <p class="text-muted small mt-3">Outils puissants pour les éditeurs : gestion catalogue, médias associés, suivi financier précis et organisation d'événements.</p>
-            </div>
-        </div>
-
-        <div class="col-md-6 col-lg-4">
-            <div class="feature-icon-box">
-                <div class="feature-icon-circle">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h4>Communauté</h4>
-                <p class="text-muted small mt-3">Espace d'échange et de partage autour des œuvres. Forums de discussion et avis vérifiés pour guider les lecteurs.</p>
+        <div class="col-md-6">
+            <div class="vm-block">
+                <h4><i class="fas fa-rocket me-2"></i>Notre Mission</h4>
+                <p>Connecter auteurs, éditeurs et lecteurs à travers une expérience sécurisée, accessible et moderne — adaptée aux réalités locales, intégrant nativement les paiements mobiles et la lecture hors-ligne.</p>
             </div>
         </div>
     </div>
 
-    <!-- Tech Stack / Robustness -->
-    <div class="card highlight-card p-5 mb-5">
-        <div class="row align-items-center">
-            <div class="col-lg-5 mb-4 mb-lg-0 text-center">
-                <div class="display-1 text-primary mb-2"><i class="fas fa-server"></i></div>
+    <!-- STATS -->
+    <div class="stat-strip">
+        <div class="row text-center g-3">
+            <div class="col-6 col-md-3 stat-item">
+                <strong>BNC</strong>
+                <span>Bibliothèque Numérique Calures</span>
             </div>
-            <div class="col-lg-7">
-                <h3 class="fw-bold mb-3">Une Infrastructure Robuste</h3>
-                <p class="lead mb-4">Architecture évolutive (Django/Python), prête pour le cloud, garantissant fiabilité, rapidité et sécurité des données.</p>
-                <div class="d-flex gap-3 flex-wrap">
-                    <span class="badge bg-white text-dark border p-2"><i class="fab fa-python me-1"></i> Django</span>
-                    <span class="badge bg-white text-dark border p-2"><i class="fas fa-database me-1"></i> PostgreSQL</span>
-                    <span class="badge bg-white text-dark border p-2"><i class="fas fa-layer-group me-1"></i> PWA</span>
-                    <span class="badge bg-white text-dark border p-2"><i class="fas fa-lock me-1"></i> HTTPS</span>
+            <div class="col-6 col-md-3 stat-item">
+                <strong>100%</strong>
+                <span>Numérique &amp; Mobile</span>
+            </div>
+            <div class="col-6 col-md-3 stat-item">
+                <strong>Africain</strong>
+                <span>Contenu &amp; Équipe</span>
+            </div>
+            <div class="col-6 col-md-3 stat-item">
+                <strong>24/7</strong>
+                <span>Accès illimité</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- PILIERS -->
+    <div class="about-section">
+        <h2 class="mb-3" style="font-size:1rem; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-light);">
+            <i class="fas fa-layer-group me-2" style="color:var(--primary)"></i>Nos Piliers
+        </h2>
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-4">
+                <div class="about-card">
+                    <div class="about-card-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h5>Lecture Sécurisée</h5>
+                    <p>Fichiers protégés contre le piratage. Streaming haute définition avec surlignage, notes et marque-pages persistants.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="about-card">
+                    <div class="about-card-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h5>Paiements Locaux</h5>
+                    <p>Mobile Money (Orange, Airtel, M-Pesa) et cartes bancaires. Modèle à l'acte ou accès gratuit selon les œuvres.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="about-card">
+                    <div class="about-card-icon"><i class="fas fa-wifi"></i></div>
+                    <h5>Mode Hors-Ligne</h5>
+                    <p>Application PWA : téléchargez vos livres légalement et lisez sans connexion. Synchronisation automatique à la reconnexion.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="about-card">
+                    <div class="about-card-icon"><i class="fas fa-brain"></i></div>
+                    <h5>IA &amp; Découverte</h5>
+                    <p>Moteur de recommandation intelligent analysant vos goûts pour des suggestions personnalisées et pertinentes.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="about-card">
+                    <div class="about-card-icon"><i class="fas fa-headphones"></i></div>
+                    <h5>Médiathèque Complète</h5>
+                    <p>Livres numériques, livres audio, podcasts, vidéos et événements culturels — tout en un seul endroit.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <div class="about-card">
+                    <div class="about-card-icon"><i class="fas fa-users"></i></div>
+                    <h5>Communauté</h5>
+                    <p>Forums de discussion, avis vérifiés et espaces d'échange autour des œuvres pour guider et inspirer les lecteurs.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Call to Action -->
-    <div class="text-center py-5">
-        <h2 class="fw-bold mb-4">Rejoignez la révolution littéraire</h2>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="{% url 'catalogue:catalogue' %}" class="btn btn-primary btn-lg px-5 pill-btn">
-                <i class="fas fa-book-open me-2"></i> Explorer le catalogue
-            </a>
-            {% if not user.is_authenticated %}
-            <a href="{% url 'account_signup' %}" class="btn btn-outline-primary btn-lg px-5 pill-btn">
-                <i class="fas fa-user-plus me-2"></i> Créer un compte
-            </a>
-            {% endif %}
+    <!-- TECHNOLOGIE -->
+    <div class="about-card mb-4">
+        <div class="row align-items-center g-3">
+            <div class="col-auto">
+                <div class="about-card-icon" style="width:56px;height:56px;font-size:1.4rem;"><i class="fas fa-server"></i></div>
+            </div>
+            <div class="col">
+                <h4 class="mb-1">Infrastructure Robuste</h4>
+                <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:0.75rem;">Architecture évolutive Django/Python déployée sur le cloud — fiabilité, rapidité et sécurité des données garanties.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="tech-badge"><i class="fab fa-python text-primary"></i> Django</span>
+                    <span class="tech-badge"><i class="fas fa-database text-primary"></i> PostgreSQL</span>
+                    <span class="tech-badge"><i class="fas fa-layer-group text-primary"></i> PWA</span>
+                    <span class="tech-badge"><i class="fas fa-lock text-primary"></i> HTTPS</span>
+                    <span class="tech-badge"><i class="fab fa-js text-primary"></i> PDF.js</span>
+                    <span class="tech-badge"><i class="fas fa-cloud text-primary"></i> Render</span>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <!-- CTA STAFF -->
+    <div class="staff-cta">
+        <div class="about-card-icon" style="margin:0 auto 1rem; width:52px;height:52px;">
+            <i class="fas fa-users-cog"></i>
+        </div>
+        <h3>Rencontrez l'équipe BNC</h3>
+        <p>Découvrez les personnes qui construisent et font vivre la Bibliothèque Numérique Calures au quotidien.</p>
+        <a href="{% url 'staff' %}" class="btn btn-premium">
+            <i class="fas fa-id-badge me-2"></i> Voir le staff technique
+        </a>
+    </div>
+
+    <!-- CTA CATALOGUE -->
+    <div class="text-center py-4">
+        <a href="{% url 'catalogue:catalogue' %}" class="btn btn-premium btn-sm me-2">
+            <i class="fas fa-book-open me-2"></i>Explorer le catalogue
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'users:login' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-user-plus me-2"></i>Créer un compte
+        </a>
+        {% endif %}
     </div>
 
 </div>
-
 {% endblock %}
