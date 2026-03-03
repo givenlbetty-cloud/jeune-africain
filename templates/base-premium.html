@@ -401,6 +401,9 @@
                         <a class="nav-link" href="{% url 'catalogue:forum_home' %}"><i class="fas fa-comments"></i> Forum</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}"><i class="fas fa-info-circle"></i> À propos</a>
+                    </li>
+                    <li class="nav-item">
                         <button class="btn btn-sm" id="darkModeBtn" style="background:none;border:none;color:var(--text-light);cursor:pointer;padding:0.35rem;">
                             <i class="fas fa-moon"></i>
                         </button>
@@ -458,19 +461,22 @@
             <a href="{% url 'catalogue:catalogue' %}" class="footer-item {% if 'catalogue' in request.path %}active{% endif %}">
                 <i class="fas fa-search"></i><span>Catalogue</span>
             </a>
+            <a href="{% url 'about' %}" class="footer-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                <i class="fas fa-info-circle"></i><span>À propos</span>
+            </a>
             {% if user.is_authenticated %}
             <a href="{% url 'users:my_library' %}" class="footer-item {% if 'library' in request.path %}active{% endif %}">
                 <i class="fas fa-book-reader"></i><span>Biblio</span>
             </a>
-            <a href="{% url 'users:favorite_list' %}" class="footer-item {% if 'favorite' in request.path %}active{% endif %}">
-                <i class="fas fa-heart"></i><span>Favoris</span>
+            <a href="{% url 'users:profile' %}" class="footer-item {% if 'profile' in request.path %}active{% endif %}">
+                <i class="fas fa-user"></i><span>Profil</span>
             </a>
             {% else %}
             <a href="{% url 'users:login' %}" class="footer-item">
                 <i class="fas fa-book-reader"></i><span>Biblio</span>
             </a>
             <a href="{% url 'users:login' %}" class="footer-item">
-                <i class="fas fa-heart"></i><span>Favoris</span>
+                <i class="fas fa-user"></i><span>Profil</span>
             </a>
             {% endif %}
         </div>
@@ -500,6 +506,22 @@
             const theme = html.getAttribute('data-bs-theme');
             darkModeBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         }
+
+        // Fermer le menu burger au scroll et au clic en dehors
+        const navbarCollapse = document.getElementById('navbarNav');
+        function closeNavbar() {
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                bootstrap.Collapse.getOrCreateInstance(navbarCollapse).hide();
+            }
+        }
+        window.addEventListener('scroll', closeNavbar, { passive: true });
+        document.addEventListener('click', (e) => {
+            if (!navbarCollapse) return;
+            const toggler = document.querySelector('.navbar-toggler');
+            if (!navbarCollapse.contains(e.target) && toggler && !toggler.contains(e.target)) {
+                closeNavbar();
+            }
+        });
     </script>
     
     {% block extra_js %}{% endblock %}
