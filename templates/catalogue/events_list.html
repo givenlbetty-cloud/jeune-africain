@@ -1,188 +1,609 @@
-{% extends 'base.html' %}
+{% extends 'base-premium.html' %}
 
-{% block title %}Événements - BNC{% endblock %}
+{% block title %}Actualités & Annonces - BNC{% endblock %}
 
-{% block content %}
-<div class="container mt-5">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1>📅 Événements et Annonces</h1>
-            <p class="text-muted">Découvrez les nouveaux livres, ateliers et conférences de la BNC</p>
-        </div>
-        <div class="col-md-4">
-            <form method="get" class="d-flex gap-2">
-                <select name="type" class="form-select" onchange="this.form.submit()">
-                    <option value="">Tous les événements</option>
-                    {% for value, label in event_types %}
-                        <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </form>
-        </div>
-    </div>
-
-    <!-- Événements en cours -->
-    {% if happening_now %}
-    <div class="mb-5">
-        <h2 class="mb-4">⚡ En cours maintenant</h2>
-        <div class="row">
-            {% for event in happening_now %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 border-warning">
-                    {% if event.image %}
-                    <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 250px; object-fit: cover;">
-                    {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
-                        <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem;"></i>
-                    </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <span class="badge bg-warning text-dark mb-2">{{ event.get_event_type_display }}</span>
-                        <h5 class="card-title">{{ event.title }}</h5>
-                        <p class="card-text text-muted small">{{ event.description|truncatewords:20 }}</p>
-                        
-                        {% if event.location %}
-                        <p class="mb-2">
-                            <i class="fas fa-map-marker-alt text-danger"></i>
-                            <strong>{{ event.location }}</strong>
-                        </p>
-                        {% endif %}
-                        
-                        <p class="mb-2">
-                            <i class="fas fa-clock text-info"></i>
-                            {{ event.date_start|date:"d M Y - H:i" }}
-                        </p>
-                        
-                        {% if event.book %}
-                        <p class="mb-3">
-                            <strong>Livre:</strong> <a href="{% url 'catalogue:book_detail' event.book.id %}">{{ event.book.title }}</a>
-                        </p>
-                        {% endif %}
-                        
-                        {% if event.url %}
-                        <a href="{{ event.url }}" target="_blank" class="btn btn-sm btn-primary">
-                            En savoir plus <i class="fas fa-external-link-alt"></i>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Événements à venir -->
-    {% if upcoming_events %}
-    <div class="mb-5">
-        <h2 class="mb-4">📌 À venir</h2>
-        <div class="row">
-            {% for event in upcoming_events %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
-                    {% if event.image %}
-                    <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 250px; object-fit: cover;">
-                    {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
-                        <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem;"></i>
-                    </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <span class="badge bg-info mb-2">{{ event.get_event_type_display }}</span>
-                        <h5 class="card-title">{{ event.title }}</h5>
-                        <p class="card-text text-muted small">{{ event.description|truncatewords:20 }}</p>
-                        
-                        {% if event.location %}
-                        <p class="mb-2">
-                            <i class="fas fa-map-marker-alt text-danger"></i>
-                            <strong>{{ event.location }}</strong>
-                        </p>
-                        {% endif %}
-                        
-                        <p class="mb-2">
-                            <i class="fas fa-clock text-info"></i>
-                            {{ event.date_start|date:"d M Y - H:i" }}
-                        </p>
-                        
-                        {% if event.book %}
-                        <p class="mb-3">
-                            <strong>Livre:</strong> <a href="{% url 'catalogue:book_detail' event.book.id %}">{{ event.book.title }}</a>
-                        </p>
-                        {% endif %}
-                        
-                        {% if event.url %}
-                        <a href="{{ event.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                            En savoir plus <i class="fas fa-external-link-alt"></i>
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Événements passés -->
-    {% if past_events %}
-    <div class="mb-5">
-        <h2 class="mb-4">🗂️ Événements passés</h2>
-        <div class="row">
-            {% for event in past_events %}
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 opacity-75">
-                    {% if event.image %}
-                    <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 250px; object-fit: cover; opacity: 0.7;">
-                    {% else %}
-                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
-                        <i class="fas fa-calendar-alt text-muted" style="font-size: 3rem;"></i>
-                    </div>
-                    {% endif %}
-                    <div class="card-body">
-                        <span class="badge bg-secondary mb-2">{{ event.get_event_type_display }}</span>
-                        <h5 class="card-title text-muted">{{ event.title }}</h5>
-                        <p class="card-text text-muted small">{{ event.description|truncatewords:20 }}</p>
-                        
-                        {% if event.location %}
-                        <p class="mb-2 text-muted">
-                            <i class="fas fa-map-marker-alt"></i>
-                            {{ event.location }}
-                        </p>
-                        {% endif %}
-                        
-                        <p class="mb-2 text-muted">
-                            <i class="fas fa-clock"></i>
-                            {{ event.date_start|date:"d M Y - H:i" }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Aucun événement -->
-    {% if not all_events %}
-    <div class="alert alert-info" role="alert">
-        <i class="fas fa-info-circle"></i>
-        <strong>Aucun événement</strong> pour le moment. Revenez bientôt pour découvrir les annonces et ateliers!
-    </div>
-    {% endif %}
-</div>
-
+{% block extra_css %}
 <style>
-    .opacity-75 {
-        opacity: 0.75;
+    /* ===================================================
+       CHAÎNE D'ACTUALITÉS — Style TV News Channel
+       =================================================== */
+
+    /* ========== PAGE WRAPPER ========== */
+    .news-channel {
+        background: #0f0f14;
+        min-height: 85vh;
+        color: #fff;
+        position: relative;
+        margin: -0.5rem -12px 0;
+        padding-bottom: 1.5rem;
     }
-    
-    .card {
-        transition: transform 0.2s, box-shadow 0.2s;
+
+    /* ========== BREAKING NEWS BAR (top) ========== */
+    .breaking-bar {
+        background: #DC2626;
+        display: flex; align-items: center;
+        overflow: hidden; position: relative;
     }
-    
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    .breaking-label {
+        background: #fff; color: #DC2626;
+        font-weight: 900; font-size: 0.7rem;
+        padding: 0.35rem 0.7rem;
+        white-space: nowrap; flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        z-index: 2;
+    }
+    .breaking-scroll {
+        flex: 1; overflow: hidden; white-space: nowrap;
+        padding: 0.35rem 0;
+    }
+    .breaking-scroll-inner {
+        display: inline-block;
+        animation: tickerMove 35s linear infinite;
+        font-size: 0.72rem; font-weight: 600; color: #fff;
+    }
+    .breaking-scroll-inner span {
+        margin-right: 4rem;
+    }
+    .breaking-scroll-inner .sep {
+        color: rgba(255,255,255,0.4); margin: 0 1rem;
+    }
+    @keyframes tickerMove {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+
+    /* ========== CARROUSEL AUTO-DÉFILANT ========== */
+    .hero-carousel {
+        position: relative;
+        overflow: hidden;
+        height: 240px;
+        background: #111118;
+    }
+    @media (min-width: 768px) { .hero-carousel { height: 300px; } }
+    .carousel-track {
+        display: flex;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .carousel-slide {
+        min-width: 100%; height: 100%;
+        position: relative; flex-shrink: 0;
+    }
+    .carousel-slide img {
+        width: 100%; height: 100%; object-fit: cover;
+        filter: brightness(0.45);
+    }
+    .carousel-slide .slide-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .carousel-slide .slide-placeholder i {
+        font-size: 4rem; color: rgba(255,255,255,0.08);
+    }
+    .carousel-overlay {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent 0%, rgba(0,0,0,0.85) 60%);
+        padding: 1.2rem 1rem 0.8rem;
+    }
+    .carousel-overlay .cat-label {
+        display: inline-block; background: var(--primary);
+        color: #fff; font-size: 0.55rem; font-weight: 800;
+        padding: 0.12rem 0.5rem; border-radius: 2px;
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+    }
+    .carousel-overlay .cat-label.live { background: #DC2626; animation: livePulse 2s infinite; }
+    @keyframes livePulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .carousel-overlay h2 {
+        font-size: 1.3rem; font-weight: 800; color: #fff;
+        margin: 0 0 0.25rem; line-height: 1.25;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+    @media (min-width: 768px) { .carousel-overlay h2 { font-size: 1.6rem; } }
+    .carousel-overlay .sub {
+        font-size: 0.75rem; color: rgba(255,255,255,0.85);
+        margin: 0; line-height: 1.4;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .carousel-overlay .date-loc {
+        font-size: 0.65rem; color: rgba(255,255,255,0.6);
+        margin-top: 0.3rem;
+        display: flex; gap: 0.8rem; flex-wrap: wrap;
+    }
+
+    /* Carousel dots */
+    .carousel-dots {
+        position: absolute; bottom: 0.5rem; right: 1rem;
+        display: flex; gap: 0.3rem; z-index: 5;
+    }
+    .carousel-dots .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: rgba(255,255,255,0.3); cursor: pointer;
+        transition: all 0.3s;
+    }
+    .carousel-dots .dot.active {
+        background: #fff; transform: scale(1.2);
+    }
+
+    /* Progress bar under carousel */
+    .carousel-progress {
+        height: 3px; background: rgba(255,255,255,0.1);
+        position: relative; overflow: hidden;
+    }
+    .carousel-progress-bar {
+        height: 100%; background: var(--primary);
+        width: 0%; animation: progressFill 6s linear infinite;
+    }
+    @keyframes progressFill {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+
+    /* ========== CATEGORY TABS ========== */
+    .news-tabs {
+        display: flex; gap: 0; border-bottom: 2px solid #222;
+        overflow-x: auto; scrollbar-width: none;
+        background: #16161d;
+    }
+    .news-tabs::-webkit-scrollbar { display: none; }
+    .news-tab {
+        padding: 0.45rem 0.8rem; font-size: 0.68rem; font-weight: 700;
+        color: rgba(255,255,255,0.5); text-decoration: none;
+        white-space: nowrap; border-bottom: 2px solid transparent;
+        margin-bottom: -2px; transition: all 0.25s;
+    }
+    .news-tab:hover { color: rgba(255,255,255,0.8); }
+    .news-tab.active {
+        color: #fff; border-bottom-color: var(--primary);
+    }
+
+    /* ========== SECTION HEADER ========== */
+    .section-head {
+        display: flex; align-items: center; gap: 0.4rem;
+        padding: 0.8rem 1rem 0.4rem;
+    }
+    .section-head .red-bar {
+        width: 4px; height: 1rem; background: #DC2626; border-radius: 2px;
+    }
+    .section-head h3 {
+        font-size: 0.85rem; font-weight: 800; color: #fff; margin: 0;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    /* ========== NEWS FEED CARDS ========== */
+    .feed-wrap { padding: 0 0.75rem; }
+
+    .news-item {
+        display: flex; gap: 0.6rem;
+        padding: 0.65rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        text-decoration: none; color: #fff;
+        transition: background 0.2s;
+        animation: itemSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .news-item:hover {
+        background: rgba(255,255,255,0.03);
+    }
+    @keyframes itemSlideIn {
+        0% { opacity: 0; transform: translateX(-15px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .news-item-img {
+        width: 100px; min-width: 100px; height: 65px;
+        border-radius: 6px; overflow: hidden; flex-shrink: 0;
+        position: relative;
+    }
+    .news-item-img img {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .news-item-img .placeholder-img {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .news-item-img .placeholder-img i {
+        font-size: 1rem; color: rgba(255,255,255,0.15);
+    }
+
+    .news-item-body { flex: 1; min-width: 0; }
+    .news-item-body .item-cat {
+        display: inline-block;
+        font-size: 0.5rem; font-weight: 800; color: var(--primary);
+        text-transform: uppercase; letter-spacing: 0.5px;
+        margin-bottom: 0.1rem;
+    }
+    .news-item-body .item-cat.live-cat { color: #DC2626; }
+    .news-item-body h4 {
+        font-size: 0.78rem; font-weight: 700; color: #fff;
+        margin: 0 0 0.15rem; line-height: 1.3;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .news-item-body .item-desc {
+        font-size: 0.62rem; color: rgba(255,255,255,0.55);
+        margin: 0 0 0.12rem; line-height: 1.35;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .news-item-body .item-meta {
+        font-size: 0.55rem; color: rgba(255,255,255,0.35);
+        display: flex; gap: 0.6rem;
+    }
+
+    /* ========== GRID CARDS (compact) ========== */
+    .news-grid { padding: 0 0.75rem; }
+    .grid-card {
+        background: #1a1a24; border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 8px; overflow: hidden;
+        height: 100%; text-decoration: none; display: block;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        animation: cardPopIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .grid-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary);
+        box-shadow: 0 8px 24px rgba(91,95,241,0.15);
+    }
+    .grid-card:hover .grid-card-img img { transform: scale(1.05); }
+    @keyframes cardPopIn {
+        0% { opacity: 0; transform: translateY(15px) scale(0.97); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .grid-card-img {
+        height: 85px; overflow: hidden; position: relative;
+    }
+    .grid-card-img img {
+        width: 100%; height: 100%; object-fit: cover;
+        transition: transform 0.4s;
+    }
+    .grid-card-img .placeholder-grid {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .grid-card-img .placeholder-grid i {
+        font-size: 1.3rem; color: rgba(255,255,255,0.1);
+    }
+    .grid-card-img .time-badge {
+        position: absolute; top: 0.25rem; left: 0.25rem;
+        font-size: 0.45rem; font-weight: 800;
+        padding: 0.08rem 0.35rem; border-radius: 2px;
+        text-transform: uppercase;
+    }
+    .time-badge.is-live { background: #DC2626; color: #fff; animation: livePulse 2s infinite; }
+    .time-badge.is-soon { background: var(--primary); color: #fff; }
+    .time-badge.is-past { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.6); }
+
+    .grid-card-body { padding: 0.4rem 0.5rem; }
+    .grid-card-body h5 {
+        font-size: 0.7rem; font-weight: 700; color: #fff;
+        margin: 0 0 0.1rem; line-height: 1.25;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .grid-card-body .grid-desc {
+        font-size: 0.56rem; color: rgba(255,255,255,0.45);
+        margin: 0 0 0.12rem; line-height: 1.3;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .grid-card-body .grid-meta {
+        font-size: 0.5rem; color: rgba(255,255,255,0.3);
+    }
+
+    /* ========== EMPTY STATE ========== */
+    .news-empty {
+        text-align: center; padding: 3rem 1rem;
+    }
+    .news-empty i { font-size: 2.5rem; color: rgba(255,255,255,0.1); display: block; margin-bottom: 0.5rem; }
+    .news-empty h4 { font-size: 0.95rem; font-weight: 700; color: rgba(255,255,255,0.7); }
+    .news-empty p { font-size: 0.7rem; color: rgba(255,255,255,0.35); }
+
+    /* ========== MOBILE ========== */
+    @media (max-width: 575.98px) {
+        .hero-carousel { height: 200px; }
+        .carousel-overlay h2 { font-size: 1.1rem; }
+        .news-item-img { width: 80px; min-width: 80px; height: 55px; }
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<div class="news-channel">
+
+    {% if all_events %}
+
+    <!-- ===== BREAKING NEWS BAR ===== -->
+    {% if happening_now or upcoming_events %}
+    <div class="breaking-bar">
+        <div class="breaking-label">
+            <i class="fas fa-bolt"></i> FLASH INFO
+        </div>
+        <div class="breaking-scroll">
+            <div class="breaking-scroll-inner">
+                {% for e in happening_now %}
+                <span>🔴 EN DIRECT — {{ e.title }} · {{ e.date_start|date:"d M" }}</span>
+                <span class="sep">|</span>
+                {% endfor %}
+                {% for e in upcoming_events|slice:":5" %}
+                <span>{{ e.title }} — {{ e.date_start|date:"d M Y" }}</span>
+                <span class="sep">|</span>
+                {% endfor %}
+                {% for e in happening_now %}
+                <span>🔴 EN DIRECT — {{ e.title }} · {{ e.date_start|date:"d M" }}</span>
+                <span class="sep">|</span>
+                {% endfor %}
+                {% for e in upcoming_events|slice:":5" %}
+                <span>{{ e.title }} — {{ e.date_start|date:"d M Y" }}</span>
+                <span class="sep">|</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== CARROUSEL AUTO-DÉFILANT ===== -->
+    {% if hero_event or feed_events %}
+    <div class="hero-carousel" id="heroCarousel">
+        <div class="carousel-track" id="carouselTrack">
+            {% if hero_event %}
+            <div class="carousel-slide">
+                {% if hero_event.image %}
+                <img src="{{ hero_event.image.url }}" alt="{{ hero_event.title }}">
+                {% else %}
+                <div class="slide-placeholder" style="background: linear-gradient(135deg, {% if hero_event.is_happening_now %}#DC2626, #991B1B{% elif hero_event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                {% endif %}
+                <div class="carousel-overlay">
+                    {% if hero_event.is_happening_now %}
+                    <span class="cat-label live"><i class="fas fa-circle" style="font-size:0.4rem;"></i> EN DIRECT</span>
+                    {% elif hero_event.is_upcoming %}
+                    <span class="cat-label">À VENIR</span>
+                    {% else %}
+                    <span class="cat-label" style="background: #4B5563;">ARCHIVE</span>
+                    {% endif %}
+                    <h2>{{ hero_event.title }}</h2>
+                    {% if hero_event.description %}
+                    <p class="sub">{{ hero_event.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    <div class="date-loc">
+                        <span><i class="fas fa-calendar-alt"></i> {{ hero_event.date_start|date:"d M Y · H:i" }}</span>
+                        {% if hero_event.location %}
+                        <span><i class="fas fa-map-marker-alt"></i> {{ hero_event.location }}</span>
+                        {% endif %}
+                        <span><i class="fas fa-tag"></i> {{ hero_event.get_event_type_display }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% for event in feed_events|slice:":4" %}
+            <div class="carousel-slide">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                {% else %}
+                <div class="slide-placeholder" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                {% endif %}
+                <div class="carousel-overlay">
+                    {% if event.is_happening_now %}
+                    <span class="cat-label live"><i class="fas fa-circle" style="font-size:0.4rem;"></i> EN DIRECT</span>
+                    {% elif event.is_upcoming %}
+                    <span class="cat-label">À VENIR</span>
+                    {% else %}
+                    <span class="cat-label" style="background: #4B5563;">ARCHIVE</span>
+                    {% endif %}
+                    <h2>{{ event.title }}</h2>
+                    {% if event.description %}
+                    <p class="sub">{{ event.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    <div class="date-loc">
+                        <span><i class="fas fa-calendar-alt"></i> {{ event.date_start|date:"d M Y · H:i" }}</span>
+                        {% if event.location %}
+                        <span><i class="fas fa-map-marker-alt"></i> {{ event.location }}</span>
+                        {% endif %}
+                        <span><i class="fas fa-tag"></i> {{ event.get_event_type_display }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="carousel-dots" id="carouselDots">
+            {% if hero_event %}<div class="dot active" data-index="0"></div>{% endif %}
+            {% for event in feed_events|slice:":4" %}
+            <div class="dot" data-index="{% if hero_event %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}"></div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="carousel-progress"><div class="carousel-progress-bar" id="progressBar"></div></div>
+    {% endif %}
+
+    <!-- ===== CATEGORY TABS ===== -->
+    <div class="news-tabs">
+        <a href="{% url 'catalogue:events_list' %}" class="news-tab {% if not selected_type %}active{% endif %}">Tout</a>
+        {% for value, label in event_types %}
+        <a href="?type={{ value }}" class="news-tab {% if selected_type == value %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- ===== À LA UNE — Top stories feed ===== -->
+    {% if feed_events %}
+    <div class="section-head">
+        <div class="red-bar"></div>
+        <h3>À la une</h3>
+    </div>
+
+    <div class="feed-wrap">
+        {% for event in feed_events|slice:":4" %}
+        <div class="news-item" style="animation-delay: {{ forloop.counter0 }}80ms;">
+            <div class="news-item-img">
+                {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                {% else %}
+                <div class="placeholder-img" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div class="news-item-body">
+                {% if event.is_happening_now %}
+                <span class="item-cat live-cat"><i class="fas fa-circle" style="font-size:0.35rem;"></i> EN DIRECT</span>
+                {% elif event.is_upcoming %}
+                <span class="item-cat">À VENIR</span>
+                {% else %}
+                <span class="item-cat" style="color: rgba(255,255,255,0.35);">ARCHIVE</span>
+                {% endif %}
+                <h4>{{ event.title }}</h4>
+                {% if event.description %}
+                <p class="item-desc">{{ event.description|truncatewords:18 }}</p>
+                {% endif %}
+                <div class="item-meta">
+                    <span><i class="fas fa-calendar-alt"></i> {{ event.date_start|date:"d M Y" }}</span>
+                    {% if event.location %}<span><i class="fas fa-map-marker-alt"></i> {{ event.location|truncatewords:3 }}</span>{% endif %}
+                    <span><i class="fas fa-tag"></i> {{ event.get_event_type_display }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ===== TOUTES LES ACTUALITÉS — Grid ===== -->
+    {% with rest_events=feed_events|slice:"4:" %}
+    {% if rest_events %}
+    <div class="section-head">
+        <div class="red-bar"></div>
+        <h3>Toutes les actualités</h3>
+    </div>
+
+    <div class="news-grid">
+        <div class="row g-2">
+            {% for event in rest_events %}
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="grid-card" style="animation-delay: {{ forloop.counter0 }}60ms;">
+                    <div class="grid-card-img">
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                        {% else %}
+                        <div class="placeholder-grid" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        {% endif %}
+                        {% if event.is_happening_now %}
+                        <span class="time-badge is-live"><i class="fas fa-circle" style="font-size:0.3rem;"></i> LIVE</span>
+                        {% elif event.is_upcoming %}
+                        <span class="time-badge is-soon">BIENTÔT</span>
+                        {% else %}
+                        <span class="time-badge is-past">PASSÉ</span>
+                        {% endif %}
+                    </div>
+                    <div class="grid-card-body">
+                        <h5>{{ event.title }}</h5>
+                        {% if event.description %}
+                        <p class="grid-desc">{{ event.description|truncatewords:10 }}</p>
+                        {% endif %}
+                        <div class="grid-meta">
+                            <i class="fas fa-calendar-alt"></i> {{ event.date_start|date:"d M Y" }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="news-empty">
+        <i class="fas fa-satellite-dish"></i>
+        <h4>Aucune actualité pour le moment</h4>
+        <p>Restez connecté, les prochaines nouvelles arrivent bientôt.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- ===== CARROUSEL JS — Auto-défilement ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const track = document.getElementById('carouselTrack');
+    const dots = document.querySelectorAll('#carouselDots .dot');
+    const progressBar = document.getElementById('progressBar');
+    if (!track || dots.length === 0) return;
+
+    const totalSlides = dots.length;
+    let current = 0;
+    let interval;
+    const DURATION = 6000;
+
+    function goTo(idx) {
+        current = idx % totalSlides;
+        track.style.transform = 'translateX(-' + (current * 100) + '%)';
+        dots.forEach((d, i) => d.classList.toggle('active', i === current));
+        // Reset progress
+        if (progressBar) {
+            progressBar.style.animation = 'none';
+            progressBar.offsetHeight; // reflow
+            progressBar.style.animation = 'progressFill ' + (DURATION / 1000) + 's linear infinite';
+        }
+    }
+
+    function next() { goTo(current + 1); }
+
+    function startAuto() {
+        interval = setInterval(next, DURATION);
+    }
+    function stopAuto() { clearInterval(interval); }
+
+    // Dot clicks
+    dots.forEach(d => {
+        d.addEventListener('click', function() {
+            stopAuto();
+            goTo(parseInt(this.dataset.index));
+            startAuto();
+        });
+    });
+
+    // Touch swipe
+    let touchStartX = 0;
+    const carousel = document.getElementById('heroCarousel');
+    if (carousel) {
+        carousel.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            stopAuto();
+        }, { passive: true });
+        carousel.addEventListener('touchend', e => {
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 40) {
+                diff > 0 ? goTo(current + 1) : goTo(current - 1 + totalSlides);
+            }
+            startAuto();
+        }, { passive: true });
+    }
+
+    // Feed items scroll animation
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.news-item, .grid-card').forEach(el => {
+        el.style.animationPlayState = 'paused';
+        observer.observe(el);
+    });
+
+    // Start
+    startAuto();
+});
+</script>
 {% endblock %}

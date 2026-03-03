@@ -51,591 +51,353 @@
             --text-light: #A0AEC0;
         }
         
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-        }
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Poppins', sans-serif; font-weight: 700; }
+        h1 { font-size: clamp(1.1rem, 4vw, 1.6rem); }
+        h2 { font-size: clamp(1rem, 3.5vw, 1.35rem); }
+        h3 { font-size: clamp(0.95rem, 3vw, 1.15rem); }
+        h4 { font-size: clamp(0.9rem, 2.5vw, 1.05rem); }
+        h5 { font-size: clamp(0.82rem, 2vw, 0.95rem); }
+        h6 { font-size: clamp(0.75rem, 1.5vw, 0.85rem); }
         
         body {
             background-color: var(--light);
             color: var(--dark);
             transition: background-color 0.3s ease;
-            padding-bottom: 80px;
         }
         
-        /* ===== NAVBAR ===== */
+        /* ============================================
+           NAVBAR — Compact, adaptative
+           ============================================ */
         .navbar-premium {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             position: sticky;
             top: 0;
-            z-index: 100;
-            padding: 0.5rem 0;
+            z-index: 1030;
+            padding: 0.15rem 0;
         }
-        
-        [data-bs-theme="dark"] .navbar-premium {
-            background: rgba(26, 26, 46, 0.95);
-        }
+        [data-bs-theme="dark"] .navbar-premium { background: rgba(26, 26, 46, 0.97); }
         
         .navbar-brand-logo {
             font-weight: 800;
-            font-size: 1.5rem;
+            font-size: 0.95rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.25rem;
         }
-        
-        .navbar-brand-logo i {
-            font-size: 1.25rem;
-            -webkit-text-fill-color: var(--primary);
-        }
+        .navbar-brand-logo i { font-size: 0.8rem; -webkit-text-fill-color: var(--primary); }
         
         .nav-link {
             font-weight: 500;
+            font-size: 0.75rem;
             color: var(--text-light) !important;
-            margin: 0 0.5rem;
-            padding: 0.5rem 1rem !important;
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
+            margin: 0 0.05rem;
+            padding: 0.2rem 0.4rem !important;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            white-space: nowrap;
         }
+        .nav-link i { font-size: 0.65rem; margin-right: 0.15rem; }
+        .nav-link:hover { color: var(--primary) !important; background-color: rgba(91, 95, 241, 0.08); }
         
-        .nav-link:hover {
-            color: var(--primary) !important;
-            background-color: rgba(91, 95, 241, 0.1);
-        }
+        .navbar-toggler { border: none; padding: 0.15rem 0.35rem; font-size: 0.85rem; }
+        .navbar-toggler:focus { box-shadow: none; }
         
-        /* ===== BUTTONS ===== */
+        /* ============================================
+           BUTTONS
+           ============================================ */
         .btn-premium {
             background: linear-gradient(135deg, var(--primary), #7B7FFF);
-            border: none;
-            color: white;
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-md);
+            border: none; color: white; font-weight: 600;
+            padding: 0.4rem 1rem; font-size: 0.85rem;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
         }
-        
-        .btn-premium:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(91, 95, 241, 0.3);
-            color: white;
-        }
-        
-        .btn-premium:active {
-            transform: translateY(0);
-        }
+        .btn-premium:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); color: white; }
         
         .btn-secondary-premium {
             background: rgba(91, 95, 241, 0.1);
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
+            border: 1.5px solid var(--primary); color: var(--primary);
+            font-weight: 600; padding: 0.4rem 1rem; font-size: 0.85rem;
+            border-radius: var(--radius-sm); transition: all 0.2s ease;
         }
+        .btn-secondary-premium:hover { background: var(--primary); color: white; }
         
-        .btn-secondary-premium:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-        
-        /* ===== CARDS ===== */
+        /* ============================================
+           CARDS GENERIQUES
+           ============================================ */
         .card-premium {
-            background: var(--light-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-            overflow: hidden;
-            height: 100%;
+            background: var(--light-alt); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease; overflow: hidden; height: 100%;
+            padding: 0; margin: 0;
         }
+        .card-premium:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
         
-        .card-premium:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        /* ===== HERO ===== */
+        /* ============================================
+           HERO — Compact
+           ============================================ */
         .hero-premium {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 3rem 1rem;
-            border-radius: var(--radius-lg);
-            margin-bottom: 2rem;
-            position: relative;
-            overflow: hidden;
+            color: white; padding: 1rem 0.75rem; border-radius: var(--radius-md);
+            margin-bottom: 1rem; position: relative; overflow: hidden;
         }
+        .hero-premium::before { content: ''; position: absolute; top: -50%; right: -50%; width: 200px; height: 200px; background: rgba(255,255,255,0.08); border-radius: 50%; }
+        .hero-premium::after { content: ''; position: absolute; bottom: -30%; left: -10%; width: 150px; height: 150px; background: rgba(0,0,0,0.08); border-radius: 50%; }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-premium h1 { font-size: clamp(1rem, 3.5vw, 1.4rem); font-weight: 900; margin-bottom: 0.3rem; }
+        .hero-premium p { font-size: clamp(0.75rem, 2vw, 0.9rem); opacity: 0.95; margin-bottom: 0; }
         
-        .hero-premium::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 300px;
-            height: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-        }
-        
-        .hero-premium::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -10%;
-            width: 200px;
-            height: 200px;
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .hero-premium h1 {
-            font-size: clamp(1.75rem, 5vw, 2.5rem);
-            font-weight: 900;
-            margin-bottom: 1rem;
-        }
-        
-        .hero-premium p {
-            font-size: clamp(1rem, 2.5vw, 1.25rem);
-            opacity: 0.95;
-            margin-bottom: 0;
-        }
-        
-        /* ===== BOOK CARD ===== */
+        /* ============================================
+           BOOK CARD — Ultra-compact
+           ============================================ */
         .book-card-premium {
-            display: flex;
-            flex-direction: column;
-            min-height: 380px;
-            height: auto;
-            border-radius: var(--radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-            background: var(--light-alt);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            position: relative;
-            z-index: 1;
+            display: flex; flex-direction: column;
+            height: 100%; border-radius: var(--radius-md);
+            overflow: hidden; box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease; background: var(--light-alt);
+            border: 1px solid var(--border); cursor: pointer;
+            text-decoration: none; color: inherit;
         }
-        
-        .book-card-premium:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-xl);
-        }
+        .book-card-premium:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
         
         .book-cover {
-            width: 100%;
-            height: 180px;
+            width: 100%; height: 120px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
-        
-        .book-cover img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        
-        .book-card-premium:hover .book-cover img {
-            transform: scale(1.05);
-        }
-        
-        .book-cover-placeholder {
-            font-size: 3rem;
-            color: white;
-            opacity: 0.3;
-        }
+        .book-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+        .book-card-premium:hover .book-cover img { transform: scale(1.03); }
+        .book-cover-placeholder { font-size: 2rem; color: white; opacity: 0.3; }
         
         .book-badge {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 700;
-            z-index: 2;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            position: absolute; top: 0.4rem; right: 0.4rem;
+            padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
+            font-size: 0.6rem; font-weight: 700; z-index: 2;
+            text-transform: uppercase; letter-spacing: 0.3px;
         }
-        
-        .badge-premium {
-            background: linear-gradient(135deg, var(--accent), #FF4757);
-            color: white;
-        }
-        
-        .badge-free {
-            background: var(--success);
-            color: white;
-        }
+        .badge-premium { background: linear-gradient(135deg, var(--accent), #FF4757); color: white; }
+        .badge-free { background: var(--success); color: white; }
         
         .book-info {
-            flex: 1;
-            padding: 0.8rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-            min-height: 160px;
-            overflow: visible;
-            position: relative;
-            z-index: 2;
+            flex: 1; padding: 0.3rem 0.4rem;
+            display: flex; flex-direction: column; gap: 0.1rem;
+            min-height: 0; overflow: hidden;
         }
-        
-        .book-description {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            line-height: 1.2;
-            margin: 0.2rem 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .book-price {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin: 0.3rem 0;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .price-main {
-            color: var(--primary);
-        }
-        
-        .price-free {
-            color: var(--success);
-            font-weight: 700;
-        }
-        
-        .price-original {
-            text-decoration: line-through;
-            color: var(--text-light);
-            font-size: 0.75rem;
-        }
-        
-        .price-discount {
-            color: var(--danger);
-            font-weight: 700;
-        }
-        
         .book-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            line-height: 1.3;
-            margin-bottom: 0.3rem;
-            margin-top: 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            color: var(--dark);
+            font-family: 'Poppins', sans-serif; font-weight: 700;
+            font-size: 0.72rem; line-height: 1.15;
+            margin: 0; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; color: var(--dark);
         }
-        
-        .book-author {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-bottom: 0.2rem;
-            margin-top: 0;
-            flex-grow: 0;
+        .book-author { font-size: 0.62rem; color: var(--text-light); margin: 0; }
+        .book-description {
+            font-size: 0.58rem; color: var(--text-light); line-height: 1.2; margin: 0;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
+        .book-price { font-size: 0.65rem; font-weight: 600; margin: 0.05rem 0; display: flex; gap: 0.2rem; align-items: center; flex-wrap: wrap; }
+        .price-main { color: var(--primary); }
+        .price-free { color: var(--success); font-weight: 700; }
+        .price-original { text-decoration: line-through; color: var(--text-light); font-size: 0.65rem; }
+        .price-discount { color: var(--danger); font-weight: 700; }
         
-        .book-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.2rem;
-            margin-top: 0.2rem;
-            font-size: 0.8rem;
-        }
+        .book-rating { display: flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; margin: 0; }
+        .book-rating .stars { color: #FFD700; font-size: 0.6rem; }
+        .book-rating .stars .empty { color: #DDD; }
         
-        .book-rating .stars {
-            color: #FFD700;
-        }
-        
-        .book-rating .stars .empty {
-            color: #DDD;
-        }
-        
-        .book-action {
-            display: flex;
-            gap: 0.3rem;
-            margin-top: auto;
-        }
-        
-        .book-action button,
-        .book-action a {
-            flex: 1;
-            padding: 0.4rem 0.3rem;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .book-action { display: flex; gap: 0.2rem; margin-top: auto; padding-top: 0.2rem; }
+        .book-action button, .book-action a {
+            flex: 1; padding: 0.3rem 0.2rem; border: none;
+            border-radius: var(--radius-sm); font-size: 0.65rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s ease;
             background: linear-gradient(135deg, var(--primary), #7B7FFF);
-            color: white;
-            text-align: center;
-            text-decoration: none;
+            color: white; text-align: center; text-decoration: none;
         }
+        .book-action button:hover, .book-action a:hover { box-shadow: var(--shadow-sm); }
         
-        .book-action button:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        
-        /* ===== FOOTER ===== */
+        /* ============================================
+           FOOTER TAB BAR — Mobile uniquement
+           ============================================ */
         .footer-app {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--light-alt);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
-            z-index: 99;
-            height: auto;
-            min-height: 60px;
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--light-alt); border-top: 1px solid var(--border);
+            box-shadow: 0 -1px 4px rgba(0,0,0,0.05); z-index: 1020;
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
-        
         .footer-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0.25rem 0;
-            transform: translateZ(0);
+            display: flex; justify-content: space-around; align-items: center;
+            padding: 0.1rem 0; max-width: 500px; margin: 0 auto;
         }
-        
         .footer-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 0.1rem;
-            padding: 0.4rem 0.5rem;
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            flex: 1;
-            border-radius: var(--radius-md);
-            position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.02rem; padding: 0.15rem 0; color: var(--text-light);
+            text-decoration: none; font-size: 0.5rem; font-weight: 500;
+            transition: color 0.2s; flex: 1;
         }
+        .footer-item i { font-size: 0.75rem; }
+        .footer-item.active { color: var(--primary); }
+        .footer-item.active i { color: var(--primary); }
+        .footer-item:hover { color: var(--primary); }
         
-        .footer-item i {
-            font-size: 1.1rem;
-        }
-        
-        .footer-item.active {
-            color: var(--primary);
-        }
-        
-        .footer-item.active i {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .footer-item:hover {
-            color: var(--primary);
-        }
-        
-        /* ===== SEARCH ===== */
+        /* ============================================
+           SEARCH
+           ============================================ */
         .search-premium {
-            background: var(--light-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-sm);
+            background: var(--light-alt); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 0.75rem;
+            margin-bottom: 1rem; box-shadow: var(--shadow-sm);
+        }
+        .search-premium input, .search-premium select {
+            background: var(--light); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 0.4rem 0.6rem;
+            font-size: 0.85rem; color: var(--dark); transition: all 0.2s;
+        }
+        .search-premium input:focus, .search-premium select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(91,95,241,0.1); outline: none; }
+        .search-premium label { font-weight: 600; color: var(--dark); margin-bottom: 0.25rem; font-size: 0.8rem; }
+        
+        /* ============================================
+           RESPONSIVE — DESKTOP (>= 992px)
+           ============================================ */
+        /* Desktop >= 992px : tout visible, compact */
+        @media (min-width: 992px) {
+            body { padding-bottom: 0; }
+            .footer-app { display: none !important; }
+            .container { max-width: 1140px; }
+            .navbar-premium { padding: 0.1rem 0; }
+            .nav-link { font-size: 0.72rem; padding: 0.2rem 0.35rem !important; }
+            .nav-link i { font-size: 0.6rem; }
+            .navbar-brand-logo { font-size: 0.9rem; }
+            .navbar-brand-logo i { font-size: 0.75rem; }
+            .dropdown-menu { font-size: 0.72rem; }
+            .dropdown-item { padding: 0.25rem 0.75rem; font-size: 0.72rem; }
+        }
+        /* Tablette large >= 768px : forcer liens visibles */
+        @media (min-width: 768px) {
+            .navbar-nav { flex-direction: row !important; }
+            .navbar-collapse { display: flex !important; flex-basis: auto !important; }
+            .navbar-toggler { display: none !important; }
+            .nav-item.dropdown .dropdown-menu { position: absolute; }
         }
         
-        .search-premium input,
-        .search-premium select {
-            background: var(--light);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            color: var(--dark);
-            transition: all 0.3s ease;
+        /* ============================================
+           RESPONSIVE — TABLETTE (768-991px)
+           ============================================ */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            body { padding-bottom: 0; }
+            .footer-app { display: none !important; }
+            .book-cover { height: 110px; }
+            .nav-link { font-size: 0.68rem; padding: 0.18rem 0.3rem !important; }
+            .nav-link i { font-size: 0.58rem; }
+            .navbar-brand-logo { font-size: 0.85rem; }
         }
         
-        .search-premium input:focus,
-        .search-premium select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(91, 95, 241, 0.1);
-            outline: none;
+        /* ============================================
+           RESPONSIVE — MOBILE (< 768px)
+           ============================================ */
+        @media (max-width: 767.98px) {
+            body { padding-bottom: 42px; }
+            
+            .hero-premium { padding: 1rem 0.75rem; margin-bottom: 0.75rem; border-radius: var(--radius-md); }
+            .hero-premium h1 { font-size: 1.15rem; margin-bottom: 0.3rem; }
+            .hero-premium p { font-size: 0.8rem; }
+            
+            .navbar-premium { padding: 0.1rem 0; }
+            .navbar-brand-logo { font-size: 0.85rem; }
+            
+            .book-cover { height: 95px; }
+            .book-info { padding: 0.25rem 0.3rem; }
+            .book-title { font-size: 0.65rem; }
+            .book-author { font-size: 0.55rem; }
+            .book-price { font-size: 0.6rem; }
+            .book-description { font-size: 0.52rem; }
+            .book-badge { font-size: 0.5rem; padding: 0.15rem 0.3rem; }
+            .book-action button, .book-action a { font-size: 0.6rem; padding: 0.25rem 0.15rem; }
+            
+            .search-premium { padding: 0.5rem; margin-bottom: 0.5rem; }
+            .container { padding-left: 0.5rem; padding-right: 0.5rem; }
         }
         
-        .search-premium label {
-            font-weight: 600;
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
+        /* ============================================
+           MODE LECTURE IMMERSIF
+           ============================================ */
+        body.reading-mode .navbar-premium,
+        body.reading-mode .footer-app {
+            display: none !important;
         }
+        body.reading-mode { padding-bottom: 0 !important; }
         
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            body {
-                padding-bottom: 70px;
-            }
-            
-            .hero-premium {
-                padding: 1.5rem 1rem;
-                margin-bottom: 1rem;
-            }
-            
-            .hero-premium h1 {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .hero-premium p {
-                font-size: 0.9rem;
-            }
-            
-            .navbar {
-                padding: 0.5rem 0;
-            }
-            
-            .navbar-brand-logo {
-                font-size: 1rem;
-            }
-            
-            .nav-link {
-                font-size: 0.85rem;
-                margin: 0 0.15rem;
-                padding: 0.3rem 0.5rem !important;
-            }
-            
-            .book-cover {
-                height: 120px;
-            }
-            
-            .book-info {
-                padding: 0.5rem;
-            }
-            
-            .book-title {
-                font-size: 0.78rem;
-                line-height: 1.2;
-                margin-bottom: 0.2rem;
-            }
-            
-            .book-author {
-                font-size: 0.65rem;
-                margin-bottom: 0.1rem;
-            }
-            
-            .book-price {
-                font-size: 0.75rem;
-                margin: 0.1rem 0;
-            }
-            
-            .book-description {
-                font-size: 0.65rem;
-                margin-bottom: 0.1rem;
-            }
-            
-            .search-premium {
-                padding: 1rem;
-                margin-bottom: 1rem;
-            }
-            
-            .container {
-                padding: 0.5rem;
-            }
-        }
+        /* ============================================
+           DARK MODE
+           ============================================ */
+        [data-bs-theme="dark"] .book-title { color: var(--dark); }
+        [data-bs-theme="dark"] .book-rating .stars .empty { color: #444; }
+        [data-bs-theme="dark"] .footer-app { background: var(--light-alt); border-top-color: var(--border); }
         
-        /* ===== DARK MODE ===== */
-        [data-bs-theme="dark"] .book-title {
-            color: var(--dark);
-        }
-        
-        [data-bs-theme="dark"] .book-rating .stars .empty {
-            color: #444;
-        }
-        
-        /* ===== ANIMATIONS ===== */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .animate-in {
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        /* ===== UTILITIES ===== */
-        .container-fluid-safe {
-            padding-left: max(1rem, env(safe-area-inset-left));
-            padding-right: max(1rem, env(safe-area-inset-right));
-        }
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-in { animation: slideUp 0.25s ease-out; }
     </style>
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-premium">
+    <!-- Navbar — Desktop: liens horizontaux / Mobile: burger -->
+    <nav class="navbar navbar-expand-md navbar-premium">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
-                <div class="navbar-brand-logo">
-                    <i class="fas fa-book-open"></i> BNC
-                </div>
+                <div class="navbar-brand-logo"><i class="fas fa-book-open"></i> BNC</div>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Menu">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center gap-2">
+                <!-- Liens principaux visibles Desktop + Mobile -->
+                <ul class="navbar-nav me-auto align-items-md-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Accueil</a>
+                        <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home"></i> Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'catalogue:catalogue' %}">Catalogue</a>
+                        <a class="nav-link" href="{% url 'catalogue:catalogue' %}"><i class="fas fa-search"></i> Catalogue</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-photo-video"></i> Médiathèque
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'catalogue:audiobooks_list' %}"><i class="fas fa-headphones"></i> Livres Audio</a></li>
+                            <li><a class="dropdown-item" href="{% url 'catalogue:videos_list' %}"><i class="fas fa-video"></i> Vidéos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'catalogue:podcasts_list' %}"><i class="fas fa-podcast"></i> Podcasts</a></li>
+                        </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:my_library' %}"><i class="fas fa-book-reader"></i> Bibliothèque</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <!-- Liens secondaires (burger uniquement sur mobile, toujours visibles desktop) -->
+                <ul class="navbar-nav align-items-md-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'catalogue:events_list' %}"><i class="fas fa-bullhorn"></i> Annonces</a>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-sm" id="darkModeBtn" style="background: none; border: none; color: var(--text-light); cursor: pointer; padding: 0.5rem;">
+                        <a class="nav-link" href="{% url 'catalogue:forum_home' %}"><i class="fas fa-comments"></i> Forum</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-sm" id="darkModeBtn" style="background:none;border:none;color:var(--text-light);cursor:pointer;padding:0.35rem;">
                             <i class="fas fa-moon"></i>
                         </button>
                     </li>
@@ -644,7 +406,7 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-user-circle"></i> {{ user.first_name|default:user.username }}
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{% url 'users:profile' %}"><i class="fas fa-user"></i> Profil</a></li>
                             <li><a class="dropdown-item" href="{% url 'users:favorite_list' %}"><i class="fas fa-heart"></i> Favoris</a></li>
                             <li><a class="dropdown-item" href="{% url 'users:my_library' %}"><i class="fas fa-book"></i> Ma Bibliothèque</a></li>
@@ -683,30 +445,28 @@
         {% block content %}{% endblock %}
     </main>
     
-    <!-- Footer App Navigation -->
+    <!-- Footer Tab Bar — Mobile uniquement (masqué sur desktop via CSS) -->
     <div class="footer-app">
         <div class="footer-nav">
-            <a href="{% url 'home' %}" class="footer-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}" title="Accueil">
-                <i class="fas fa-home"></i>
-                <span>Accueil</span>
+            <a href="{% url 'home' %}" class="footer-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <i class="fas fa-home"></i><span>Accueil</span>
             </a>
-            <a href="{% url 'catalogue:catalogue' %}" class="footer-item {% if request.resolver_match.app_names|join:'' == 'catalogue' %}active{% endif %}" title="Catalogue">
-                <i class="fas fa-search"></i>
-                <span>Catalogue</span>
+            <a href="{% url 'catalogue:catalogue' %}" class="footer-item {% if 'catalogue' in request.path %}active{% endif %}">
+                <i class="fas fa-search"></i><span>Catalogue</span>
             </a>
             {% if user.is_authenticated %}
-            <a href="{% url 'users:favorite_list' %}" class="footer-item" title="Favoris">
-                <i class="fas fa-heart"></i>
-                <span>Favoris</span>
+            <a href="{% url 'users:my_library' %}" class="footer-item {% if 'library' in request.path %}active{% endif %}">
+                <i class="fas fa-book-reader"></i><span>Biblio</span>
             </a>
-            <a href="{% url 'users:profile' %}" class="footer-item" title="Profil">
-                <i class="fas fa-user"></i>
-                <span>Profil</span>
+            <a href="{% url 'users:favorite_list' %}" class="footer-item {% if 'favorite' in request.path %}active{% endif %}">
+                <i class="fas fa-heart"></i><span>Favoris</span>
             </a>
             {% else %}
-            <a href="{% url 'users:login' %}" class="footer-item" title="Connexion">
-                <i class="fas fa-sign-in-alt"></i>
-                <span>Connexion</span>
+            <a href="{% url 'users:login' %}" class="footer-item">
+                <i class="fas fa-book-reader"></i><span>Biblio</span>
+            </a>
+            <a href="{% url 'users:login' %}" class="footer-item">
+                <i class="fas fa-heart"></i><span>Favoris</span>
             </a>
             {% endif %}
         </div>

@@ -1,183 +1,246 @@
-{% extends "base.html" %}
-{% load i18n %}
+{% extends 'base-premium.html' %}
 
 {% block title %}Vidéos - BNC{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    /* YouTube-like Styles */
-    .media-container {
-        padding: 20px 40px;
-        background-color: #f9f9f9;
-        min-height: 100vh;
-    }
-    
+    /* ========== MEDIA PAGE — Premium Compact ========== */
     .media-header {
-        margin-bottom: 30px;
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 0.5rem;
     }
-    
-    .chip-container {
-        display: flex;
-        gap: 10px;
-        overflow-x: auto;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
+    .media-header h2 {
+        font-weight: 800; font-size: 1rem; margin: 0;
+        display: flex; align-items: center; gap: 0.3rem;
     }
-    
-    .chip {
-        background: #0000000d;
-        border-radius: 8px;
-        padding: 6px 12px;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        white-space: nowrap;
-        border: 1px solid transparent;
-        transition: background 0.2s;
-        text-decoration: none;
-        color: var(--text-primary);
-    }
-    
-    .chip:hover {
-        background: #0000001a;
-        color: var(--text-primary);
-    }
-    
-    .chip.active {
-        background: var(--text-primary);
-        color: white;
+    .media-header .count {
+        font-size: 0.6rem; color: var(--text-light); font-weight: 400;
     }
 
-    .media-card {
-        border: none;
-        background: transparent;
-        margin-bottom: 30px;
+    /* Search & Filter bar */
+    .media-toolbar {
+        display: flex; gap: 0.4rem; margin-bottom: 0.6rem; flex-wrap: wrap;
+    }
+    .media-search {
+        position: relative; flex: 1; min-width: 140px;
+    }
+    .media-search input {
+        width: 100%; padding: 0.3rem 0.6rem 0.3rem 1.8rem;
+        border: 1px solid var(--border); border-radius: 2rem;
+        font-size: 0.65rem; background: var(--light-alt);
+        transition: all 0.3s;
+    }
+    .media-search input:focus {
+        outline: none; border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(91,95,241,0.12);
+    }
+    .media-search i {
+        position: absolute; left: 0.6rem; top: 50%;
+        transform: translateY(-50%); font-size: 0.6rem; color: var(--text-light);
+    }
+    .media-filter select {
+        padding: 0.3rem 0.5rem; border: 1px solid var(--border);
+        border-radius: 2rem; font-size: 0.6rem; background: var(--light-alt);
         cursor: pointer;
     }
-    
-    .media-thumbnail {
-        position: relative;
-        border-radius: 12px;
-        overflow: hidden;
-        aspect-ratio: 16/9; /* Standard video format */
-        background: #e0e0e0;
-        margin-bottom: 12px;
+
+    /* ========== VIDEO CARD ========== */
+    .media-card {
+        background: var(--light-alt); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); overflow: hidden;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%; text-decoration: none; display: block;
+        opacity: 0; transform: translateY(20px);
+        animation: mediaIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    
-    .media-thumbnail img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s;
+    .media-card:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 8px 28px rgba(91,95,241,0.12);
+        border-color: var(--primary);
     }
-    
-    .media-card:hover .media-thumbnail img {
-        transform: scale(1.02);
+    .media-card:hover .media-card-img { transform: scale(1.06); }
+    @keyframes mediaIn {
+        0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    
-    .duration-badge {
-        position: absolute;
-        bottom: 8px;
-        right: 8px;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 3px 6px;
-        font-size: 0.75rem;
-        border-radius: 4px;
-        font-weight: 500;
+
+    /* Thumbnail — 16:9 */
+    .media-card-img-wrap {
+        position: relative; overflow: hidden;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
     }
-    
-    .media-info {
-        display: flex;
-        gap: 12px;
+    .media-card-img {
+        width: 100%; height: 100%; object-fit: cover;
+        transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    .media-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: #dc3545; /* Red for YouTube vibe */
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 0.8rem;
+    .media-card-placeholder {
+        width: 100%; height: 100%; display: flex;
+        align-items: center; justify-content: center;
     }
-    
-    .media-details {
-        flex: 1;
+    .media-card-placeholder i { font-size: 1.5rem; color: white; opacity: 0.2; }
+    .media-badge {
+        position: absolute; bottom: 0.2rem; right: 0.2rem;
+        background: rgba(0,0,0,0.75); color: white;
+        font-size: 0.45rem; padding: 0.1rem 0.3rem;
+        border-radius: var(--radius-sm); font-weight: 600;
+        backdrop-filter: blur(4px);
     }
-    
-    .media-title {
-        font-size: 1rem;
-        font-weight: 600;
-        line-height: 1.4;
-        margin-bottom: 4px;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        color: var(--text-primary);
+    .play-overlay {
+        position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(0,0,0,0); transition: all 0.3s;
     }
-    
-    .media-meta {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        line-height: 1.3;
+    .media-card:hover .play-overlay { background: rgba(0,0,0,0.25); }
+    .play-overlay i {
+        font-size: 1.5rem; color: white; opacity: 0;
+        transform: scale(0.7); transition: all 0.3s;
+    }
+    .media-card:hover .play-overlay i { opacity: 0.9; transform: scale(1); }
+
+    /* Card body */
+    .media-card-body { padding: 0.3rem 0.4rem; }
+    .media-card-body h6 {
+        font-size: 0.65rem; font-weight: 700; margin: 0 0 0.05rem 0;
+        line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+        color: var(--text-dark);
+    }
+    .media-card-body .author {
+        font-size: 0.52rem; color: var(--text-light); margin: 0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .media-card-body .meta {
+        font-size: 0.48rem; color: var(--text-light); margin-top: 0.1rem;
+        display: flex; gap: 0.4rem;
+    }
+
+    /* ========== EMPTY ========== */
+    .media-empty {
+        text-align: center; padding: 2rem 1rem; border-radius: var(--radius-md);
+        background: var(--light); border: 2px dashed var(--border);
+    }
+    .media-empty i { font-size: 2rem; color: var(--text-light); opacity: 0.4; display: block; margin-bottom: 0.5rem; }
+
+    /* ========== PAGINATION ========== */
+    .pagination-compact {
+        display: flex; justify-content: center; gap: 0.2rem; margin-top: 0.75rem;
+    }
+    .pagination-compact a, .pagination-compact span {
+        padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
+        font-size: 0.6rem; font-weight: 600; text-decoration: none;
+        border: 1px solid var(--border); color: var(--text-light);
+        transition: all 0.2s;
+    }
+    .pagination-compact .active {
+        background: var(--primary); color: white; border-color: var(--primary);
+    }
+    .pagination-compact a:hover {
+        background: var(--primary); color: white; border-color: var(--primary);
     }
 </style>
+{% endblock %}
 
-<div class="media-container">
-    <!-- Header / Chips -->
-    <div class="chip-container">
-        <a href="?cat=all" class="chip active">Tout</a>
-        <a href="?cat=conferences" class="chip">Conférences</a>
-        <a href="?cat=interviews" class="chip">Interviews</a>
-        <a href="?cat=tutorials" class="chip">Tutoriels</a>
-        <a href="?cat=documentaries" class="chip">Documentaires</a>
-        <a href="?cat=live" class="chip">En direct</a>
+{% block content %}
+<div class="container mt-2">
+
+    <!-- Header -->
+    <div class="media-header">
+        <div>
+            <h2><i class="fas fa-video" style="color: var(--accent);"></i> Vidéos</h2>
+            <span class="count">{{ total_count }} vidéo{{ total_count|pluralize }} disponible{{ total_count|pluralize }}</span>
+        </div>
     </div>
 
-    <!-- Media Grid -->
+    <!-- Search + Filter -->
+    <form method="get" class="media-toolbar">
+        <div class="media-search">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" value="{{ query }}" placeholder="Rechercher une vidéo...">
+        </div>
+        <div class="media-filter">
+            <select name="type" onchange="this.form.submit()">
+                <option value="">Tous types</option>
+                <option value="trailer" {% if video_type == 'trailer' %}selected{% endif %}>Bandes-annonces</option>
+                <option value="interview" {% if video_type == 'interview' %}selected{% endif %}>Interviews</option>
+                <option value="review" {% if video_type == 'review' %}selected{% endif %}>Critiques</option>
+                <option value="tutorial" {% if video_type == 'tutorial' %}selected{% endif %}>Tutoriels</option>
+            </select>
+        </div>
+    </form>
+
     {% if videos %}
-    <div class="row">
+    <!-- Grid -->
+    <div class="row g-2">
         {% for video in videos %}
-        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-            <div class="media-card" onclick="window.location.href='{% url 'catalogue:video_detail' video.id %}'">
-                <div class="media-thumbnail">
-                    {% if video.thumbnail_url %}
-                        <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}">
+        <div class="col-6 col-sm-4 col-md-3">
+            <a href="{% url 'catalogue:video_detail' video.id %}" class="media-card" style="animation-delay: {{ forloop.counter0 }}50ms;">
+                <div class="media-card-img-wrap">
+                    {% if video.thumbnail %}
+                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" class="media-card-img">
+                    {% elif video.thumbnail_url %}
+                    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" class="media-card-img">
                     {% else %}
-                        <div class="d-flex align-items-center justify-content-center h-100 bg-dark text-white">
-                            <i class="fas fa-play-circle fa-3x"></i>
-                        </div>
+                    <div class="media-card-placeholder">
+                        <i class="fas fa-film"></i>
+                    </div>
                     {% endif %}
-                    <span class="duration-badge">{{ video.duration|default:"--" }}s</span>
+                    <div class="play-overlay"><i class="fas fa-play-circle"></i></div>
+                    {% if video.duration_seconds %}
+                    <span class="media-badge"><i class="fas fa-clock"></i> {{ video.duration_seconds|floatformat:0 }}s</span>
+                    {% elif video.duration %}
+                    <span class="media-badge"><i class="fas fa-clock"></i> {{ video.duration }}</span>
+                    {% endif %}
                 </div>
-                
-                <div class="media-info">
-                    <div class="media-avatar">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="media-details">
-                        <h3 class="media-title">{{ video.title }}</h3>
-                        <div class="media-meta">
-                            {{ video.author.name|default:"BNC Chaîne Officielle" }}<br>
-                            {{ video.views|default:"1.2k" }} vues • Il y a 5 heures
-                        </div>
+                <div class="media-card-body">
+                    <h6>{{ video.title }}</h6>
+                    {% if video.book %}
+                    <p class="author"><i class="fas fa-book"></i> {{ video.book.title|truncatewords:5 }}</p>
+                    {% endif %}
+                    <div class="meta">
+                        {% if video.view_count %}
+                        <span><i class="fas fa-eye"></i> {{ video.view_count }}</span>
+                        {% endif %}
+                        {% if video.get_video_type_display %}
+                        <span><i class="fas fa-tag"></i> {{ video.get_video_type_display }}</span>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="text-center py-5">
-        <i class="fas fa-video fa-4x text-muted mb-3"></i>
-        <h3>Aucune vidéo trouvée</h3>
-        <p class="text-muted">Revenez plus tard pour du nouveau contenu.</p>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="pagination-compact">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if video_type %}&type={{ video_type }}{% endif %}">&laquo;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="active">{{ num }}</span>
+            {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+            <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if video_type %}&type={{ video_type }}{% endif %}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if video_type %}&type={{ video_type }}{% endif %}">&raquo;</a>
+        {% endif %}
     </div>
     {% endif %}
+
+    {% else %}
+    <div class="media-empty">
+        <i class="fas fa-video"></i>
+        <h5 style="font-weight: 700; font-size: 0.9rem;">Aucune vidéo trouvée</h5>
+        {% if query %}
+        <p style="color: var(--text-light); font-size: 0.7rem;">Essayez un autre mot-clé</p>
+        {% else %}
+        <p style="color: var(--text-light); font-size: 0.7rem;">Revenez bientôt !</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}

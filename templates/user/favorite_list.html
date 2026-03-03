@@ -1,37 +1,77 @@
-{% extends "base.html" %}
+{% extends "base-premium.html" %}
 
 {% block title %}Mes Favoris - BNC{% endblock %}
 
+{% block extra_css %}
+<style>
+    .fav-header { 
+        background: linear-gradient(135deg, var(--accent), #FF4757); 
+        color: white; padding: 0.6rem 0.75rem; border-radius: var(--radius-md); 
+        margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .fav-header h1 { font-size: clamp(0.9rem, 3vw, 1.15rem); margin: 0; color: white; }
+    .fav-header .count { 
+        background: rgba(255,255,255,0.25); border-radius: var(--radius-sm); 
+        padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 700; 
+    }
+    .fav-empty { 
+        text-align: center; padding: 2rem 1rem; background: var(--light-alt); 
+        border-radius: var(--radius-md); border: 1px solid var(--border); 
+    }
+    .fav-empty i { font-size: 2rem; color: var(--text-light); margin-bottom: 0.5rem; }
+    .fav-empty p { font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.5rem; }
+    .fav-date { 
+        font-size: 0.5rem; color: var(--text-light); padding: 0.1rem 0.3rem; 
+        text-align: center; border-top: 1px solid var(--border); background: var(--light);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4">Mes Livres Favoris</h1>
+<div class="container mt-3">
+    <div class="fav-header">
+        <i class="fas fa-heart"></i>
+        <h1>Mes Favoris</h1>
+        {% if favorites %}
+        <span class="count">{{ favorites|length }}</span>
+        {% endif %}
+    </div>
 
     {% if favorites %}
-        <div class="row">
-            {% for favorite in favorites %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <img src="{% if favorite.book.cover %}{{ favorite.book.cover.url }}{% else %}/static/images/placeholder-book.png{% endif %}" class="card-img-top" alt="Couverture de {{ favorite.book.title }}" style="height: 300px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ favorite.book.title }}</h5>
-                            <p class="card-text">
-                                {% for author in favorite.book.authors.all %}
-                                    {{ author.first_name }} {{ author.last_name }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            </p>
-                            <a href="{% url 'catalogue:book_detail' favorite.book.id %}" class="btn btn-primary">Voir les détails</a>
-                        </div>
-                        <div class="card-footer text-muted">
-                            Ajouté le {{ favorite.created_at|date:"d/m/Y" }}
-                        </div>
-                    </div>
+    <div class="row g-2">
+        {% for favorite in favorites %}
+        <div class="col-6 col-sm-4 col-md-3 col-lg-3">
+            <a href="{% url 'catalogue:book_detail' favorite.book.id %}" class="book-card-premium animate-in" style="animation-delay: {{ forloop.counter0|floatformat:0 }}00ms">
+                <div class="book-cover">
+                    {% if favorite.book.cover %}
+                    <img src="{{ favorite.book.cover.url }}" alt="{{ favorite.book.title }}">
+                    {% else %}
+                    <i class="fas fa-book book-cover-placeholder"></i>
+                    {% endif %}
                 </div>
-            {% endfor %}
+                <div class="book-info">
+                    <h6 class="book-title">{{ favorite.book.title }}</h6>
+                    <p class="book-author">
+                        {% for author in favorite.book.authors.all|slice:":1" %}
+                            {{ author.first_name }} {{ author.last_name }}
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="fav-date">
+                    <i class="fas fa-clock"></i> {{ favorite.created_at|date:"d/m/Y" }}
+                </div>
+            </a>
         </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <div class="alert alert-info" role="alert">
-            Vous n'avez pas encore ajouté de livre à vos favoris. Parcourez notre <a href="{% url 'catalogue:catalogue' %}" class="alert-link">catalogue</a> pour en découvrir !
-        </div>
+    <div class="fav-empty">
+        <i class="fas fa-heart-broken"></i>
+        <p>Aucun favori pour le moment.</p>
+        <a href="{% url 'catalogue:catalogue' %}" class="btn btn-premium btn-sm">
+            <i class="fas fa-search"></i> Explorer le catalogue
+        </a>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

@@ -23,9 +23,10 @@
         border-radius: 8px;
         box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         width: 100%;
-        max-width: 550px;
+        max-width: 500px;
         border: 1px solid var(--border-color);
         overflow: hidden;
+        margin: 0 auto;
     }
     
     .register-card-header {
@@ -258,22 +259,6 @@
                                 <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </button>
-                    </div>
-                </div>
-                
-                <div class="row-2col">
-                    <div class="form-group">
-                        <label for="id_phone" class="form-label">Numéro WhatsApp (optionnel)</label>
-                        <input type="tel" class="form-control {% if form.phone.errors %}is-invalid{% endif %}" id="id_phone" name="phone" 
-                               value="{{ form.phone.value|default:'+243' }}" placeholder="+243...">
-                        {% if form.phone.errors %}
-                            <div class="error-message" style="margin-top: 5px;">{{ form.phone.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="id_country" class="form-label">Pays</label>
-                        <input type="text" class="form-control" id="id_country" name="country" 
-                               value="{{ form.country.value|default:'RDC' }}" placeholder="RDC">
                     </div>
                 </div>
                 

@@ -203,7 +203,7 @@ def signup_view(request):
                     password=form.cleaned_data['password1'],
                     first_name=form.cleaned_data.get('first_name', ''),
                     last_name=form.cleaned_data.get('last_name', ''),
-                    phone=form.cleaned_data.get('phone', ''),
+                    phone=form.cleaned_data.get('phone') or None,
                     country=form.cleaned_data.get('country', ''),
                 )
                 
@@ -219,7 +219,7 @@ def signup_view(request):
             messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
     else:
         # Valeur par défaut pour le pays (RDC) et le téléphone (+243)
-        form = RegisterForm(initial={'country': 'RDC', 'phone': '+243'})
+        form = RegisterForm(initial={'country': 'RDC'})
     
     return render(request, 'auth/register.html', {'form': form})
 

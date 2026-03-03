@@ -1,0 +1,548 @@
+{% extends 'base-premium.html' %}
+
+{% block title %}Actualités & Annonces - BNC{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ========== ANIMATED BACKGROUND ========== */
+    .events-universe {
+        position: relative; overflow: hidden;
+        min-height: 80vh;
+    }
+    .events-universe::before {
+        content: ''; position: absolute; top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(ellipse at 20% 50%, rgba(91,95,241,0.04) 0%, transparent 50%),
+                    radial-gradient(ellipse at 80% 20%, rgba(0,212,255,0.04) 0%, transparent 50%),
+                    radial-gradient(ellipse at 50% 80%, rgba(255,107,107,0.03) 0%, transparent 50%);
+        animation: cosmicDrift 20s ease-in-out infinite alternate;
+        pointer-events: none; z-index: 0;
+    }
+    @keyframes cosmicDrift {
+        0% { transform: translate(0,0) rotate(0deg); }
+        50% { transform: translate(-2%,1%) rotate(1deg); }
+        100% { transform: translate(1%,-1%) rotate(-0.5deg); }
+    }
+
+    /* ========== FLOATING SHAPES (decorative) ========== */
+    .float-shape {
+        position: absolute; border-radius: 50%; pointer-events: none;
+        opacity: 0.08; z-index: 0;
+    }
+    .float-shape.s1 {
+        width: 120px; height: 120px; background: var(--primary);
+        top: 5%; right: 10%; animation: floatBubble 8s ease-in-out infinite;
+    }
+    .float-shape.s2 {
+        width: 80px; height: 80px; background: var(--secondary);
+        top: 40%; left: 5%; animation: floatBubble 12s ease-in-out infinite reverse;
+    }
+    .float-shape.s3 {
+        width: 60px; height: 60px; background: var(--accent);
+        bottom: 15%; right: 20%; animation: floatBubble 10s ease-in-out infinite 2s;
+    }
+    @keyframes floatBubble {
+        0%, 100% { transform: translateY(0) scale(1); }
+        33% { transform: translateY(-20px) scale(1.05); }
+        66% { transform: translateY(10px) scale(0.95); }
+    }
+
+    /* ========== TICKER — Breaking News ========== */
+    .news-ticker {
+        background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary));
+        background-size: 200% 100%;
+        animation: gradientShift 4s linear infinite;
+        color: white; overflow: hidden; white-space: nowrap;
+        padding: 0.25rem 0; font-size: 0.6rem; font-weight: 600;
+        margin-bottom: 0.75rem; border-radius: var(--radius-sm);
+        position: relative; z-index: 1;
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 200% 0%; }
+    }
+    .ticker-inner {
+        display: inline-block;
+        animation: tickerScroll 30s linear infinite;
+    }
+    .ticker-inner span { margin-right: 3rem; }
+    .ticker-inner .dot {
+        display: inline-block; width: 5px; height: 5px;
+        background: white; border-radius: 50%; margin-right: 0.4rem;
+        vertical-align: middle; animation: pulse 1s infinite;
+    }
+    @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.3); } }
+
+    /* ========== HERO EVENT — Cinematic ========== */
+    .event-hero {
+        position: relative; border-radius: var(--radius-md); overflow: hidden;
+        margin-bottom: 0.75rem; cursor: pointer;
+        z-index: 1;
+        animation: heroFloat 6s ease-in-out infinite;
+        box-shadow: 0 8px 32px rgba(91,95,241,0.15);
+    }
+    @keyframes heroFloat {
+        0%, 100% { transform: translateY(0); box-shadow: 0 8px 32px rgba(91,95,241,0.15); }
+        50% { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(91,95,241,0.25); }
+    }
+    .event-hero img {
+        width: 100%; height: 200px; object-fit: cover;
+        display: block; filter: brightness(0.6);
+        animation: heroZoom 25s ease-in-out infinite alternate;
+    }
+    @keyframes heroZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.08); }
+    }
+    .event-hero-placeholder {
+        height: 200px; display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        animation: heroPulseGrad 6s ease-in-out infinite;
+    }
+    @keyframes heroPulseGrad {
+        0%,100% { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+        50% { background: linear-gradient(135deg, var(--secondary), var(--primary)); }
+    }
+    .event-hero-placeholder i { font-size: 3rem; color: white; opacity: 0.15; animation: iconFloat 3s ease-in-out infinite; }
+    @keyframes iconFloat {
+        0%,100% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-8px) rotate(5deg); }
+    }
+    .event-hero-overlay {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.9));
+        padding: 0.8rem 0.85rem; color: white;
+    }
+    .status-badge {
+        font-size: 0.5rem; padding: 0.12rem 0.4rem; border-radius: 2rem;
+        font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        display: inline-block; margin-bottom: 0.2rem;
+    }
+    .badge-live { background: #EF4444; animation: liveGlow 1.5s infinite; }
+    @keyframes liveGlow {
+        0%,100% { box-shadow: 0 0 4px rgba(239,68,68,0.4); }
+        50% { box-shadow: 0 0 12px rgba(239,68,68,0.8); }
+    }
+    .badge-upcoming { background: var(--primary); }
+    .badge-past { background: #6B7280; }
+    .event-hero-overlay h2 {
+        font-size: clamp(0.9rem, 3vw, 1.2rem); margin: 0 0 0.15rem 0;
+        line-height: 1.2; color: white;
+    }
+    .event-hero-overlay .meta {
+        font-size: 0.6rem; opacity: 0.85; display: flex; gap: 0.6rem; flex-wrap: wrap;
+    }
+
+    /* ========== FILTER CHIPS ========== */
+    .filter-chips {
+        display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.75rem;
+        position: relative; z-index: 1;
+    }
+    .chip {
+        background: rgba(255,255,255,0.7); backdrop-filter: blur(8px);
+        border: 1px solid var(--border);
+        border-radius: 2rem; padding: 0.2rem 0.55rem;
+        font-size: 0.6rem; font-weight: 600; color: var(--text-light);
+        text-decoration: none; white-space: nowrap;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .chip:hover, .chip.active {
+        background: var(--primary); color: white; border-color: var(--primary);
+        transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,95,241,0.3);
+    }
+
+    /* ========== SECTION TITLES ========== */
+    .section-title {
+        font-size: 0.72rem; font-weight: 800; color: var(--text-dark);
+        margin: 0.75rem 0 0.4rem; padding-left: 0.5rem;
+        border-left: 3px solid var(--primary); position: relative; z-index: 1;
+        animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* ========== STREAM CARD — Flowing Cards ========== */
+    .stream-card {
+        position: relative; z-index: 1;
+        background: rgba(255,255,255,0.75); backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-sm); overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        opacity: 0; transform: translateY(30px);
+        animation: cascadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .stream-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 12px 40px rgba(91,95,241,0.18);
+        border-color: var(--primary);
+    }
+    .stream-card:hover .stream-card-img {
+        transform: scale(1.08);
+    }
+    .stream-card-img-wrap {
+        position: relative; overflow: hidden;
+        height: 90px;
+    }
+    .stream-card-img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stream-card-gradient {
+        position: absolute; bottom: 0; left: 0; right: 0; height: 50%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4));
+        pointer-events: none;
+    }
+    .stream-card-placeholder {
+        height: 90px; display: flex; align-items: center; justify-content: center;
+        position: relative;
+    }
+    .stream-card-placeholder i { font-size: 1.2rem; color: white; opacity: 0.2; }
+    .stream-card-placeholder .shimmer {
+        position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+        animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer { 0% { left: -100%; } 100% { left: 200%; } }
+    .stream-card-body { padding: 0.4rem 0.5rem; }
+    .stream-card-body h6 {
+        font-size: 0.68rem; font-weight: 700; margin: 0 0 0.1rem 0;
+        line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+        color: var(--text-dark);
+    }
+    .stream-card-body .desc {
+        font-size: 0.55rem; color: var(--text-light); margin: 0 0 0.12rem 0;
+        line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .stream-card-body .meta-row {
+        font-size: 0.5rem; color: var(--text-light);
+        display: flex; gap: 0.5rem; align-items: center;
+    }
+
+    /* ========== WIDE STREAM (Featured) ========== */
+    .stream-wide {
+        position: relative; z-index: 1;
+        background: rgba(255,255,255,0.8); backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: var(--radius-sm); overflow: hidden;
+        display: flex; height: 100%;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0; transform: translateX(-40px);
+        animation: slideInFlow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .stream-wide:hover {
+        transform: translateY(-4px) scale(1.01);
+        box-shadow: 0 16px 48px rgba(91,95,241,0.15);
+        border-color: var(--primary);
+    }
+    .stream-wide:hover .stream-wide-img {
+        transform: scale(1.06);
+    }
+    .stream-wide-img-wrap {
+        width: 38%; min-width: 90px; overflow: hidden; flex-shrink: 0;
+        position: relative;
+    }
+    .stream-wide-img {
+        width: 100%; height: 100%; object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stream-wide-placeholder {
+        width: 38%; min-width: 90px; display: flex; align-items: center;
+        justify-content: center; flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .stream-wide-placeholder i { font-size: 1.3rem; color: white; opacity: 0.15; }
+    .stream-wide-body {
+        padding: 0.45rem 0.55rem; flex: 1; display: flex;
+        flex-direction: column; justify-content: center;
+    }
+    .stream-wide-body h6 {
+        font-size: 0.72rem; font-weight: 700; margin: 0 0 0.12rem 0;
+        line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .stream-wide-body .desc {
+        font-size: 0.58rem; color: var(--text-light); margin: 0 0 0.12rem 0;
+        line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .stream-wide-body .meta-row { font-size: 0.5rem; color: var(--text-light); }
+
+    /* ========== TIMELINE ACCENT ========== */
+    .timeline-accent { border-left: 2px solid var(--primary); padding-left: 0.5rem; }
+    .timeline-accent:nth-child(even) { border-left-color: var(--secondary); }
+
+    /* ========== ANIMATIONS ========== */
+    @keyframes cascadeIn {
+        0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes slideInFlow {
+        0% { opacity: 0; transform: translateX(-40px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInLeft {
+        0% { opacity: 0; transform: translateX(-20px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInScale {
+        0% { opacity: 0; transform: scale(0.9); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ========== CONTINUOUS FLOAT ========== */
+    .float-subtle { animation: subtleFloat 5s ease-in-out infinite; }
+    @keyframes subtleFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+    .float-subtle:nth-child(2n) { animation-delay: 1s; }
+    .float-subtle:nth-child(3n) { animation-delay: 2s; }
+    .float-subtle:nth-child(4n) { animation-delay: 0.5s; }
+
+    /* ========== SCROLL REVEAL ========== */
+    .reveal { opacity: 0; transform: translateY(25px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ========== COUNTER ========== */
+    .stat-counter {
+        font-size: 1.5rem; font-weight: 900; color: var(--primary);
+        animation: countPop 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes countPop {
+        0% { opacity: 0; transform: scale(0.5); }
+        70% { transform: scale(1.1); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* ========== EMPTY STATE ========== */
+    .events-empty {
+        text-align: center; padding: 2rem 1rem; border-radius: var(--radius-md);
+        background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);
+        border: 2px dashed var(--border); position: relative; z-index: 1;
+    }
+    .events-empty i { font-size: 2rem; color: var(--text-light); opacity: 0.4; margin-bottom: 0.5rem; display: block; }
+
+    /* ========== MOBILE ========== */
+    @media (max-width: 767.98px) {
+        .event-hero img, .event-hero-placeholder { height: 150px; }
+        .stream-wide { flex-direction: column; }
+        .stream-wide-img-wrap, .stream-wide-placeholder { width: 100%; height: 90px; min-width: unset; }
+        .float-shape { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="events-universe">
+    <!-- Floating decorative shapes -->
+    <div class="float-shape s1"></div>
+    <div class="float-shape s2"></div>
+    <div class="float-shape s3"></div>
+
+    <div class="container mt-2" style="position: relative; z-index: 1;">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-2" style="animation: fadeInScale 0.5s both;">
+            <div>
+                <h2 style="font-weight: 800; font-size: 1rem; margin: 0;">
+                    <i class="fas fa-newspaper" style="color: var(--primary);"></i> Actualités
+                </h2>
+                <p style="color: var(--text-light); font-size: 0.65rem; margin: 0;">
+                    <span class="stat-counter" style="font-size: 0.85rem;">{{ total_count }}</span>
+                    événement{{ total_count|pluralize }} à découvrir
+                </p>
+            </div>
+        </div>
+
+        {% if all_events %}
+
+        <!-- ===== TICKER ===== -->
+        {% if happening_now or upcoming_events %}
+        <div class="news-ticker">
+            <div class="ticker-inner">
+                {% for e in happening_now %}
+                <span><span class="dot"></span>EN DIRECT: {{ e.title }} — {{ e.date_start|date:"d M" }}</span>
+                {% endfor %}
+                {% for e in upcoming_events|slice:":4" %}
+                <span>À VENIR: {{ e.title }} — {{ e.date_start|date:"d M Y" }}</span>
+                {% endfor %}
+                {% for e in happening_now %}
+                <span><span class="dot"></span>EN DIRECT: {{ e.title }} — {{ e.date_start|date:"d M" }}</span>
+                {% endfor %}
+                {% for e in upcoming_events|slice:":4" %}
+                <span>À VENIR: {{ e.title }} — {{ e.date_start|date:"d M Y" }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== FILTER CHIPS ===== -->
+        <div class="filter-chips" style="animation: fadeInScale 0.5s 0.1s both;">
+            <a href="{% url 'catalogue:events_list' %}" class="chip {% if not selected_type %}active{% endif %}"># Tout</a>
+            {% for value, label in event_types %}
+            <a href="?type={{ value }}" class="chip {% if selected_type == value %}active{% endif %}"># {{ label }}</a>
+            {% endfor %}
+        </div>
+
+        <!-- ===== HERO EVENT ===== -->
+        {% if hero_event %}
+        <div class="event-hero" style="animation: fadeInScale 0.6s 0.2s both;">
+            {% if hero_event.image %}
+            <img src="{{ hero_event.image.url }}" alt="{{ hero_event.title }}">
+            {% else %}
+            <div class="event-hero-placeholder">
+                <i class="fas fa-bullhorn"></i>
+            </div>
+            {% endif %}
+            <div class="event-hero-overlay">
+                {% if hero_event.is_happening_now %}
+                    <span class="status-badge badge-live"><i class="fas fa-circle"></i> En direct</span>
+                {% elif hero_event.is_upcoming %}
+                    <span class="status-badge badge-upcoming"><i class="fas fa-clock"></i> À venir</span>
+                {% else %}
+                    <span class="status-badge badge-past"><i class="fas fa-history"></i> Passé</span>
+                {% endif %}
+                <h2>{{ hero_event.title }}</h2>
+                <div class="meta">
+                    <span><i class="fas fa-tag"></i> {{ hero_event.get_event_type_display }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ hero_event.date_start|date:"d M Y à H:i" }}</span>
+                    {% if hero_event.location %}
+                    <span><i class="fas fa-map-marker-alt"></i> {{ hero_event.location }}</span>
+                    {% endif %}
+                </div>
+                {% if hero_event.description %}
+                <p style="font-size: 0.62rem; margin: 0.25rem 0 0; opacity: 0.9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    {{ hero_event.description|truncatewords:25 }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== FEED — Flowing Stream ===== -->
+        {% if feed_events %}
+
+        <!-- Featured (1st & 2nd) -->
+        <p class="section-title" style="animation-delay: 0.3s;">
+            <i class="fas fa-fire" style="color: var(--accent);"></i> À la une
+        </p>
+        <div class="row g-2 mb-2">
+            {% for event in feed_events %}
+                {% if forloop.counter <= 2 %}
+                <div class="col-12 col-md-6 float-subtle">
+                    <div class="stream-wide" style="animation-delay: {{ forloop.counter }}00ms;">
+                        {% if event.image %}
+                        <div class="stream-wide-img-wrap">
+                            <img src="{{ event.image.url }}" alt="{{ event.title }}" class="stream-wide-img">
+                        </div>
+                        {% else %}
+                        <div class="stream-wide-placeholder" style="background: linear-gradient(135deg, {% if event.is_happening_now %}var(--accent), #FF4757{% elif event.is_upcoming %}var(--primary), var(--secondary){% else %}#6B7280, #9CA3AF{% endif %});">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div class="shimmer" style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);animation:shimmer 3s infinite;"></div>
+                        </div>
+                        {% endif %}
+                        <div class="stream-wide-body">
+                            {% if event.is_happening_now %}
+                                <span class="status-badge badge-live" style="font-size:0.45rem;padding:0.08rem 0.3rem;margin-bottom:0.1rem;width:fit-content;"><i class="fas fa-circle"></i> En direct</span>
+                            {% elif event.is_upcoming %}
+                                <span class="status-badge badge-upcoming" style="font-size:0.45rem;padding:0.08rem 0.3rem;margin-bottom:0.1rem;width:fit-content;"><i class="fas fa-clock"></i> À venir</span>
+                            {% else %}
+                                <span class="status-badge badge-past" style="font-size:0.45rem;padding:0.08rem 0.3rem;margin-bottom:0.1rem;width:fit-content;color:white;"><i class="fas fa-history"></i> Passé</span>
+                            {% endif %}
+                            <h6>{{ event.title }}</h6>
+                            <p class="desc">{{ event.description|truncatewords:15 }}</p>
+                            <div class="meta-row">
+                                <span><i class="fas fa-calendar"></i> {{ event.date_start|date:"d M Y" }}</span>
+                                {% if event.location %}<span>· <i class="fas fa-map-marker-alt"></i> {{ event.location|truncatewords:3 }}</span>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Remaining — Cascading grid -->
+        {% with remaining_events=feed_events|slice:"2:" %}
+        {% if remaining_events %}
+        <p class="section-title" style="animation-delay: 0.5s;">
+            <i class="fas fa-stream" style="color: var(--secondary);"></i> Fil d'actualités
+        </p>
+        <div class="row g-2">
+            {% for event in remaining_events %}
+            <div class="col-6 col-md-4 col-lg-3 float-subtle reveal" data-delay="{{ forloop.counter }}">
+                <div class="stream-card timeline-accent" style="animation-delay: {{ forloop.counter }}50ms;">
+                    {% if event.image %}
+                    <div class="stream-card-img-wrap">
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}" class="stream-card-img"{% if event.is_past %} style="filter: grayscale(30%); opacity: 0.8;"{% endif %}>
+                        <div class="stream-card-gradient"></div>
+                    </div>
+                    {% else %}
+                    <div class="stream-card-placeholder" style="background: linear-gradient(135deg, {% if event.is_happening_now %}var(--accent), #FF4757{% elif event.is_upcoming %}var(--primary), var(--secondary){% else %}#6B7280, #9CA3AF{% endif %});">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div class="shimmer"></div>
+                    </div>
+                    {% endif %}
+                    <div class="stream-card-body">
+                        {% if event.is_happening_now %}
+                            <span class="status-badge badge-live"><i class="fas fa-circle"></i> Live</span>
+                        {% elif event.is_upcoming %}
+                            <span class="status-badge badge-upcoming"><i class="fas fa-clock"></i> Bientôt</span>
+                        {% else %}
+                            <span class="status-badge badge-past" style="color:white;"><i class="fas fa-history"></i> Passé</span>
+                        {% endif %}
+                        <h6>{{ event.title }}</h6>
+                        <p class="desc">{{ event.description|truncatewords:10 }}</p>
+                        <div class="meta-row">
+                            <span><i class="fas fa-calendar"></i> {{ event.date_start|date:"d M Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% endif %}
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="events-empty" style="animation: fadeInScale 0.6s both;">
+            <i class="fas fa-newspaper"></i>
+            <h5 style="font-weight: 700; font-size: 0.9rem;">Aucun événement</h5>
+            <p style="color: var(--text-light); font-size: 0.7rem;">Revenez bientôt pour les actualités et annonces !</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- Scroll Reveal JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const delay = parseInt(entry.target.dataset.delay || 0) * 80;
+                setTimeout(() => { entry.target.classList.add('visible'); }, delay);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    const hero = document.querySelector('.event-hero');
+    if (hero) {
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const heroImg = hero.querySelector('img');
+            if (heroImg && scrollY < 400) {
+                heroImg.style.transform = 'scale(' + (1 + scrollY * 0.0003) + ') translateY(' + (scrollY * 0.15) + 'px)';
+            }
+        }, { passive: true });
+    }
+});
+</script>
+{% endblock %}

@@ -275,7 +275,7 @@ class Book(models.Model):
     # Preview gratuit pour livres payants
     free_pages_count = models.PositiveIntegerField(
         _("Nombre de pages libres"),
-        default=0,
+        default=15,
         help_text=_("Nombre de pages accessibles gratuitement (0 = aucune preview)")
     )
     
@@ -337,7 +337,6 @@ class Book(models.Model):
     def get_file_url(self):
         """
         Retourner l'URL du fichier PDF ou EPUB.
-        Force HTTPS pour éviter les erreurs de contenu mixte.
         """
         url = None
         if self.pdf_file:
@@ -345,7 +344,8 @@ class Book(models.Model):
         elif self.epub_file:
             url = self.epub_file.url
             
-        if url and url.startswith("http://"):
+        # Ne forcer HTTPS qu'en production
+        if url and url.startswith("http://") and not settings.DEBUG:
             url = url.replace("http://", "https://", 1)
         return url
 

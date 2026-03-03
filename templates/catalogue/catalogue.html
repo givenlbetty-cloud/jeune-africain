@@ -13,55 +13,46 @@
         </div>
     </div>
     
-    <!-- Search & Filters -->
-    <div class="search-premium">
-        <form method="GET" class="row g-3">
-            <div class="col-12">
-                <label for="searchInput" class="form-label">Rechercher</label>
-                <div class="input-group">
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        id="searchInput" 
-                        name="q" 
-                        placeholder="Titre, auteur, ISBN..."
-                        value="{{ request.GET.q }}"
-                    >
-                    <button class="btn btn-premium" type="submit">
-                        <i class="fas fa-search"></i> Chercher
-                    </button>
+    <!-- Search & Filters — Compact -->
+    <div class="search-premium" style="padding: 0.5rem 0.6rem;">
+        <form method="GET" id="catalogueForm">
+            <div class="d-flex gap-2 align-items-center">
+                <div class="flex-grow-1">
+                    <div class="input-group input-group-sm">
+                        <input type="text" class="form-control" name="q" placeholder="Titre, auteur, ISBN..." value="{{ request.GET.q }}" style="font-size: 0.75rem; padding: 0.3rem 0.5rem;">
+                        <button class="btn btn-premium btn-sm" type="submit" style="font-size: 0.7rem; padding: 0.3rem 0.6rem;">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="col-12 col-md-6">
-                <label for="categoryFilter" class="form-label">Catégorie</label>
-                <select class="form-select" id="categoryFilter" name="category">
-                    <option value="">Toutes les catégories</option>
-                    <option value="fiction" {% if request.GET.category == 'fiction' %}selected{% endif %}>Fiction</option>
-                    <option value="non-fiction" {% if request.GET.category == 'non-fiction' %}selected{% endif %}>Non-Fiction</option>
-                    <option value="science" {% if request.GET.category == 'science' %}selected{% endif %}>Science</option>
-                    <option value="histoire" {% if request.GET.category == 'histoire' %}selected{% endif %}>Histoire</option>
-                    <option value="biographie" {% if request.GET.category == 'biographie' %}selected{% endif %}>Biographie</option>
-                </select>
-            </div>
-            
-            <div class="col-12 col-md-6">
-                <label for="sortFilter" class="form-label">Trier par</label>
-                <select class="form-select" id="sortFilter" name="sort">
-                    <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Plus récents</option>
-                    <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Titre (A-Z)</option>
-                    <option value="-rating" {% if request.GET.sort == '-rating' %}selected{% endif %}>Mieux notés</option>
-                    <option value="-views" {% if request.GET.sort == '-views' %}selected{% endif %}>Plus lus</option>
-                </select>
-            </div>
-            
-            <div class="col-12">
-                <button type="submit" class="btn btn-premium w-100">
-                    <i class="fas fa-filter"></i> Appliquer les filtres
+                <button class="btn btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filtersPanel" aria-expanded="false" style="background: rgba(91,95,241,0.1); color: var(--primary); border: 1px solid var(--primary); border-radius: var(--radius-sm); padding: 0.25rem 0.5rem; font-size: 0.7rem; white-space: nowrap;">
+                    <i class="fas fa-sliders-h"></i> Filtres
                 </button>
-                <a href="{% url 'catalogue:catalogue' %}" class="btn btn-secondary-premium w-100 mt-2">
-                    <i class="fas fa-redo"></i> Réinitialiser
-                </a>
+            </div>
+            <div class="collapse mt-2" id="filtersPanel">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <select class="form-select form-select-sm" name="category" onchange="document.getElementById('catalogueForm').submit()" style="font-size: 0.7rem; padding: 0.25rem 0.4rem;">
+                            <option value="">Catégorie</option>
+                            <option value="fiction" {% if request.GET.category == 'fiction' %}selected{% endif %}>Fiction</option>
+                            <option value="non-fiction" {% if request.GET.category == 'non-fiction' %}selected{% endif %}>Non-Fiction</option>
+                            <option value="science" {% if request.GET.category == 'science' %}selected{% endif %}>Science</option>
+                            <option value="histoire" {% if request.GET.category == 'histoire' %}selected{% endif %}>Histoire</option>
+                            <option value="biographie" {% if request.GET.category == 'biographie' %}selected{% endif %}>Biographie</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-select form-select-sm" name="sort" onchange="document.getElementById('catalogueForm').submit()" style="font-size: 0.7rem; padding: 0.25rem 0.4rem;">
+                            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Récents</option>
+                            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>A-Z</option>
+                            <option value="-rating" {% if request.GET.sort == '-rating' %}selected{% endif %}>Mieux notés</option>
+                            <option value="-views" {% if request.GET.sort == '-views' %}selected{% endif %}>Plus lus</option>
+                        </select>
+                    </div>
+                </div>
+                {% if request.GET.q or request.GET.category or request.GET.sort %}
+                <a href="{% url 'catalogue:catalogue' %}" class="btn btn-sm mt-2" style="font-size: 0.6rem; color: var(--text-light);"><i class="fas fa-times"></i> Réinitialiser</a>
+                {% endif %}
             </div>
         </form>
     </div>
@@ -70,8 +61,8 @@
     <div class="row g-3">
         {% if books %}
             {% for book in books %}
-            <div class="col-12 col-sm-6 col-lg-4 col-xl-3 animate-in">
-                <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="book-card-premium">
+            <div class="col-6 col-sm-6 col-lg-4 col-xl-3 animate-in">
+                <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
                     <div class="book-cover">
                         {% if book.cover %}
                             <img src="{{ book.cover.url }}" alt="{{ book.title }}">
@@ -123,7 +114,7 @@
                         </div>
                         
                         <div class="book-action">
-                            <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn-read">
+                            <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn-read" onclick="event.stopPropagation()">
                                 <i class="fas fa-eye"></i> Voir
                             </a>
                             {% if user.is_authenticated %}
@@ -134,7 +125,7 @@
                             {% endif %}
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
             {% endfor %}
         {% else %}

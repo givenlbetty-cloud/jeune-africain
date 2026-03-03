@@ -71,7 +71,7 @@
         {% if books %}
             {% for book in books %}
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3 animate-in">
-                <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="book-card-premium">
+                <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
                     <div class="book-cover">
                         {% if book.cover %}
                             <img src="{{ book.cover.url }}" alt="{{ book.title }}">
@@ -80,8 +80,8 @@
                                 <i class="fas fa-book"></i>
                             </div>
                         {% endif %}
-                        {% if book.is_premium %}
-                            <span class="book-badge badge-premium">Premium</span>
+                        {% if book.is_paid %}
+                            <span class="book-badge badge-premium">Payant</span>
                         {% else %}
                             <span class="book-badge badge-free">Gratuit</span>
                         {% endif %}
@@ -106,7 +106,7 @@
                             <span class="rating-value">({{ book.reviews_count }})</span>
                         </div>
                         <div class="book-action">
-                            <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn-read">
+                            <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn-read" onclick="event.stopPropagation()">
                                 <i class="fas fa-eye"></i> Voir
                             </a>
                             {% if user.is_authenticated %}
@@ -117,7 +117,7 @@
                             {% endif %}
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
             {% endfor %}
         {% else %}

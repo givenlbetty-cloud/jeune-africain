@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Mes Favoris - BNC{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Mes Livres Favoris</h1>
+
+    {% if favorites %}
+        <div class="row">
+            {% for favorite in favorites %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{% if favorite.book.cover %}{{ favorite.book.cover.url }}{% else %}/static/images/placeholder-book.png{% endif %}" class="card-img-top" alt="Couverture de {{ favorite.book.title }}" style="height: 300px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ favorite.book.title }}</h5>
+                            <p class="card-text">
+                                {% for author in favorite.book.authors.all %}
+                                    {{ author.first_name }} {{ author.last_name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <a href="{% url 'catalogue:book_detail' favorite.book.id %}" class="btn btn-primary">Voir les détails</a>
+                        </div>
+                        <div class="card-footer text-muted">
+                            Ajouté le {{ favorite.created_at|date:"d/m/Y" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Vous n'avez pas encore ajouté de livre à vos favoris. Parcourez notre <a href="{% url 'catalogue:catalogue' %}" class="alert-link">catalogue</a> pour en découvrir !
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

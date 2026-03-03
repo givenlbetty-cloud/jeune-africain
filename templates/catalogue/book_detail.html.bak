@@ -15,119 +15,170 @@
     </nav>
     
     <!-- Book Header -->
-    <div class="card-premium mb-4">
-        <div class="row g-0">
-            <!-- Cover (Left Column) -->
-            <div class="col-12 col-md-4 col-lg-3" style="background: rgba(91, 95, 241, 0.05); display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
-                <div class="book-cover" style="height: 250px; width: 100%; max-width: 180px; box-shadow: var(--shadow-lg); border-radius: var(--radius-sm);">
-                    {% if book.cover %}
-                        <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm);">
-                    {% else %}
-                        <div class="book-cover-placeholder" style="font-size: 4rem; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--light); border-radius: var(--radius-sm);">
-                            <i class="fas fa-book"></i>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- Book Details & Actions (Right Column) -->
-            <div class="col-12 col-md-8 col-lg-9">
-                <div style="padding: 1.5rem;">
-                    <!-- Title & Author -->
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <h1 style="font-size: clamp(1.5rem, 4vw, 2rem); margin-bottom: 0.25rem; font-weight: 800;">{{ book.title }}</h1>
-                            <p style="font-size: 1.1rem; color: var(--text-light); margin-bottom: 0;">par <strong>{{ book.author }}</strong></p>
-                        </div>
-                        {% if book.is_paid %}
-                            <span class="badge" style="background: rgba(255, 107, 107, 0.1); color: var(--accent); font-size: 1.1rem; padding: 0.5rem 1rem; border: 1px solid rgba(255, 107, 107, 0.2);">{{ book.price|floatformat:0 }} FC</span>
+    <div class="row g-4 mb-4">
+        <!-- Cover & Actions (Left Column - Mobile Full Width) -->
+        <div class="col-12 col-lg-4">
+            <div style="position: sticky; top: 80px;">
+                <div class="card-premium">
+                    <div class="book-cover" style="height: 350px;">
+                        {% if book.cover %}
+                            <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
                         {% else %}
-                            <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: var(--success); font-size: 1.1rem; padding: 0.5rem 1rem; border: 1px solid rgba(16, 185, 129, 0.2);">Gratuit</span>
+                            <div class="book-cover-placeholder" style="font-size: 5rem;">
+                                <i class="fas fa-book"></i>
+                            </div>
                         {% endif %}
                     </div>
-                    
-                    <!-- Rating & Quick Stats -->
-                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="color: #FFD700;">
-                                {% for i in "12345" %}
-                                    {% if book.rating >= i %}
-                                        <i class="fas fa-star"></i>
-                                    {% elif book.rating > i|add:'-1' %}
-                                        <i class="fas fa-star-half-alt"></i>
-                                    {% else %}
-                                        <i class="fas fa-star empty" style="color: #DDD;"></i>
-                                    {% endif %}
-                                {% endfor %}
-                            </span>
-                            <strong>{{ book.rating|default:"0" }}/5</strong>
-                            <small style="color: var(--text-light);">({{ book.reviews_count|default:0 }} avis)</small>
+                    <div style="padding: 1.5rem;">
+                        <!-- Book Stats -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; padding: 1rem; background: rgba(91, 95, 241, 0.05); border-radius: var(--radius-md);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);">{{ book.views_count|default:0 }}</div>
+                                <small style="color: var(--text-light);">Lectures</small>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">{{ book.favorites_count|default:0 }}</div>
+                                <small style="color: var(--text-light);">Favoris</small>
+                            </div>
                         </div>
-                        <div style="color: var(--text-light); font-size: 0.9rem;">
-                            <i class="fas fa-eye"></i> {{ book.views_count|default:0 }} lectures
-                        </div>
-                        <div style="color: var(--text-light); font-size: 0.9rem;">
-                            <i class="fas fa-heart"></i> {{ book.favorites_count|default:0 }} favoris
-                        </div>
-                        {% if book.pages %}
-                        <div style="color: var(--text-light); font-size: 0.9rem;">
-                            <i class="fas fa-file-alt"></i> {{ book.pages }} pages
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Synopsis Preview -->
-                    {% if book.description %}
-                    <p style="color: var(--text-light); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                        {{ book.description }}
-                    </p>
-                    {% endif %}
-                    
-                    <!-- Action Buttons -->
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                        {% if not book.is_paid or has_access %}
-                            <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="btn btn-premium" style="flex: 1; min-width: 200px;">
-                                <i class="fas fa-book-open"></i> Lire le livre
-                            </a>
-                            {% if user.is_authenticated %}
-                            <button type="button" class="btn btn-secondary-premium" onclick="saveForOffline('{{ book.pk }}', '{{ book.get_file_url|safe }}')" id="offlineBtn" style="flex: 1; min-width: 200px;">
-                                <i class="fas fa-cloud-download-alt"></i> <span id="offlineText">Sauvegarder hors-ligne</span>
-                            </button>
-                            {% endif %}
-                        {% else %}
-                            {% if has_free_preview %}
-                                <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="btn btn-secondary-premium" style="flex: 1; min-width: 200px;">
-                                    <i class="fas fa-eye"></i> Extrait gratuit ({{ free_pages_count }} p.)
+                        
+                        <!-- Action Buttons -->
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% if not book.is_paid or has_access %}
+                                <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="btn btn-premium w-100">
+                                    <i class="fas fa-book-open"></i> Lire le livre
+                                </a>
+                                {% if user.is_authenticated %}
+                                <button type="button" class="btn btn-secondary-premium w-100" onclick="saveForOffline('{{ book.pk }}', '{{ book.get_file_url|safe }}')" id="offlineBtn">
+                                    <i class="fas fa-cloud-download-alt"></i> <span id="offlineText">Sauvegarder hors-ligne</span>
+                                </button>
+                                {% endif %}
+                            {% else %}
+                                {% if has_free_preview %}
+                                    <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="btn btn-secondary-premium w-100">
+                                        <i class="fas fa-eye"></i> Lire l'extrait gratuit ({{ free_pages_count }} pages)
+                                    </a>
+                                {% endif %}
+                                <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="btn btn-premium w-100">
+                                    <i class="fas fa-shopping-cart"></i> Acheter ({{ book.price|floatformat:0 }} FC)
                                 </a>
                             {% endif %}
-                            <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="btn btn-premium" style="flex: 1; min-width: 200px;">
-                                <i class="fas fa-shopping-cart"></i> Acheter ({{ book.price|floatformat:0 }} FC)
+                            {% if user.is_authenticated %}
+                            <button type="button" class="btn btn-secondary-premium w-100" onclick="toggleFavorite(event, {{ book.pk }})" id="favBtn">
+                                <i class="fas fa-heart"></i> <span id="favText">Ajouter aux favoris</span>
+                            </button>
+                            {% else %}
+                            <a href="{% url 'users:login' %}" class="btn btn-secondary-premium w-100">
+                                <i class="fas fa-sign-in-alt"></i> Se connecter
                             </a>
+                            {% endif %}
+                            {% if book.in_library %}
+                            <div style="padding: 0.75rem; background: #10B981; color: white; border-radius: var(--radius-md); text-align: center; font-weight: 600;">
+                                <i class="fas fa-check-circle"></i> Dans votre bibliothèque
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Book Details (Right Column - Mobile Below) -->
+        <div class="col-12 col-lg-8">
+            <!-- Title & Rating -->
+            <div class="mb-4">
+                <h1 style="font-size: clamp(1.75rem, 5vw, 2.25rem); margin-bottom: 0.5rem;">{{ book.title }}</h1>
+                <p style="font-size: 1.1rem; color: var(--text-light); margin-bottom: 1rem;">par <strong>{{ book.author }}</strong></p>
+                
+                <!-- Rating -->
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: #FFD700;">
+                            {% for i in "12345" %}
+                                {% if book.rating >= i %}
+                                    <i class="fas fa-star"></i>
+                                {% elif book.rating > i|add:'-1' %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                {% else %}
+                                    <i class="fas fa-star empty"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        <strong>{{ book.rating|default:"0" }}/5</strong>
+                    </div>
+                    <span style="color: var(--text-light);">({{ book.reviews_count|default:0 }} avis)</span>
+                </div>
+                
+                <!-- Tags -->
+                {% if book.category or book.language %}
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    {% if book.category %}
+                    <span class="badge" style="background: rgba(91, 95, 241, 0.2); color: var(--primary); padding: 0.5rem 1rem;">
+                        <i class="fas fa-tag"></i> {{ book.category }}
+                    </span>
+                    {% endif %}
+                    {% if book.language %}
+                    <span class="badge" style="background: rgba(0, 212, 255, 0.2); color: var(--secondary-dark); padding: 0.5rem 1rem;">
+                        <i class="fas fa-globe"></i> {{ book.language }}
+                    </span>
+                    {% endif %}
+                    {% if book.is_premium %}
+                    <span class="badge" style="background: rgba(255, 107, 107, 0.2); color: var(--accent); padding: 0.5rem 1rem;">
+                        <i class="fas fa-crown"></i> Premium
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Metadata Grid -->
+            <div class="card-premium mb-4">
+                <div style="padding: 1.5rem;">
+                    <h5 class="mb-3" style="font-weight: 700;"><i class="fas fa-info-circle"></i> Informations</h5>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        {% if book.isbn %}
+                        <div>
+                            <small style="color: var(--text-light);">ISBN</small>
+                            <p style="margin: 0; font-weight: 600;">{{ book.isbn }}</p>
+                        </div>
                         {% endif %}
-                        
-                        {% if user.is_authenticated %}
-                        <button type="button" class="btn btn-light" onclick="toggleFavorite(event, {{ book.pk }})" id="favBtn" style="border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0.75rem 1.5rem;">
-                            <i class="fas fa-heart" style="color: {% if book.in_library %}#FF4757{% else %}var(--text-light){% endif %};"></i>
-                        </button>
+                        {% if book.publication_date %}
+                        <div>
+                            <small style="color: var(--text-light);">Date de publication</small>
+                            <p style="margin: 0; font-weight: 600;">{{ book.publication_date|date:"d M Y" }}</p>
+                        </div>
                         {% endif %}
+                        {% if book.pages %}
+                        <div>
+                            <small style="color: var(--text-light);">Pages</small>
+                            <p style="margin: 0; font-weight: 600;">{{ book.pages }}</p>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <small style="color: var(--text-light);">Statut</small>
+                            <p style="margin: 0; font-weight: 600;">
+                                {% if book.is_available %}
+                                    <i class="fas fa-check-circle" style="color: var(--success);"></i> Disponible
+                                {% else %}
+                                    <i class="fas fa-times-circle" style="color: var(--danger);"></i> Indisponible
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <div class="row g-4">
-        <!-- Left Column: Details & Author -->
-        <div class="col-12 col-lg-8">
-            <!-- Description Full -->
-            {% if book.description %}
-            <div class="card-premium mb-4">
-                <div style="padding: 1.5rem;">
-                    <h5 class="mb-3" style="font-weight: 700;"><i class="fas fa-align-left"></i> Synopsis complet</h5>
-                    <p style="line-height: 1.8; color: var(--text-light); margin: 0;">{{ book.description }}</p>
-                </div>
-            </div>
-            {% endif %}
+    <!-- Description -->
+    {% if book.description %}
+    <div class="card-premium mb-4">
+        <div style="padding: 1.5rem;">
+            <h5 class="mb-3" style="font-weight: 700;"><i class="fas fa-align-left"></i> Synopsis</h5>
+            <p style="line-height: 1.8; color: var(--text-light);">{{ book.description }}</p>
+        </div>
+    </div>
+    {% endif %}
     
     <!-- Author Bio -->
     {% if book.author_bio or book.author %}

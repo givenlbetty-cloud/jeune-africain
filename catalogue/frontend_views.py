@@ -673,9 +673,10 @@ def author_detail_view(request, author_id):
 
 
 def events_view(request):
-    """Affiche la liste des événements, annonces et ateliers."""
+    """Affiche la liste des événements — style page d'actualité dynamique."""
     from catalogue.models import Event
     from django.utils import timezone
+    import random
     
     # Récupérer tous les événements publiés
     events = Event.objects.filter(is_published=True).order_by('-date_start')
@@ -686,17 +687,46 @@ def events_view(request):
         events = events.filter(event_type=event_type)
     
     # Séparer en catégories
-    upcoming_events = [e for e in events if e.is_upcoming()]
     happening_now = [e for e in events if e.is_happening_now()]
+    upcoming_events = sorted(
+        [e for e in events if e.is_upcoming()],
+        key=lambda e: e.date_start  # Plus proches d'abord
+    )
     past_events = [e for e in events if e.is_past()]
+    
+    # Mélanger légèrement au sein de chaque groupe pour l'effet dynamique
+    if len(happening_now) > 1:
+        random.shuffle(happening_now)
+    if len(upcoming_events) > 2:
+        # Garder les 2 prochains en tête, mélanger le reste
+        top2 = upcoming_events[:2]
+        rest = upcoming_events[2:]
+        random.shuffle(rest)
+        upcoming_events = top2 + rest
+    if len(past_events) > 1:
+        # Mélanger un peu les passés récents (top 6)
+        top_past = past_events[:6]
+        rest_past = past_events[6:]
+        random.shuffle(top_past)
+        past_events = top_past + rest_past
+    
+    # Construire le flux unifié par pertinence
+    feed = happening_now + upcoming_events + past_events
+    
+    # Événement vedette = premier du flux (en cours ou prochain)
+    hero_event = feed[0] if feed else None
+    feed_rest = feed[1:] if len(feed) > 1 else []
     
     context = {
         'all_events': events,
-        'upcoming_events': upcoming_events,
+        'hero_event': hero_event,
+        'feed_events': feed_rest,
         'happening_now': happening_now,
+        'upcoming_events': upcoming_events,
         'past_events': past_events,
         'event_types': Event.EVENT_TYPE_CHOICES,
         'selected_type': event_type,
+        'total_count': len(feed),
     }
     
     return render(request, 'catalogue/events_list.html', context)
