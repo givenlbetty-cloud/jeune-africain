@@ -8,9 +8,9 @@ from django.db.models import Q
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from allauth.socialaccount.models import SocialAccount
+from .models import CustomUser, StaffMember
 from datetime import datetime
 
-from users.models import CustomUser
 from users.forms import LoginForm, RegisterForm, UserProfileForm
 from users.otp_service import generate_otp, send_otp_via_whatsapp
 from catalogue.models import Book, ReadingSession, Payment, Favorite, Highlight, Note
@@ -378,3 +378,16 @@ def set_language_view(request):
             pass
     
     return response
+
+
+def staff_view(request):
+    """Vue de la page staff technique — contenu dynamique depuis l'admin."""
+    membres = StaffMember.objects.filter(actif=True)
+    # Regrouper par département
+    departements = {}
+    for m in membres:
+        dept_label = m.get_departement_display()
+        if dept_label not in departements:
+            departements[dept_label] = []
+        departements[dept_label].append(m)
+    return render(request, 'staff.html', {'departements': departements})

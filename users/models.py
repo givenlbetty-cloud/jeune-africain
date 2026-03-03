@@ -197,3 +197,47 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             return False
         
         return True
+
+
+class StaffMember(models.Model):
+    """Membre du staff technique BNC — gérable depuis l'admin."""
+
+    DEPT_CHOICES = [
+        ('direction',    'Direction & Fondateurs'),
+        ('technique',    'Équipe Technique & Développement'),
+        ('contenu',      'Contenu & Communication'),
+        ('support',      'Support & Service client'),
+        ('autre',        'Autre'),
+    ]
+
+    nom         = models.CharField('Nom complet', max_length=120)
+    poste       = models.CharField('Poste / Rôle', max_length=120)
+    departement = models.CharField('Département', max_length=30, choices=DEPT_CHOICES, default='technique')
+    bio         = models.TextField('Biographie courte', blank=True)
+    competences = models.CharField('Compétences (séparées par virgules)', max_length=255, blank=True,
+                                   help_text='Ex: Django, PostgreSQL, PWA')
+    photo       = models.ImageField('Photo', upload_to='staff/', blank=True, null=True)
+    initiales   = models.CharField('Initiales (2-3 lettres)', max_length=3, blank=True,
+                                   help_text='Affiché si pas de photo. Ex: DG')
+    ordre       = models.PositiveSmallIntegerField('Ordre d\'affichage', default=0)
+    actif       = models.BooleanField('Affiché sur le site', default=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['departement', 'ordre', 'nom']
+        verbose_name = 'Membre du staff'
+        verbose_name_plural = 'Membres du staff'
+
+    def __str__(self):
+        return f"{self.nom} — {self.poste}"
+
+    def get_competences_list(self):
+        """Retourne la liste des compétences nettoyées."""
+        return [c.strip() for c in self.competences.split(',') if c.strip()]
+
+    def get_initiales(self):
+        """Génère les initiales automatiquement si non renseignées."""
+        if self.initiales:
+            return self.initiales.upper()
+        parts = self.nom.split()
+        return ''.join(p[0] for p in parts[:2]).upper()

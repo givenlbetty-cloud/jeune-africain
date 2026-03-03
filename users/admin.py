@@ -15,7 +15,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from import_export.admin import ImportExportModelAdmin
-from .models import CustomUser
+from .models import CustomUser, StaffMember
 
 
 # =============================================================
@@ -394,3 +394,21 @@ class CustomUserAdmin(ImportExportModelAdmin, BaseUserAdmin):
         if not request.user.is_superuser:
             return False
         return True
+
+
+# =============================================================
+# ADMIN STAFF MEMBER
+# =============================================================
+
+@admin.register(StaffMember)
+class StaffMemberAdmin(admin.ModelAdmin):
+    list_display  = ('nom', 'poste', 'departement', 'ordre', 'actif')
+    list_editable = ('ordre', 'actif')
+    list_filter   = ('departement', 'actif')
+    search_fields = ('nom', 'poste', 'competences')
+    ordering      = ('departement', 'ordre', 'nom')
+    fieldsets = (
+        ('Informations', {'fields': ('nom', 'poste', 'departement', 'bio')}),
+        ('Apparence',    {'fields': ('photo', 'initiales', 'competences')}),
+        ('Paramètres',   {'fields': ('ordre', 'actif')}),
+    )

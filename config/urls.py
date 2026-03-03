@@ -17,7 +17,7 @@ from catalogue.dashboard_views import (
     activity_statistics
 )
 from catalogue.frontend_views import redirect_old_book_url
-from users.views import home
+from users.views import home, staff_view
 
 # API URLs (not translated - same for all languages)
 urlpatterns = [
@@ -55,7 +55,7 @@ urlpatterns += i18n_patterns(
     path("apropos/", TemplateView.as_view(template_name="about.html"), name='about'),
 
     # Page Staff technique
-    path("staff/", TemplateView.as_view(template_name="staff.html"), name='staff'),
+    path("staff/", staff_view, name='staff'),
 
     # Offline page (fallback for service worker)
     path("offline/", lambda request: __import__('django.shortcuts', fromlist=['render']).render(request, 'offline.html'), name='offline'),

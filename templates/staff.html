@@ -112,116 +112,55 @@
         <span>Staff technique</span>
     </div>
 
-    <!-- DIRECTION -->
-    <div class="dept-header">
-        <h3><i class="fas fa-star me-2" style="color:var(--primary)"></i>Direction & Fondateurs</h3>
-        <p>Vision, stratégie et pilotage du projet BNC.</p>
+    {% if departements %}
+        {% for dept_name, membres in departements.items %}
+        <!-- DÉPARTEMENT -->
+        <div class="dept-header">
+            <h3>
+                {% if 'Direction' in dept_name %}<i class="fas fa-star me-2" style="color:var(--primary)"></i>
+                {% elif 'Technique' in dept_name %}<i class="fas fa-code me-2" style="color:var(--primary)"></i>
+                {% elif 'Contenu' in dept_name %}<i class="fas fa-pen-nib me-2" style="color:var(--primary)"></i>
+                {% elif 'Support' in dept_name %}<i class="fas fa-headset me-2" style="color:var(--primary)"></i>
+                {% else %}<i class="fas fa-users me-2" style="color:var(--primary)"></i>{% endif %}
+                {{ dept_name }}
+            </h3>
+        </div>
+        <div class="row g-3 mb-2">
+            {% for membre in membres %}
+            <div class="col-sm-6 col-lg-4">
+                <div class="team-card">
+                    {% if membre.photo %}
+                    <img src="{{ membre.photo.url }}" alt="{{ membre.nom }}"
+                         style="width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto 1rem;display:block;border:3px solid var(--primary);">
+                    {% else %}
+                    <div class="team-avatar">{{ membre.get_initiales }}</div>
+                    {% endif %}
+                    <div class="team-name">{{ membre.nom }}</div>
+                    <div class="team-role">{{ membre.poste }}</div>
+                    {% if membre.bio %}<p class="team-bio">{{ membre.bio }}</p>{% endif %}
+                    {% if membre.competences %}
+                    <div>
+                        {% for comp in membre.get_competences_list %}
+                        <span class="team-badge"><i class="fas fa-check"></i> {{ comp }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="text-center py-5" style="color:var(--text-light);">
+        <i class="fas fa-users-cog fa-3x mb-3 d-block" style="opacity:0.3;"></i>
+        <p>Aucun membre du staff pour le moment.</p>
+        {% if user.is_staff %}
+        <a href="{% url 'admin:users_staffmember_add' %}" class="btn btn-premium btn-sm">
+            <i class="fas fa-plus me-2"></i>Ajouter un membre depuis l'admin
+        </a>
+        {% endif %}
     </div>
-    <div class="row g-3 mb-2">
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">DG</div>
-                <div class="team-name">Direction Générale</div>
-                <div class="team-role">Fondateur & CEO</div>
-                <p class="team-bio">Visionnaire à l'origine du projet BNC, responsable de la stratégie globale, des partenariats avec les éditeurs et du développement de Calures Éditions.</p>
-                <div>
-                    <span class="team-badge"><i class="fas fa-lightbulb"></i> Stratégie</span>
-                    <span class="team-badge"><i class="fas fa-handshake"></i> Partenariats</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">DP</div>
-                <div class="team-name">Direction des Projets</div>
-                <div class="team-role">Directeur de Publication</div>
-                <p class="team-bio">Supervision éditoriale, gestion des catalogues d'auteurs et coordination des sorties numériques sur la plateforme BNC.</p>
-                <div>
-                    <span class="team-badge"><i class="fas fa-book"></i> Édition</span>
-                    <span class="team-badge"><i class="fas fa-tasks"></i> Catalogue</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- DÉVELOPPEMENT -->
-    <div class="dept-header">
-        <h3><i class="fas fa-code me-2" style="color:var(--primary)"></i>Équipe Technique & Développement</h3>
-        <p>Conception, développement et maintenance de la plateforme.</p>
-    </div>
-    <div class="row g-3 mb-2">
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">LT</div>
-                <div class="team-name">Lead Technique</div>
-                <div class="team-role">Architecte Logiciel</div>
-                <p class="team-bio">Architecture backend Django, API REST, sécurité des fichiers et intégration des systèmes de paiement mobile (Mobile Money, Stripe).</p>
-                <div>
-                    <span class="team-badge"><i class="fab fa-python"></i> Django</span>
-                    <span class="team-badge"><i class="fas fa-database"></i> PostgreSQL</span>
-                    <span class="team-badge"><i class="fas fa-lock"></i> Sécurité</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">FE</div>
-                <div class="team-name">Frontend Developer</div>
-                <div class="team-role">UI/UX & Intégration Web</div>
-                <p class="team-bio">Design de l'interface utilisateur, intégration responsive, lecteur PDF haute définition et optimisation de l'expérience mobile.</p>
-                <div>
-                    <span class="team-badge"><i class="fab fa-html5"></i> HTML/CSS</span>
-                    <span class="team-badge"><i class="fab fa-js"></i> JavaScript</span>
-                    <span class="team-badge"><i class="fas fa-mobile-alt"></i> PWA</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">DE</div>
-                <div class="team-name">DevOps & Infra</div>
-                <div class="team-role">Ingénieur Infrastructure</div>
-                <p class="team-bio">Déploiement cloud sur Render, gestion des bases de données PostgreSQL, monitoring, backups et continuité de service.</p>
-                <div>
-                    <span class="team-badge"><i class="fas fa-cloud"></i> Render</span>
-                    <span class="team-badge"><i class="fas fa-cogs"></i> CI/CD</span>
-                    <span class="team-badge"><i class="fas fa-shield-alt"></i> HTTPS</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- CONTENU & COMMUNICATION -->
-    <div class="dept-header">
-        <h3><i class="fas fa-pen-nib me-2" style="color:var(--primary)"></i>Contenu & Communication</h3>
-        <p>Animation de la plateforme, gestion du catalogue et communication avec les auteurs.</p>
-    </div>
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">CM</div>
-                <div class="team-name">Community Manager</div>
-                <div class="team-role">Animateur Communauté</div>
-                <p class="team-bio">Animation du forum, modération des avis lecteurs, gestion des réseaux sociaux et organisation des événements littéraires en ligne.</p>
-                <div>
-                    <span class="team-badge"><i class="fas fa-comments"></i> Forum</span>
-                    <span class="team-badge"><i class="fas fa-bullhorn"></i> Annonces</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-lg-4">
-            <div class="team-card">
-                <div class="team-avatar">GC</div>
-                <div class="team-name">Gestionnaire Catalogue</div>
-                <div class="team-role">Responsable Contenu</div>
-                <p class="team-bio">Mise en ligne des œuvres, vérification des métadonnées, gestion des couvertures et coordination avec les auteurs et éditeurs partenaires.</p>
-                <div>
-                    <span class="team-badge"><i class="fas fa-book-open"></i> Livres</span>
-                    <span class="team-badge"><i class="fas fa-headphones"></i> Audio</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% endif %}
 
     <!-- CTA RETOUR À PROPOS -->
     <div class="text-center py-3 mb-4">
