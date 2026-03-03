@@ -828,14 +828,25 @@
             darkModeBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         }
 
-        // Fermer le menu burger au scroll
+        // Fermer le menu burger au scroll et au clic en dehors
         const navbarCollapse = document.getElementById('navbarNav');
-        window.addEventListener('scroll', () => {
+
+        function closeNavbar() {
             if (navbarCollapse && navbarCollapse.classList.contains('show')) {
-                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                if (bsCollapse) bsCollapse.hide();
+                bootstrap.Collapse.getOrCreateInstance(navbarCollapse).hide();
             }
-        }, { passive: true });
+        }
+
+        window.addEventListener('scroll', closeNavbar, { passive: true });
+
+        document.addEventListener('click', (e) => {
+            if (!navbarCollapse) return;
+            const toggler = document.querySelector('.navbar-toggler');
+            // Fermer si le clic est en dehors de la navbar
+            if (!navbarCollapse.contains(e.target) && !toggler.contains(e.target)) {
+                closeNavbar();
+            }
+        });
     </script>
     
     {% block extra_js %}{% endblock %}
