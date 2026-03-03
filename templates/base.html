@@ -785,10 +785,6 @@
                 <i class="fas fa-search"></i>
                 <span>Catalogue</span>
             </a>
-            <a href="{% url 'about' %}" class="footer-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}" title="À propos">
-                <i class="fas fa-info-circle"></i>
-                <span>À propos</span>
-            </a>
             {% if user.is_authenticated %}
             <a href="{% url 'users:my_library' %}" class="footer-item {% if 'library' in request.path %}active{% endif %}" title="Biblio">
                 <i class="fas fa-book-reader"></i>
