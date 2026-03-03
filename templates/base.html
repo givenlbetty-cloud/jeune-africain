@@ -50,6 +50,80 @@
             --border: #2D3748;
             --text-light: #A0AEC0;
         }
+
+        /* ===== DARK MODE — FORMULAIRES GLOBAL ===== */
+        [data-bs-theme="dark"] input,
+        [data-bs-theme="dark"] select,
+        [data-bs-theme="dark"] textarea,
+        [data-bs-theme="dark"] .form-control,
+        [data-bs-theme="dark"] .form-select {
+            background-color: #1e1e35 !important;
+            color: #f1f1f1 !important;
+            border-color: #3d3d5c !important;
+        }
+        [data-bs-theme="dark"] input::placeholder,
+        [data-bs-theme="dark"] textarea::placeholder {
+            color: #7a7a9a !important;
+        }
+        [data-bs-theme="dark"] input:focus,
+        [data-bs-theme="dark"] select:focus,
+        [data-bs-theme="dark"] textarea:focus,
+        [data-bs-theme="dark"] .form-control:focus,
+        [data-bs-theme="dark"] .form-select:focus {
+            background-color: #252545 !important;
+            color: #ffffff !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 2px rgba(91, 95, 241, 0.25) !important;
+        }
+        [data-bs-theme="dark"] label,
+        [data-bs-theme="dark"] .form-label {
+            color: #d0d0e8 !important;
+        }
+        [data-bs-theme="dark"] .form-text {
+            color: #8888aa !important;
+        }
+        /* Cartes de formulaire (login, register, modals) */
+        [data-bs-theme="dark"] .login-card,
+        [data-bs-theme="dark"] .register-card,
+        [data-bs-theme="dark"] .modal-content,
+        [data-bs-theme="dark"] .card {
+            background-color: #1a1a2e !important;
+            border-color: #2d2d4a !important;
+            color: #f1f1f1 !important;
+        }
+        [data-bs-theme="dark"] .login-card-body,
+        [data-bs-theme="dark"] .register-card-body {
+            background-color: #1a1a2e !important;
+        }
+        /* Liens et textes secondaires dans les formulaires */
+        [data-bs-theme="dark"] .footer-text,
+        [data-bs-theme="dark"] .footer-text a {
+            color: #a0a0c0 !important;
+        }
+        [data-bs-theme="dark"] .footer-text a:hover {
+            color: var(--primary) !important;
+        }
+        /* Sélect options */
+        [data-bs-theme="dark"] option {
+            background-color: #1e1e35;
+            color: #f1f1f1;
+        }
+        /* Input autofill en mode sombre */
+        [data-bs-theme="dark"] input:-webkit-autofill,
+        [data-bs-theme="dark"] input:-webkit-autofill:hover,
+        [data-bs-theme="dark"] input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #f1f1f1 !important;
+            -webkit-box-shadow: 0 0 0px 1000px #1e1e35 inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        /* Erreurs de validation */
+        [data-bs-theme="dark"] .error-message,
+        [data-bs-theme="dark"] .invalid-feedback {
+            color: #ff8080 !important;
+        }
+        [data-bs-theme="dark"] .is-invalid {
+            border-color: #ff6b6b !important;
+        }
         
         * {
             font-family: 'Inter', sans-serif;
