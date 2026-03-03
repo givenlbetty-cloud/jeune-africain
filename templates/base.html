@@ -640,6 +640,14 @@
                         <a class="nav-link" href="{% url 'catalogue:catalogue' %}">Catalogue</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">À propos</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:favorite_list' %}"><i class="fas fa-heart"></i> Favoris</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
                         <button class="btn btn-sm" id="darkModeBtn" style="background: none; border: none; color: var(--text-light); cursor: pointer; padding: 0.5rem;">
                             <i class="fas fa-moon"></i>
                         </button>
@@ -704,18 +712,18 @@
                 <i class="fas fa-book-reader"></i>
                 <span>Biblio</span>
             </a>
-            <a href="{% url 'users:favorite_list' %}" class="footer-item {% if 'favorite' in request.path %}active{% endif %}" title="Favoris">
-                <i class="fas fa-heart"></i>
-                <span>Favoris</span>
+            <a href="{% url 'users:profile' %}" class="footer-item {% if 'profile' in request.path %}active{% endif %}" title="Profil">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
             </a>
             {% else %}
             <a href="{% url 'users:login' %}" class="footer-item" title="Biblio">
                 <i class="fas fa-book-reader"></i>
                 <span>Biblio</span>
             </a>
-            <a href="{% url 'users:login' %}" class="footer-item" title="Favoris">
-                <i class="fas fa-heart"></i>
-                <span>Favoris</span>
+            <a href="{% url 'users:login' %}" class="footer-item" title="Profil">
+                <i class="fas fa-user"></i>
+                <span>Profil</span>
             </a>
             {% endif %}
         </div>
@@ -745,6 +753,15 @@
             const theme = html.getAttribute('data-bs-theme');
             darkModeBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         }
+
+        // Fermer le menu burger au scroll
+        const navbarCollapse = document.getElementById('navbarNav');
+        window.addEventListener('scroll', () => {
+            if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                if (bsCollapse) bsCollapse.hide();
+            }
+        }, { passive: true });
     </script>
     
     {% block extra_js %}{% endblock %}
