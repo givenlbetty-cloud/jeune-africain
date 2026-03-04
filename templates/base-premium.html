@@ -184,8 +184,12 @@
         .book-card-premium:hover .book-cover img { transform: scale(1.07); }
         .book-cover-placeholder { font-size: 2.5rem; color: white; opacity: 0.35; }
         
-        /* Badge masqué — remplacé par price-overlay */
-        .book-badge { display: none; }
+        .book-badge {
+            position: absolute; top: 0.4rem; left: 0.4rem;
+            padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
+            font-size: 0.6rem; font-weight: 700; z-index: 2;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
         .badge-premium { background: linear-gradient(135deg, var(--accent), #FF4757); color: white; }
         .badge-free { background: var(--success); color: white; }
         
