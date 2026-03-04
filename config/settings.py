@@ -219,8 +219,7 @@ if DEBUG:
 
 STORAGES = {
     "default": {
-        # "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-        "BACKEND": "django.core.files.storage.FileSystemStorage",  # Local storage requested
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if not DEBUG else "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": STATIC_FILES_BACKEND,
