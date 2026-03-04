@@ -154,59 +154,14 @@
                                 <i class="fas fa-book"></i>
                             </div>
                         {% endif %}
-                        {% if book.is_paid %}
-                            <span class="book-badge badge-premium">Payant</span>
-                        {% else %}
-                            <span class="book-badge badge-free">Gratuit</span>
-                        {% endif %}
-                    </div>
-                    <div class="book-info">
-                        <h5 class="book-title">{{ book.title }}</h5>
-                        <p class="book-author">{{ book.author|truncatewords:3 }}</p>
-                        
-                        {% if book.description %}
-                        <p class="book-description">{{ book.description|truncatewords:10 }}</p>
-                        {% endif %}
-                        
-                        <div class="book-price">
-                            {% if book.is_paid and book.price > 0 %}
-                                {% if book.discount_percentage > 0 %}
-                                    <span class="price-original">{{ book.price|floatformat:0 }} FC</span>
-                                    <span style="font-size: 0.65rem; color: #EF4444; font-weight: 600;">-{{ book.discount_percentage }}%</span>
-                                {% else %}
-                                    <span class="price-main">{{ book.price|floatformat:0 }} FC</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="price-free">Gratuit</span>
+                        {% if book.is_paid and book.price > 0 %}
+                        <div class="book-price-overlay">
+                            {% if book.discount_percentage > 0 %}
+                                <span class="price-original-sm">{{ book.price|floatformat:0 }} FC</span>
                             {% endif %}
+                            <span class="price-final">{{ book.price|floatformat:0 }} FC</span>
                         </div>
-                        
-                        <div class="book-rating">
-                            <span class="stars">
-                                {% for i in "12345" %}
-                                    {% if book.rating >= i %}
-                                        <i class="fas fa-star"></i>
-                                    {% elif book.rating > i|add:'-1' %}
-                                        <i class="fas fa-star-half-alt"></i>
-                                    {% else %}
-                                        <i class="fas fa-star empty"></i>
-                                    {% endif %}
-                                {% endfor %}
-                            </span>
-                            <span class="rating-value">({{ book.reviews_count|default:0 }})</span>
-                        </div>
-                        
-                        <div class="book-action">
-                            <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn-read" onclick="event.stopPropagation()">
-                                <i class="fas fa-eye"></i> Voir
-                            </a>
-                            {% if user.is_authenticated %}
-                            <button type="button" class="btn-fav" data-book-id="{{ book.pk }}" onclick="toggleFavorite(event, {{ book.pk }})" 
-                                    style="background: {% if book in user.favorite_books.all %}linear-gradient(135deg, #FF6B6B, #FF4757){% else %}rgba(255, 107, 107, 0.15){% endif %}; color: {% if book in user.favorite_books.all %}white{% else %}#FF6B6B{% endif %};">
-                                <i class="fas fa-heart"></i> Fav
-                            </button>
-                            {% endif %}
-                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

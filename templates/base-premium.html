@@ -165,62 +165,49 @@
            BOOK CARD — Ultra-compact
            ============================================ */
         .book-card-premium {
-            display: flex; flex-direction: column;
-            height: 100%; border-radius: var(--radius-md);
+            display: block;
+            border-radius: var(--radius-md);
             overflow: hidden; box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease; background: var(--light-alt);
-            border: 1px solid var(--border); cursor: pointer;
+            transition: all 0.25s ease; cursor: pointer;
             text-decoration: none; color: inherit;
+            position: relative;
         }
-        .book-card-premium:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        .book-card-premium:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(91,95,241,0.18); }
         
         .book-cover {
-            width: 100%; height: 120px;
+            width: 100%; aspect-ratio: 2 / 3;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             position: relative; overflow: hidden;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
         }
-        .book-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-        .book-card-premium:hover .book-cover img { transform: scale(1.03); }
-        .book-cover-placeholder { font-size: 2rem; color: white; opacity: 0.3; }
+        .book-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; display: block; }
+        .book-card-premium:hover .book-cover img { transform: scale(1.07); }
+        .book-cover-placeholder { font-size: 2.5rem; color: white; opacity: 0.35; }
         
-        .book-badge {
-            position: absolute; top: 0.4rem; right: 0.4rem;
-            padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
-            font-size: 0.6rem; font-weight: 700; z-index: 2;
-            text-transform: uppercase; letter-spacing: 0.3px;
-        }
+        /* Badge masqué — remplacé par price-overlay */
+        .book-badge { display: none; }
         .badge-premium { background: linear-gradient(135deg, var(--accent), #FF4757); color: white; }
         .badge-free { background: var(--success); color: white; }
         
-        .book-info {
-            flex: 1; padding: 0.3rem 0.4rem;
-            display: flex; flex-direction: column; gap: 0.1rem;
-            min-height: 0; overflow: hidden;
+        /* Overlay prix en bas de la couverture (livres payants uniquement) */
+        .book-price-overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            padding: 1.4rem 0.65rem 0.5rem;
+            background: linear-gradient(transparent, rgba(0,0,0,0.70));
+            display: flex; align-items: center; gap: 0.35rem;
         }
-        .book-title {
-            font-family: 'Poppins', sans-serif; font-weight: 700;
-            font-size: 0.72rem; line-height: 1.15;
-            margin: 0; display: -webkit-box;
-            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; color: var(--dark);
+        .book-price-overlay .price-final {
+            color: #fff; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4);
         }
-        .book-author { font-size: 0.62rem; color: var(--text-light); margin: 0; }
-        .book-description {
-            font-size: 0.58rem; color: var(--text-light); line-height: 1.2; margin: 0;
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        .book-price-overlay .price-original-sm {
+            color: rgba(255,255,255,0.5); font-size: 0.6rem; text-decoration: line-through;
         }
-        .book-price { font-size: 0.65rem; font-weight: 600; margin: 0.05rem 0; display: flex; gap: 0.2rem; align-items: center; flex-wrap: wrap; }
-        .price-main { color: var(--primary); }
-        .price-free { color: var(--success); font-weight: 700; }
-        .price-original { text-decoration: line-through; color: var(--text-light); font-size: 0.65rem; }
-        .price-discount { color: var(--danger); font-weight: 700; }
         
-        .book-rating { display: flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; margin: 0; }
-        .book-rating .stars { color: #FFD700; font-size: 0.6rem; }
-        .book-rating .stars .empty { color: #DDD; }
+        /* Infos texte masquées */
+        .book-info { display: none; }
         
-        .book-action { display: flex; gap: 0.2rem; margin-top: auto; padding-top: 0.2rem; }
+        /* Rétrocompatibilité styles conservés */
         .book-action button, .book-action a {
             flex: 1; padding: 0.3rem 0.2rem; border: none;
             border-radius: var(--radius-sm); font-size: 0.65rem; font-weight: 600;
@@ -300,7 +287,7 @@
         @media (min-width: 768px) and (max-width: 991.98px) {
             body { padding-bottom: 0; }
             .footer-app { display: none !important; }
-            .book-cover { height: 110px; }
+            /* book-cover gérée via aspect-ratio */
             .nav-link { font-size: 0.68rem; padding: 0.18rem 0.3rem !important; }
             .nav-link i { font-size: 0.58rem; }
             .navbar-brand-logo { font-size: 0.85rem; }
@@ -319,14 +306,7 @@
             .navbar-premium { padding: 0.1rem 0; }
             .navbar-brand-logo { font-size: 0.85rem; }
             
-            .book-cover { height: 95px; }
-            .book-info { padding: 0.25rem 0.3rem; }
-            .book-title { font-size: 0.65rem; }
-            .book-author { font-size: 0.55rem; }
-            .book-price { font-size: 0.6rem; }
-            .book-description { font-size: 0.52rem; }
-            .book-badge { font-size: 0.5rem; padding: 0.15rem 0.3rem; }
-            .book-action button, .book-action a { font-size: 0.6rem; padding: 0.25rem 0.15rem; }
+            /* book-cover gérée via aspect-ratio */
             
             .search-premium { padding: 0.5rem; margin-bottom: 0.5rem; }
             .container { padding-left: 0.5rem; padding-right: 0.5rem; }
