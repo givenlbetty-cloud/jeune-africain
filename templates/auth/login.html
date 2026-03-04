@@ -9,11 +9,19 @@
                     url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
         background-size: cover;
         background-position: center;
-        min-height: 100vh;
+        min-height: calc(100vh - 65px);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+    @media (max-width: 576px) {
+        .login-container {
+            min-height: calc(100vh - 65px - 56px);
+            align-items: flex-start;
+            padding-top: 24px;
+        }
     }
     
     .login-card {
@@ -181,6 +189,27 @@
     .footer-text a:hover {
         text-decoration: underline;
     }
+
+    /* Lien inscription affiché AU-DESSUS du formulaire sur mobile */
+    .signup-cta-mobile {
+        display: none;
+        text-align: center;
+        margin-bottom: 18px;
+        padding: 10px 14px;
+        background: rgba(102,126,234,0.08);
+        border: 1px solid rgba(102,126,234,0.25);
+        border-radius: 8px;
+        color: #4b5563;
+        font-size: 0.92rem;
+    }
+    .signup-cta-mobile a {
+        color: #667eea;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    @media (max-width: 576px) {
+        .signup-cta-mobile { display: block; }
+    }
 </style>
 {% endblock %}
 
@@ -192,6 +221,11 @@
         </div>
         
         <div class="login-card-body">
+            <!-- Lien inscription visible uniquement sur mobile (au-dessus) -->
+            <div class="signup-cta-mobile">
+                Pas encore inscrit ? <a href="{% url 'users:signup' %}">Créer un compte</a>
+            </div>
+
             <!-- Form Traditionnelle -->
             <form method="post" novalidate autocomplete="off">
                 {% csrf_token %}
