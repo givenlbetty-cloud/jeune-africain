@@ -76,12 +76,16 @@
                         {% else %}
                             <span class="book-badge badge-free">Gratuit</span>
                         {% endif %}
-                        {% if book.is_paid and book.price > 0 %}
+                        {% if book.is_paid %}
                         <div class="book-price-overlay">
                             {% if book.discount_percentage > 0 %}
                                 <span class="price-original-sm">{{ book.price|floatformat:0 }} FC</span>
                             {% endif %}
-                            <span class="price-final">{{ book.price|floatformat:0 }} FC</span>
+                            {% if book.price > 0 %}
+                                <span class="price-final">{{ book.price|floatformat:0 }} FC</span>
+                            {% else %}
+                                <span class="price-final">Payant</span>
+                            {% endif %}
                         </div>
                         {% endif %}
                     </div>
