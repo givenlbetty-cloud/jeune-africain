@@ -10,12 +10,15 @@
                     url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
         background-size: cover;
         background-position: center;
-        background-attachment: fixed;
         min-height: 100vh;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: center;
         padding: 20px;
+        box-sizing: border-box;
+    }
+    @media (min-width: 577px) {
+        .register-container { align-items: center; }
     }
     
     .register-card {
@@ -33,20 +36,25 @@
     .register-card-header {
         background: var(--primary-color);
         color: white;
-        padding: 30px;
+        padding: 20px 30px;
         border-radius: 0;
         text-align: center;
     }
     
     .register-card-header h2 {
         margin: 0;
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 700;
         font-family: 'Segoe UI', sans-serif;
     }
     
     .register-card-body {
-        padding: 40px;
+        padding: 24px 32px;
+    }
+    @media (max-width: 576px) {
+        .register-card-body { padding: 16px; }
+        .register-card-header { padding: 16px; }
+        .register-card-header h2 { font-size: 1.3rem; }
     }
     
     .form-group {
@@ -78,6 +86,9 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 15px;
+    }
+    @media (max-width: 576px) {
+        .row-2col { grid-template-columns: 1fr; gap: 0; }
     }
     
     .btn-register {
