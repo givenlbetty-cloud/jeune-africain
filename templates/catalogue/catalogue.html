@@ -71,6 +71,11 @@
                                 <i class="fas fa-book"></i>
                             </div>
                         {% endif %}
+                        {% if book.is_paid %}
+                            <span class="book-badge badge-premium">Payant</span>
+                        {% else %}
+                            <span class="book-badge badge-free">Gratuit</span>
+                        {% endif %}
                         {% if book.is_paid and book.price > 0 %}
                         <div class="book-price-overlay">
                             {% if book.discount_percentage > 0 %}
