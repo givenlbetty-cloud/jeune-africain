@@ -217,9 +217,10 @@ STATIC_FILES_BACKEND = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 if DEBUG:
     STATIC_FILES_BACKEND = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
+_use_cloudinary = bool(os.environ.get('CLOUDINARY_CLOUD_NAME'))
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if not DEBUG else "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if _use_cloudinary else "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": STATIC_FILES_BACKEND,
