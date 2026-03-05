@@ -337,15 +337,24 @@ class Book(models.Model):
     def get_file_url(self):
         """
         Retourner l'URL du fichier PDF ou EPUB.
+        Cloudinary stocke les PDFs comme 'raw' mais l'URL peut contenir
+        'image/upload' — on corrige pour 'raw/upload' si besoin.
         """
         url = None
         if self.pdf_file:
             url = self.pdf_file.url
         elif self.epub_file:
             url = self.epub_file.url
-            
+
+        if not url:
+            return url
+
+        # Cloudinary: forcer raw/upload pour PDF/EPUB (évite le blocage CORS/content-type)
+        if 'res.cloudinary.com' in url and '/image/upload/' in url:
+            url = url.replace('/image/upload/', '/raw/upload/', 1)
+
         # Ne forcer HTTPS qu'en production
-        if url and url.startswith("http://") and not settings.DEBUG:
+        if url.startswith("http://") and not settings.DEBUG:
             url = url.replace("http://", "https://", 1)
         return url
 
