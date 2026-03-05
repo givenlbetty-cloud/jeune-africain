@@ -361,7 +361,12 @@
                 throw new Error("Le fichier PDF n'est pas disponible.");
             }
             
-            state.pdf = await pdfjsLib.getDocument(pdfData).promise;
+            state.pdf = await pdfjsLib.getDocument({
+                url: pdfData,
+                withCredentials: false,
+                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                cMapPacked: true,
+            }).promise;
             state.totalPages = state.pdf.numPages;
             
             document.getElementById('totalPages').textContent = state.totalPages;

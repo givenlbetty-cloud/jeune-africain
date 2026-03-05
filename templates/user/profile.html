@@ -254,6 +254,14 @@
                 <strong>{{ user.email }}</strong>
             </div>
         </div>
+        <div class="mt-2 d-grid gap-2">
+            <a href="{% url 'users:favorite_list' %}" class="btn btn-secondary-premium btn-sm">
+                <i class="fas fa-heart"></i> Mes Favoris
+            </a>
+            <a href="{% url 'users:logout' %}" class="btn btn-sm" style="background: var(--danger); color: white; border: none; border-radius: var(--radius-sm); padding: 0.4rem;">
+                <i class="fas fa-sign-out-alt"></i> Se déconnecter
+            </a>
+        </div>
     </div>
     
     <!-- TAB: Actions rapides -->
