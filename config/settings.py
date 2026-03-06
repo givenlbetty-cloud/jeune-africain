@@ -82,9 +82,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "cloudinary_storage",
     "django.contrib.staticfiles",
-    "cloudinary",
     "django.contrib.sites",  # Required for allauth
     
     # REST Framework
@@ -217,37 +215,18 @@ STATIC_FILES_BACKEND = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 if DEBUG:
     STATIC_FILES_BACKEND = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
-_use_cloudinary = bool(os.environ.get('CLOUDINARY_CLOUD_NAME'))
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage" if _use_cloudinary else "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": STATIC_FILES_BACKEND,
     },
 }
 
-# Media files (Cloudinary)
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    'SECURE': True,
-    'PREFIX': '',   # Pas de préfixe /media/ dans les chemins Cloudinary
-}
-
 # Upload Limits (Increased for bulk processing)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB (default 2.5MB)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB (default 2.5MB)
-
-# Configuration Cloudinary directe (global)
-import cloudinary
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET'),
-    secure=True
-)
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

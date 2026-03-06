@@ -2,7 +2,7 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseForbidden, StreamingHttpResponse, HttpResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.cache import cache_page  # CORRECTION #9: Performance
 from django.db.models import Avg, Q, Prefetch
@@ -320,63 +320,6 @@ def simulate_purchase_view(request, book_id):
     
     messages.success(request, f"🎉 Achat simulé réussi ! Vous avez maintenant accès à '{book.title}'.")
     return redirect('catalogue:read_book', book_id=book.id)
-
-
-@login_required(login_url='users:login')
-def serve_pdf_view(request, book_id):
-    """Vue proxy : stream le PDF depuis Cloudinary vers le navigateur."""
-    import requests as http_requests
-    import cloudinary
-    import cloudinary.utils
-    import time
-    from django.conf import settings
-
-    book = get_object_or_404(Book, id=book_id, is_published=True)
-
-    # Contrôle d'accès
-    if book.is_paid:
-        has_payment = Payment.objects.filter(
-            user=request.user, book=book, status='COMPLETED'
-        ).exists()
-        if not has_payment and book.free_pages_count == 0:
-            return HttpResponseForbidden("Accès refusé")
-
-    if not book.pdf_file:
-        return HttpResponse("Fichier non disponible", status=404)
-
-    # Générer une URL signée Cloudinary (valide 30 min, côté serveur)
-    cloudinary.config(
-        cloud_name=settings.CLOUDINARY_STORAGE.get('CLOUD_NAME'),
-        api_key=settings.CLOUDINARY_STORAGE.get('API_KEY'),
-        api_secret=settings.CLOUDINARY_STORAGE.get('API_SECRET'),
-        secure=True,
-    )
-
-    public_id = book.pdf_file.name
-    signed_url, _ = cloudinary.utils.cloudinary_url(
-        public_id,
-        resource_type="raw",
-        type="upload",
-        sign_url=True,
-        expires_at=int(time.time()) + 1800,
-    )
-
-    # Stream le fichier vers le navigateur
-    try:
-        upstream = http_requests.get(signed_url, stream=True, timeout=30)
-        if upstream.status_code != 200:
-            # Fallback : tenter l'URL directe
-            direct_url = book.get_file_url()
-            upstream = http_requests.get(direct_url, stream=True, timeout=30)
-        response = StreamingHttpResponse(
-            upstream.iter_content(chunk_size=65536),
-            content_type='application/pdf',
-        )
-        response['Content-Disposition'] = f'inline; filename="{book.title}.pdf"'
-        response['Cache-Control'] = 'private, max-age=1800'
-        return response
-    except Exception as e:
-        return HttpResponse(f"Erreur de chargement du fichier: {e}", status=502)
 
 
 def read_book_view(request, book_id):
