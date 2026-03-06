@@ -20,6 +20,7 @@ urlpatterns = [
     path('', frontend_views.catalogue_view, name='catalogue'),
     path('book/<uuid:book_id>/', frontend_views.book_detail_view, name='book_detail'),
     path('book/<uuid:book_id>/read/', frontend_views.read_book_view, name='read_book'),
+    path('book/<uuid:book_id>/serve-pdf/', frontend_views.serve_pdf_view, name='serve_pdf'),
     path('book/<uuid:book_id>/update-session/', frontend_views.update_reading_session, name='update_reading_session'),
     path('book/<uuid:book_id>/purchase/', frontend_views.purchase_book_view, name='purchase_book'),
     path('book/<uuid:book_id>/simulate-purchase/', frontend_views.simulate_purchase_view, name='simulate_purchase'),

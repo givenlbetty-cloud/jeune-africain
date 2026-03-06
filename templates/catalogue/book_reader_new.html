@@ -290,7 +290,7 @@
     // Context Data
     const CONFIG = {
         bookId: "{{ book.id }}",
-        pdfUrl: "{{ book.get_file_url|safe }}",
+        pdfUrl: "{% url 'catalogue:serve_pdf' book.id %}",
         lastPage: parseInt("{{ last_page }}" || "1"),
         isPaid: {{ has_full_access|lower }} === false,
         hasAccess: {{ has_full_access|lower }},
