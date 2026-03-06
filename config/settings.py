@@ -229,7 +229,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB (default 2.5MB)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB (default 2.5MB)
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Sur Render : utiliser le disque persistant montée sur /var/data/media
+# En local : dossier media/ classique
+MEDIA_ROOT = Path(os.environ.get("RENDER_MEDIA_ROOT", str(BASE_DIR / "media")))
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
