@@ -116,11 +116,18 @@
         transition: all 0.2s;
     }
     .action-btn i { font-size: 0.9rem; }
-    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(91,95,241,0.05); }
+    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: rgba(27,42,74,0.05); }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Hero Profil -->
+<div style="position: relative; background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center top; min-height: 80px;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(27,42,74,0.9) 0%, rgba(230,57,70,0.6) 100%);"></div>
+    <div style="position: relative; z-index: 1; padding: 0.75rem 1rem; color: white; text-align: center;">
+        <h1 style="font-size: clamp(0.9rem, 3vw, 1.25rem); font-weight: 800; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i class="fas fa-user-circle"></i> Mon Profil</h1>
+    </div>
+</div>
 <div class="container mt-2 mb-4" style="max-width: 600px;">
     
     <!-- En-tête Profil Compact -->

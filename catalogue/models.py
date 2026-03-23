@@ -192,18 +192,21 @@ class Book(models.Model):
     """Modèle pour les livres."""
     
     GENRE_CHOICES = [
+        ("articles", _("Articles")),
+        ("magasin", _("Magasin")),
+        ("revues_scientifiques", _("Revues Scientifiques")),
+        ("geographie_histoires", _("Géographie et Histoires")),
+        ("theories_litteraires", _("Théories Littéraires")),
+        ("tourisme", _("Tourisme")),
+        ("hotellerie", _("Hôtellerie")),
+        ("sport", _("Sport")),
+        ("loisir", _("Loisir")),
+        ("dev_personnel", _("Développement Personnel")),
         ("fiction", _("Fiction")),
         ("non_fiction", _("Non-fiction")),
         ("science", _("Science")),
-        ("history", _("Histoire")),
         ("biography", _("Biographie")),
-        ("children", _("Enfants")),
         ("poetry", _("Poésie")),
-        ("drama", _("Drame")),
-        ("mystery", _("Mystère")),
-        ("romance", _("Romance")),
-        ("fantasy", _("Fantasy")),
-        ("self_help", _("Développement personnel")),
         ("other", _("Autre")),
     ]
     
@@ -2431,3 +2434,120 @@ class SiteConfiguration(models.Model):
     class Meta:
         verbose_name = "Personnalisation du Site"
         verbose_name_plural = "Personnalisation du Site"
+
+
+class PrintOrder(models.Model):
+    """Commande de version imprimée d'un livre."""
+    
+    STATUS_CHOICES = [
+        ('pending', _('En attente')),
+        ('confirmed', _('Confirmée')),
+        ('shipped', _('Expédiée')),
+        ('delivered', _('Livrée')),
+        ('cancelled', _('Annulée')),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='print_orders')
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+        null=True, blank=True, related_name='print_orders'
+    )
+    full_name = models.CharField(_("Nom complet"), max_length=255)
+    phone = models.CharField(_("Téléphone"), max_length=30)
+    email = models.EmailField(_("Email"))
+    city = models.CharField(_("Ville"), max_length=100)
+    status = models.CharField(
+        _("Statut"), max_length=20,
+        choices=STATUS_CHOICES, default='pending'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = _("Commande imprimée")
+        verbose_name_plural = _("Commandes imprimées")
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Commande de {self.full_name} - {self.book.title}"
+
+
+class Donateur(models.Model):
+    """Donateur qui soutient BNC."""
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nom = models.CharField(_("Nom"), max_length=200)
+    message = models.CharField(_("Message (optionnel)"), max_length=300, blank=True)
+    montant = models.DecimalField(_("Montant (FC)"), max_digits=12, decimal_places=2, null=True, blank=True)
+    is_visible = models.BooleanField(_("Visible publiquement"), default=True)
+    order = models.IntegerField(_("Ordre d'affichage"), default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("Donateur")
+        verbose_name_plural = _("Donateurs")
+        ordering = ['order', '-created_at']
+
+    def __str__(self):
+        return self.nom
+
+
+class LienSocial(models.Model):
+    """Lien de réseau social / canal de communication géré depuis l'admin."""
+    
+    PLATFORM_CHOICES = [
+        ('facebook', 'Facebook'),
+        ('youtube', 'YouTube'),
+        ('whatsapp', 'WhatsApp'),
+        ('tiktok', 'TikTok'),
+        ('twitter', 'X (Twitter)'),
+        ('linkedin', 'LinkedIn'),
+        ('email', 'Email'),
+        ('telegram', 'Telegram'),
+        ('instagram', 'Instagram'),
+    ]
+    ICON_MAP = {
+        'facebook': 'fab fa-facebook',
+        'youtube': 'fab fa-youtube',
+        'whatsapp': 'fab fa-whatsapp',
+        'tiktok': 'fab fa-tiktok',
+        'twitter': 'fab fa-x-twitter',
+        'linkedin': 'fab fa-linkedin',
+        'email': 'fas fa-envelope',
+        'telegram': 'fab fa-telegram',
+        'instagram': 'fab fa-instagram',
+    }
+    COLOR_MAP = {
+        'facebook': '#1877F2',
+        'youtube': '#FF0000',
+        'whatsapp': '#25D366',
+        'tiktok': '#000000',
+        'twitter': '#000000',
+        'linkedin': '#0A66C2',
+        'email': '#E63946',
+        'telegram': '#26A5E4',
+        'instagram': '#E4405F',
+    }
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    platform = models.CharField(_("Plateforme"), max_length=20, choices=PLATFORM_CHOICES)
+    label = models.CharField(_("Libellé affiché"), max_length=100, help_text=_("Ex: +243 812 345 678, @bnccalures, contact@bnc.com"))
+    url = models.CharField(_("Lien / URL"), max_length=500, help_text=_("URL complète ou mailto: ou tel:"))
+    is_active = models.BooleanField(_("Actif"), default=True)
+    order = models.IntegerField(_("Ordre d'affichage"), default=0)
+
+    class Meta:
+        verbose_name = _("Lien social")
+        verbose_name_plural = _("Liens sociaux")
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.get_platform_display()} — {self.label}"
+
+    @property
+    def icon_class(self):
+        return self.ICON_MAP.get(self.platform, 'fas fa-link')
+
+    @property
+    def color(self):
+        return self.COLOR_MAP.get(self.platform, '#1B2A4A')

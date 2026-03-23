@@ -6,7 +6,7 @@
 {% block extra_css %}
 <style>
     .forum-header {
-        background: linear-gradient(135deg, #6C63FF, var(--secondary));
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
         color: white; padding: 0.6rem 0.75rem; border-radius: var(--radius-md);
         margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;
     }
@@ -22,7 +22,7 @@
         font-weight: 600; transition: all 0.2s;
         display: flex; align-items: center; gap: 0.3rem;
     }
-    .forum-cat:hover { border-color: var(--primary); color: var(--primary); background: rgba(91,95,241,0.05); }
+    .forum-cat:hover { border-color: var(--primary); color: var(--primary); background: rgba(27,42,74,0.05); }
     .forum-cat .badge { font-size: 0.55rem; padding: 0.1rem 0.35rem; }
     .discussion-card {
         background: var(--light-alt); border: 1px solid var(--border);
@@ -52,6 +52,13 @@
 {% endblock %}
 
 {% block content %}
+<!-- Hero Forum -->
+<div style="position: relative; background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; min-height: 80px;">
+    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(27,42,74,0.9) 0%, rgba(230,57,70,0.6) 100%);"></div>
+    <div style="position: relative; z-index: 1; padding: 0.75rem 1rem; color: white; text-align: center;">
+        <h1 style="font-size: clamp(0.9rem, 3vw, 1.25rem); font-weight: 800; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"><i class="fas fa-comments"></i> Forum</h1>
+    </div>
+</div>
 <div class="container mt-3">
     <div class="forum-header">
         <div>

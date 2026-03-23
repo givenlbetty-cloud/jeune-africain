@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% block title %}BNC - Bibliothèque Numérique{% endblock %}</title>
-    <meta name="theme-color" content="#5B5FF1">
+    <title>{% block title %}BNC - Bibliothèque Numérique Calures{% endblock %}</title>
+    <meta name="theme-color" content="#1B2A4A">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -18,11 +18,11 @@
     
     <style>
         :root {
-            --primary: #5B5FF1;
-            --primary-dark: #4338CA;
-            --secondary: #00D4FF;
-            --secondary-dark: #009BC8;
-            --accent: #FF6B6B;
+            --primary: #1B2A4A;
+            --primary-dark: #0F1D36;
+            --secondary: #E63946;
+            --secondary-dark: #C1121F;
+            --accent: #E63946;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
@@ -73,7 +73,7 @@
             background-color: #252545 !important;
             color: #ffffff !important;
             border-color: var(--primary) !important;
-            box-shadow: 0 0 0 2px rgba(91, 95, 241, 0.25) !important;
+            box-shadow: 0 0 0 2px rgba(27, 42, 74, 0.25) !important;
         }
         [data-bs-theme="dark"] label,
         [data-bs-theme="dark"] .form-label {
@@ -193,7 +193,7 @@
         
         .nav-link:hover {
             color: var(--primary) !important;
-            background-color: rgba(91, 95, 241, 0.08);
+            background-color: rgba(27, 42, 74, 0.08);
         }
         
         .navbar-toggler { border: none; padding: 0.15rem 0.35rem; font-size: 0.85rem; }
@@ -217,7 +217,7 @@
         
         /* ===== BUTTONS ===== */
         .btn-premium {
-            background: linear-gradient(135deg, var(--primary), #7B7FFF);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
             color: white;
             font-weight: 600;
@@ -229,7 +229,7 @@
         
         .btn-premium:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(91, 95, 241, 0.3);
+            box-shadow: 0 8px 16px rgba(27, 42, 74, 0.3);
             color: white;
         }
         
@@ -238,7 +238,7 @@
         }
         
         .btn-secondary-premium {
-            background: rgba(91, 95, 241, 0.1);
+            background: rgba(27, 42, 74, 0.1);
             border: 2px solid var(--primary);
             color: var(--primary);
             font-weight: 600;
@@ -491,7 +491,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: linear-gradient(135deg, var(--primary), #7B7FFF);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             text-align: center;
             text-decoration: none;
@@ -579,7 +579,7 @@
         .search-premium input:focus,
         .search-premium select:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(91, 95, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(27, 42, 74, 0.1);
             outline: none;
         }
         
@@ -669,7 +669,7 @@
         }
         
         [data-bs-theme="dark"] .book-rating .stars .empty {
-            color: #444;
+            color: #1a1a1a;
         }
         
         /* ===== ANIMATIONS ===== */

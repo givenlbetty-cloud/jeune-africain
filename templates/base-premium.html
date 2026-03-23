@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>{% block title %}BNC - Bibliothèque Numérique{% endblock %}</title>
-    <meta name="theme-color" content="#5B5FF1">
+    <title>{% block title %}BNC - Bibliothèque Numérique Calures{% endblock %}</title>
+    <meta name="theme-color" content="#1B2A4A">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -18,11 +18,11 @@
     
     <style>
         :root {
-            --primary: #5B5FF1;
-            --primary-dark: #4338CA;
-            --secondary: #00D4FF;
-            --secondary-dark: #009BC8;
-            --accent: #FF6B6B;
+            --primary: #1B2A4A;
+            --primary-dark: #0F1D36;
+            --secondary: #E63946;
+            --secondary-dark: #C1121F;
+            --accent: #E63946;
             --success: #10B981;
             --warning: #F59E0B;
             --danger: #EF4444;
@@ -31,7 +31,13 @@
             --dark: #0F0F1E;
             --dark-alt: #1A1A2E;
             --border: #E5E7EB;
+            --text: #1a1a1a;
+            --text-secondary: #2d2d2d;
             --text-light: #6B7280;
+            --bg-page: #ffffff;
+            --bg-card: #ffffff;
+            --bg-soft: rgba(27,42,74,0.03);
+            --bg-soft-alt: rgba(27,42,74,0.06);
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
@@ -43,12 +49,20 @@
         }
         
         [data-bs-theme="dark"] {
+            --primary: #5B8DD8;
+            --primary-dark: #4A7AC0;
             --light: #0F0F1E;
             --light-alt: #1A1A2E;
             --dark: #F8F9FA;
             --dark-alt: #E5E7EB;
             --border: #2D3748;
+            --text: #E2E8F0;
+            --text-secondary: #CBD5E1;
             --text-light: #A0AEC0;
+            --bg-page: #0F0F1E;
+            --bg-card: #1A1A2E;
+            --bg-soft: rgba(255,255,255,0.05);
+            --bg-soft-alt: rgba(255,255,255,0.08);
         }
         
         * { font-family: 'Inter', sans-serif; }
@@ -83,6 +97,7 @@
             top: 0;
             z-index: 1030;
             padding: 0.15rem 0;
+            overflow: visible;
         }
         [data-bs-theme="dark"] .navbar-premium { background: rgba(26, 26, 46, 0.97); }
         
@@ -119,7 +134,7 @@
            BUTTONS
            ============================================ */
         .btn-premium {
-            background: linear-gradient(135deg, var(--primary), #7B7FFF);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none; color: white; font-weight: 600;
             padding: 0.4rem 1rem; font-size: 0.85rem;
             border-radius: var(--radius-sm);
@@ -129,7 +144,7 @@
         .btn-premium:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); color: white; }
         
         .btn-secondary-premium {
-            background: rgba(91, 95, 241, 0.1);
+            background: rgba(27, 42, 74, 0.1);
             border: 1.5px solid var(--primary); color: var(--primary);
             font-weight: 600; padding: 0.4rem 1rem; font-size: 0.85rem;
             border-radius: var(--radius-sm); transition: all 0.2s ease;
@@ -162,43 +177,46 @@
         .hero-premium p { font-size: clamp(0.75rem, 2vw, 0.9rem); opacity: 0.95; margin-bottom: 0; }
         
         /* ============================================
-           BOOK CARD — Ultra-compact
+           BOOK CARD — Style YouScribe
            ============================================ */
         .book-card-premium {
-            display: block;
-            border-radius: var(--radius-md);
-            overflow: hidden; box-shadow: var(--shadow-sm);
-            transition: all 0.25s ease; cursor: pointer;
+            display: flex; flex-direction: column;
             text-decoration: none; color: inherit;
-            position: relative;
+            cursor: pointer; position: relative;
+            transition: transform 0.25s ease;
         }
-        .book-card-premium:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(91,95,241,0.18); }
+        .book-card-premium:hover { transform: translateY(-6px); }
         
         .book-cover {
             width: 100%; aspect-ratio: 2 / 3;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             position: relative; overflow: hidden;
             display: flex; align-items: center; justify-content: center;
+            border-radius: 6px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            transition: box-shadow 0.25s ease;
         }
-        .book-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; display: block; }
-        .book-card-premium:hover .book-cover img { transform: scale(1.07); }
+        .book-card-premium:hover .book-cover { box-shadow: 0 10px 32px rgba(0,0,0,0.22); }
+        .book-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s ease; display: block; border-radius: 6px; }
+        .book-card-premium:hover .book-cover img { transform: scale(1.04); }
         .book-cover-placeholder { font-size: 2.5rem; color: white; opacity: 0.35; }
         
         .book-badge {
             position: absolute; top: 0.4rem; left: 0.4rem;
             padding: 0.2rem 0.5rem; border-radius: var(--radius-sm);
-            font-size: 0.6rem; font-weight: 700; z-index: 2;
+            font-size: 0.55rem; font-weight: 700; z-index: 2;
             text-transform: uppercase; letter-spacing: 0.3px;
         }
         .badge-premium { background: linear-gradient(135deg, var(--accent), #FF4757); color: white; }
         .badge-free { background: var(--success); color: white; }
         
-        /* Overlay prix en bas de la couverture (livres payants uniquement) */
+        /* Overlay prix en bas de la couverture */
         .book-price-overlay {
             position: absolute; bottom: 0; left: 0; right: 0;
             padding: 1.4rem 0.65rem 0.5rem;
             background: linear-gradient(transparent, rgba(0,0,0,0.70));
             display: flex; align-items: center; gap: 0.35rem;
+            border-radius: 0 0 6px 6px;
         }
         .book-price-overlay .price-final {
             color: #fff; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.3px;
@@ -208,15 +226,77 @@
             color: rgba(255,255,255,0.5); font-size: 0.6rem; text-decoration: line-through;
         }
         
-        /* Infos texte masquées */
-        .book-info { display: none; }
+        /* Infos texte sous la couverture — Style YouScribe */
+        .book-info {
+            display: flex; flex-direction: column;
+            padding: 0.5rem 0.15rem 0;
+        }
+        .book-cat-tag {
+            font-size: 0.65rem; font-weight: 700;
+            color: var(--secondary);
+            display: flex; align-items: center; gap: 0.25rem;
+            margin-bottom: 0.15rem;
+        }
+        .book-cat-tag i { font-size: 0.55rem; }
+        .book-title {
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--text); margin: 0;
+            line-height: 1.3;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .book-author {
+            font-size: 0.68rem; color: var(--text-light);
+            margin: 0.1rem 0 0; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        /* Carousel horizontal style YouScribe */
+        .ys-carousel-wrapper { position: relative; }
+        .ys-carousel {
+            display: flex; gap: 0.85rem;
+            overflow-x: auto; scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding: 0.5rem 0 1rem;
+            scrollbar-width: none;
+        }
+        .ys-carousel::-webkit-scrollbar { display: none; }
+        .ys-carousel .ys-card {
+            scroll-snap-align: start;
+            flex: 0 0 140px; min-width: 140px;
+        }
+        @media (min-width: 768px) {
+            .ys-carousel .ys-card { flex: 0 0 160px; min-width: 160px; }
+        }
+        .ys-arrow {
+            position: absolute; top: 40%; transform: translateY(-50%);
+            width: 36px; height: 36px; border-radius: 50%;
+            background: white; border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 3; font-size: 0.9rem; color: #333;
+            transition: all 0.2s;
+        }
+        .ys-arrow:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .ys-arrow-left { left: -8px; }
+        .ys-arrow-right { right: -8px; }
+        @media (max-width: 767px) {
+            .ys-arrow { display: none; }
+        }
+        
+        /* Section titre style YouScribe */
+        .ys-section-title {
+            font-weight: 800; font-size: 1.15rem;
+            margin: 0 0 0.25rem; color: var(--text);
+        }
         
         /* Rétrocompatibilité styles conservés */
         .book-action button, .book-action a {
             flex: 1; padding: 0.3rem 0.2rem; border: none;
             border-radius: var(--radius-sm); font-size: 0.65rem; font-weight: 600;
             cursor: pointer; transition: all 0.2s ease;
-            background: linear-gradient(135deg, var(--primary), #7B7FFF);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white; text-align: center; text-decoration: none;
         }
         .book-action button:hover, .book-action a:hover { box-shadow: var(--shadow-sm); }
@@ -258,7 +338,7 @@
             border-radius: var(--radius-sm); padding: 0.4rem 0.6rem;
             font-size: 0.85rem; color: var(--dark); transition: all 0.2s;
         }
-        .search-premium input:focus, .search-premium select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(91,95,241,0.1); outline: none; }
+        .search-premium input:focus, .search-premium select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(27,42,74,0.1); outline: none; }
         .search-premium label { font-weight: 600; color: var(--dark); margin-bottom: 0.25rem; font-size: 0.8rem; }
         
         /* ============================================
@@ -279,8 +359,8 @@
         }
         /* Tablette large >= 768px : forcer liens visibles */
         @media (min-width: 768px) {
-            .navbar-nav { flex-direction: row !important; }
-            .navbar-collapse { display: flex !important; flex-basis: auto !important; }
+            .navbar-nav { flex-direction: row !important; flex-wrap: wrap; }
+            .navbar-collapse { display: flex !important; flex-basis: auto !important; flex-wrap: wrap; }
             .navbar-toggler { display: none !important; }
             .nav-item.dropdown .dropdown-menu { position: absolute; }
         }
@@ -328,9 +408,22 @@
         /* ============================================
            DARK MODE
            ============================================ */
-        [data-bs-theme="dark"] .book-title { color: var(--dark); }
-        [data-bs-theme="dark"] .book-rating .stars .empty { color: #444; }
+        [data-bs-theme="dark"] .book-title { color: var(--text); }
+        [data-bs-theme="dark"] .book-author { color: var(--text-light); }
+        [data-bs-theme="dark"] .book-cat-tag { color: var(--secondary); }
+        [data-bs-theme="dark"] .book-rating .stars .empty { color: #4A5568; }
         [data-bs-theme="dark"] .footer-app { background: var(--light-alt); border-top-color: var(--border); }
+        [data-bs-theme="dark"] .book-card-premium { background: var(--bg-card); }
+        [data-bs-theme="dark"] .book-cover { background: #2D3748; }
+        [data-bs-theme="dark"] .card-premium { background: var(--bg-card); border-color: var(--border); }
+        [data-bs-theme="dark"] .search-premium { background: var(--bg-card); border-color: var(--border); }
+        [data-bs-theme="dark"] .ys-arrow { background: var(--bg-card); border-color: var(--border); color: var(--text); }
+        [data-bs-theme="dark"] .ys-arrow:hover { background: var(--primary); color: white; }
+        [data-bs-theme="dark"] .ys-section-title { color: var(--text); }
+        [data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select { background: var(--bg-card); color: var(--text); border-color: var(--border); }
+        [data-bs-theme="dark"] .dropdown-menu { background: var(--bg-card); border-color: var(--border); }
+        [data-bs-theme="dark"] .dropdown-item { color: var(--text); }
+        [data-bs-theme="dark"] .dropdown-item:hover { background: var(--bg-soft); }
         
         /* ============================================
            ANIMATIONS
@@ -378,14 +471,18 @@
                     </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:my_library' %}"><i class="fas fa-book-reader"></i> Bibliothèque</a>
+                        <a class="nav-link" href="{% url 'users:my_library' %}"><i class="fas fa-book-reader"></i> Ma Bibliothèque</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:login' %}"><i class="fas fa-book-reader"></i> Ma Bibliothèque</a>
                     </li>
                     {% endif %}
                 </ul>
                 <!-- Liens secondaires (burger uniquement sur mobile, toujours visibles desktop) -->
                 <ul class="navbar-nav align-items-md-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'catalogue:events_list' %}"><i class="fas fa-bullhorn"></i> Annonces</a>
+                        <a class="nav-link" href="{% url 'catalogue:events_list' %}"><i class="fas fa-newspaper"></i> Actualité</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'catalogue:forum_home' %}"><i class="fas fa-comments"></i> Forum</a>
@@ -451,14 +548,14 @@
             </a>
             {% if user.is_authenticated %}
             <a href="{% url 'users:my_library' %}" class="footer-item {% if 'library' in request.path %}active{% endif %}">
-                <i class="fas fa-book-reader"></i><span>Biblio</span>
+                <i class="fas fa-book-reader"></i><span>Ma Biblio</span>
             </a>
             <a href="{% url 'users:profile' %}" class="footer-item {% if 'profile' in request.path %}active{% endif %}">
                 <i class="fas fa-user"></i><span>Profil</span>
             </a>
             {% else %}
             <a href="{% url 'users:login' %}" class="footer-item">
-                <i class="fas fa-book-reader"></i><span>Biblio</span>
+                <i class="fas fa-book-reader"></i><span>Ma Biblio</span>
             </a>
             <a href="{% url 'users:login' %}" class="footer-item">
                 <i class="fas fa-user"></i><span>Profil</span>

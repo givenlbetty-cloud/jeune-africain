@@ -3,271 +3,738 @@
 
 {% block title %}{{ book.title }} - BNC{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* ===== HERO SOMBRE (YouScribe style) ===== */
+    .ys-detail-hero {
+        position: relative;
+        background: linear-gradient(180deg, #1B2A4A 0%, #0F1D36 100%);
+        padding: 0 0 1.5rem;
+    }
+    .ys-detail-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -20px;
+        left: 0; right: 0;
+        height: 20px;
+        background: var(--bg-page);
+        border-radius: 20px 20px 0 0;
+    }
+    .ys-breadcrumb {
+        padding: 0.6rem 1rem 0;
+        font-size: 0.72rem;
+    }
+    .ys-breadcrumb a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    .ys-breadcrumb a:hover { color: rgba(255,255,255,0.95); }
+    .ys-breadcrumb .sep { color: rgba(255,255,255,0.4); margin: 0 0.3rem; }
+    .ys-breadcrumb .current { color: rgba(255,255,255,0.45); }
+
+    .ys-detail-body {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem 1rem 0;
+        align-items: flex-start;
+    }
+    .ys-detail-cover {
+        flex: 0 0 130px;
+        min-width: 130px;
+    }
+    .ys-detail-cover img {
+        width: 100%;
+        border-radius: 6px;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
+        display: block;
+    }
+    .ys-detail-cover .cover-placeholder {
+        width: 100%;
+        height: 190px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.3);
+        font-size: 2.5rem;
+    }
+    .ys-detail-info {
+        flex: 1;
+        min-width: 0;
+        color: white;
+    }
+    .ys-detail-title {
+        font-size: clamp(1rem, 3.5vw, 1.45rem);
+        font-weight: 800;
+        line-height: 1.25;
+        margin: 0 0 0.5rem;
+        color: white;
+    }
+    .ys-detail-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        margin-bottom: 0.55rem;
+    }
+    .ys-detail-badges .badge-tag {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 4px;
+        font-weight: 600;
+        background: rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.9);
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+    .ys-detail-author {
+        font-size: 0.82rem;
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 0.2rem;
+    }
+    .ys-detail-author a {
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .ys-detail-author a:hover { text-decoration: underline; }
+    .ys-detail-publisher {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.6);
+    }
+    .ys-detail-publisher strong { color: rgba(255,255,255,0.85); font-weight: 700; }
+    .ys-share-btns {
+        position: absolute;
+        top: 0.6rem;
+        right: 0.75rem;
+        display: flex;
+        gap: 0.4rem;
+    }
+    .ys-share-btn {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+    }
+    .ys-share-btn:hover { background: rgba(255,255,255,0.25); color: white; }
+
+    /* ===== ACTIONS (sous le hero) ===== */
+    .ys-actions {
+        padding: 0.75rem 1rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .ys-btn-read {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: #E63946;
+        color: white;
+        font-weight: 700;
+        font-size: 0.95rem;
+        padding: 0.7rem 1rem;
+        border-radius: 30px;
+        border: none;
+        text-decoration: none;
+        text-align: center;
+        transition: background 0.2s, transform 0.15s;
+        box-shadow: 0 4px 14px rgba(230,57,70,0.35);
+    }
+    .ys-btn-read:hover { background: #d32f3d; color: white; transform: translateY(-1px); }
+    .ys-btn-outline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: transparent;
+        color: #E63946;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.55rem 1rem;
+        border-radius: 30px;
+        border: 2px solid #E63946;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .ys-btn-outline:hover { background: #E63946; color: white; }
+
+    /* ===== CTA ABONNEMENT ===== */
+    .ys-cta-banner {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 0.85rem 1rem;
+        margin: 0.75rem 1rem;
+    }
+    .ys-cta-banner .cta-icon {
+        flex-shrink: 0;
+        font-size: 1.5rem;
+        color: var(--text-light);
+    }
+    .ys-cta-banner .cta-text {
+        flex: 1;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.4;
+    }
+    .ys-cta-banner .cta-btn {
+        flex-shrink: 0;
+        background: #1B2A4A;
+        color: white;
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    [data-bs-theme="dark"] .ys-cta-banner .cta-btn {
+        background: #E63946;
+    }
+
+    /* ===== DESCRIPTION & SECTIONS ===== */
+    .ys-section {
+        padding: 1rem 1rem 0;
+    }
+    .ys-section-head {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        margin-bottom: 0.6rem;
+        color: var(--text);
+    }
+    .ys-section-head i { color: var(--text-light); font-size: 0.85rem; }
+    .ys-description-text {
+        font-size: 0.85rem;
+        line-height: 1.75;
+        color: var(--text-light);
+        margin: 0;
+    }
+    .ys-keyword-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.75rem;
+    }
+    .ys-keyword-tag {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        color: #E63946;
+        border: 1px solid rgba(230,57,70,0.35);
+        background: rgba(230,57,70,0.06);
+        text-decoration: none;
+    }
+
+    /* ===== SIDEBAR MÉTADONNÉES ===== */
+    .ys-meta-sidebar {
+        padding: 0 1rem;
+        margin-top: 0.75rem;
+    }
+    .ys-meta-item {
+        padding: 0.55rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .ys-meta-item:last-child { border: none; }
+    .ys-meta-label {
+        font-size: 0.68rem;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.15rem;
+    }
+    .ys-meta-value {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text);
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        background: var(--bg-soft);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+    }
+
+    /* ===== AUTEUR ===== */
+    .ys-author-card {
+        display: flex;
+        gap: 0.7rem;
+        align-items: center;
+        padding: 0.85rem 1rem;
+        background: var(--bg-soft);
+        border-radius: var(--radius-md);
+        margin: 0 1rem;
+    }
+    .ys-author-avatar {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #1B2A4A, #E63946);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .ys-author-name { font-weight: 700; font-size: 0.88rem; color: var(--text); margin: 0; text-decoration: none; }
+    .ys-author-name:hover { color: var(--primary); }
+    .ys-author-bio { font-size: 0.75rem; color: var(--text-light); margin: 0.1rem 0 0; line-height: 1.45; }
+
+    /* ===== AVIS ===== */
+    .ys-review-card {
+        padding: 0.55rem 0.65rem;
+        background: var(--bg-soft);
+        border-radius: var(--radius-sm);
+        border-left: 3px solid #1B2A4A;
+    }
+    [data-bs-theme="dark"] .ys-review-card {
+        border-left-color: #5B8DD8;
+    }
+    .ys-review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.2rem;
+    }
+    .ys-review-author { font-size: 0.72rem; font-weight: 700; color: var(--text); }
+    .ys-review-date { font-size: 0.6rem; color: var(--text-light); }
+    .ys-review-text { font-size: 0.72rem; color: var(--text-light); line-height: 1.5; margin: 0; }
+
+    /* ===== SIMILAIRES CAROUSEL ===== */
+    .ys-similar-section {
+        padding: 0.75rem 1rem 1.5rem;
+    }
+    .ys-similar-title {
+        font-weight: 800;
+        font-size: 0.95rem;
+        margin-bottom: 0.65rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .ys-similar-title a {
+        color: var(--text);
+        text-decoration: none;
+    }
+    .ys-similar-title .chevron { color: var(--text-light); font-size: 0.75rem; }
+
+    /* ===== BOUTONS SECONDAIRES COMPACTS ===== */
+    .ys-secondary-actions {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        padding: 0 1rem;
+        margin-top: 0.3rem;
+    }
+    .ys-btn-sm {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.35rem 0.7rem;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text);
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .ys-btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+    .ys-btn-sm i { font-size: 0.7rem; }
+
+    /* ===== RESPONSIVE DESKTOP ===== */
+    @media (min-width: 768px) {
+        .ys-detail-cover { flex: 0 0 200px; min-width: 200px; }
+        .ys-detail-cover .cover-placeholder { height: 290px; }
+        .ys-detail-body { padding: 1rem 2rem 0; }
+        .ys-breadcrumb { padding: 0.75rem 2rem 0; }
+        .ys-desktop-layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 1.5rem;
+            padding: 0 1rem;
+        }
+        .ys-actions, .ys-section, .ys-similar-section { padding-left: 0; padding-right: 0; }
+        .ys-meta-sidebar { padding: 0; margin-top: 0; }
+        .ys-cta-banner { margin: 0.75rem 0; }
+        .ys-author-card { margin: 0; }
+        .ys-secondary-actions { padding: 0; }
+    }
+
+    /* ===== DARK MODE ===== */
+    [data-bs-theme="dark"] .ys-detail-hero {
+        background: linear-gradient(180deg, #0F0F1E 0%, #1A1A2E 100%);
+    }
+    [data-bs-theme="dark"] .ys-detail-hero::after {
+        background: var(--bg-page);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-2 mb-3">
-    <!-- Breadcrumb compact -->
-    <nav aria-label="breadcrumb" class="mb-2">
-        <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.65rem;">
-            <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{% url 'catalogue:catalogue' %}">Catalogue</a></li>
-            <li class="breadcrumb-item active">{{ book.title|truncatewords:3 }}</li>
-        </ol>
-    </nav>
-    
-    <!-- Book Header -->
-    <div class="row g-2 mb-3">
-        <!-- Cover & Actions -->
-        <div class="col-5 col-md-3">
-            <div style="position: sticky; top: 50px;">
-                <div class="card-premium" style="border-radius: var(--radius-sm); overflow: hidden;">
-                    <div class="book-cover" style="height: 180px;">
-                        {% if book.cover %}
-                            <img src="{{ book.cover.url }}" alt="{{ book.title }}">
-                        {% else %}
-                            <div class="book-cover-placeholder" style="font-size: 3rem;"><i class="fas fa-book"></i></div>
-                        {% endif %}
-                    </div>
-                </div>
-                <!-- Stats compact -->
-                <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem; justify-content: center;">
-                    <span style="font-size: 0.6rem; color: var(--text-light);"><i class="fas fa-eye" style="color: var(--primary);"></i> {{ book.views_count|default:0 }}</span>
-                    <span style="font-size: 0.6rem; color: var(--text-light);"><i class="fas fa-heart" style="color: var(--accent);"></i> {{ book.favorites_count|default:0 }}</span>
-                </div>
-            </div>
+<!-- ===== HERO SOMBRE ===== -->
+<div class="ys-detail-hero">
+    <!-- Breadcrumb -->
+    <div class="ys-breadcrumb">
+        <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
+        <span class="sep">&rsaquo;</span>
+        <a href="{% url 'catalogue:catalogue' %}">Catalogue</a>
+        {% if book.get_genre_display %}
+        <span class="sep">&rsaquo;</span>
+        <a href="{% url 'catalogue:catalogue' %}?genre={{ book.genre }}">{{ book.get_genre_display }}</a>
+        {% endif %}
+        <span class="sep">&rsaquo;</span>
+        <span class="current">{{ book.title|truncatewords:4 }}</span>
+    </div>
+
+    <!-- Share buttons -->
+    <div class="ys-share-btns">
+        <a href="javascript:void(0)" class="ys-share-btn" onclick="navigator.share ? navigator.share({title: '{{ book.title|escapejs }}', url: window.location.href}) : navigator.clipboard.writeText(window.location.href)" title="Partager">
+            <i class="fas fa-share-alt"></i>
+        </a>
+    </div>
+
+    <!-- Cover + Info -->
+    <div class="ys-detail-body">
+        <div class="ys-detail-cover">
+            {% if book.cover %}
+                <img src="{{ book.cover.url }}" alt="{{ book.title }}">
+            {% else %}
+                <div class="cover-placeholder"><i class="fas fa-book"></i></div>
+            {% endif %}
         </div>
-        
-        <!-- Info & Actions -->
-        <div class="col-7 col-md-5">
-            <h1 style="font-size: clamp(0.9rem, 3vw, 1.3rem); margin-bottom: 0.2rem; line-height: 1.2;">{{ book.title }}</h1>
-            <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 0.4rem;">par 
+        <div class="ys-detail-info">
+            <h1 class="ys-detail-title">{{ book.title }}</h1>
+
+            <!-- Badges -->
+            <div class="ys-detail-badges">
+                {% if book.pages_count %}<span class="badge-tag">{{ book.pages_count }} pages</span>{% endif %}
+                {% if book.language %}<span class="badge-tag">{{ book.get_language_display }}</span>{% endif %}
+                {% if book.get_genre_display %}<span class="badge-tag">{{ book.get_genre_display }}</span>{% endif %}
+                {% if book.publication_date %}<span class="badge-tag">{{ book.publication_date|date:"Y" }}</span>{% endif %}
+                {% if book.is_premium %}<span class="badge-tag"><i class="fas fa-crown" style="color: #F59E0B;"></i> Premium</span>{% endif %}
+            </div>
+
+            <!-- Auteur -->
+            <p class="ys-detail-author">
+                Écrit par
                 {% if authors %}
-                    {% for a in authors %}<a href="{% url 'catalogue:author_detail' a.id %}" style="color: var(--primary); font-weight: 700; text-decoration: none;">{{ a.get_full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+                    {% for a in authors %}<a href="{% url 'catalogue:author_detail' a.id %}">{{ a.get_full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %} &rsaquo;
                 {% else %}
-                    <strong>{{ book.author }}</strong>
+                    <strong>{{ book.author }}</strong> &rsaquo;
                 {% endif %}
             </p>
-            
-            <!-- Rating inline -->
-            <div style="display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
-                <span style="color: #FFD700; font-size: 0.65rem;">
+
+            <!-- Rating -->
+            <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.35rem; flex-wrap: wrap;">
+                <span style="color: #FFD700; font-size: 0.78rem;">
                     {% for i in "12345" %}
-                        {% if book.rating >= i %}<i class="fas fa-star"></i>{% elif book.rating > i|add:'-1' %}<i class="fas fa-star-half-alt"></i>{% else %}<i class="fas fa-star" style="color:#ddd;"></i>{% endif %}
+                        {% if book.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star" style="opacity:0.3;"></i>{% endif %}
                     {% endfor %}
                 </span>
-                <span style="font-size: 0.6rem; font-weight: 600;">{{ book.rating|default:"0" }}/5</span>
-                <span style="font-size: 0.55rem; color: var(--text-light);">({{ book.reviews_count|default:0 }} avis)</span>
-            </div>
-            
-            <!-- Tags compact -->
-            {% if book.category or book.language %}
-            <div style="display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.5rem;">
-                {% if book.category %}<span class="badge" style="background: rgba(91,95,241,0.15); color: var(--primary); font-size: 0.55rem; padding: 0.15rem 0.4rem;"><i class="fas fa-tag"></i> {{ book.category }}</span>{% endif %}
-                {% if book.language %}<span class="badge" style="background: rgba(0,212,255,0.15); color: var(--secondary-dark); font-size: 0.55rem; padding: 0.15rem 0.4rem;"><i class="fas fa-globe"></i> {{ book.language }}</span>{% endif %}
-                {% if book.is_premium %}<span class="badge" style="background: rgba(255,107,107,0.15); color: var(--accent); font-size: 0.55rem; padding: 0.15rem 0.4rem;"><i class="fas fa-crown"></i> Premium</span>{% endif %}
-            </div>
-            {% endif %}
-            
-            <!-- Action Buttons compact -->
-            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
-                {% if not book.is_paid or has_access %}
-                    <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="btn btn-premium btn-sm" style="font-size: 0.7rem; padding: 0.3rem 0.5rem;">
-                        <i class="fas fa-book-open"></i> Lire
-                    </a>
-                    {% if user.is_authenticated %}
-                    <button type="button" class="btn btn-secondary-premium btn-sm" onclick="saveForOffline('{{ book.pk }}', '{{ book.get_file_url|safe }}')" id="offlineBtn" style="font-size: 0.65rem; padding: 0.25rem 0.4rem;">
-                        <i class="fas fa-cloud-download-alt"></i> <span id="offlineText">Hors-ligne</span>
-                    </button>
-                    {% endif %}
-                {% else %}
-                    {% if has_free_preview %}
-                    <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="btn btn-secondary-premium btn-sm" style="font-size: 0.65rem; padding: 0.25rem 0.4rem;">
-                        <i class="fas fa-eye"></i> Extrait ({{ free_pages_count }}p)
-                    </a>
-                    {% endif %}
-                    <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="btn btn-premium btn-sm" style="font-size: 0.7rem; padding: 0.3rem 0.5rem;">
-                        <i class="fas fa-shopping-cart"></i> Acheter ({{ book.price|floatformat:0 }} FC)
-                    </a>
-                {% endif %}
-                {% if user.is_authenticated %}
-                <button type="button" class="btn btn-secondary-premium btn-sm" onclick="toggleFavorite(event, {{ book.pk }})" id="favBtn" style="font-size: 0.65rem; padding: 0.25rem 0.4rem;">
-                    <i class="fas fa-heart"></i> <span id="favText">Favori</span>
-                </button>
-                {% else %}
-                <a href="{% url 'users:login' %}" class="btn btn-secondary-premium btn-sm" style="font-size: 0.65rem; padding: 0.25rem 0.4rem;">
-                    <i class="fas fa-sign-in-alt"></i> Connexion
-                </a>
-                {% endif %}
-                {% if book.in_library %}
-                <div style="padding: 0.2rem 0.4rem; background: #10B981; color: white; border-radius: var(--radius-sm); text-align: center; font-size: 0.6rem; font-weight: 600;">
-                    <i class="fas fa-check-circle"></i> Dans votre biblio
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        
-        <!-- Metadata (desktop) -->
-        <div class="col-12 col-md-4">
-            <div class="card-premium" style="border-radius: var(--radius-sm);">
-                <div style="padding: 0.5rem 0.6rem;">
-                    <h6 style="font-weight: 700; font-size: 0.7rem; margin-bottom: 0.4rem;"><i class="fas fa-info-circle"></i> Informations</h6>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem;">
-                        {% if book.isbn %}
-                        <div><small style="color: var(--text-light); font-size: 0.5rem;">ISBN</small><p style="margin: 0; font-weight: 600; font-size: 0.65rem;">{{ book.isbn }}</p></div>
-                        {% endif %}
-                        {% if book.publication_date %}
-                        <div><small style="color: var(--text-light); font-size: 0.5rem;">Publication</small><p style="margin: 0; font-weight: 600; font-size: 0.65rem;">{{ book.publication_date|date:"d/m/Y" }}</p></div>
-                        {% endif %}
-                        {% if book.pages %}
-                        <div><small style="color: var(--text-light); font-size: 0.5rem;">Pages</small><p style="margin: 0; font-weight: 600; font-size: 0.65rem;">{{ book.pages }}</p></div>
-                        {% endif %}
-                        <div><small style="color: var(--text-light); font-size: 0.5rem;">Statut</small><p style="margin: 0; font-weight: 600; font-size: 0.65rem;">{% if book.is_available %}<i class="fas fa-check-circle" style="color: var(--success);"></i> Dispo{% else %}<i class="fas fa-times-circle" style="color: var(--danger);"></i> Indispo{% endif %}</p></div>
-                    </div>
-                </div>
+                <span style="font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.9);">{{ book.rating|default:"0" }}/5</span>
+                <span style="font-size: 0.68rem; color: rgba(255,255,255,0.55);">({{ book.rating_count|default:0 }} avis)</span>
             </div>
         </div>
     </div>
-    
-    <!-- Synopsis — Visible immédiatement -->
-    {% if book.description %}
-    <div class="card-premium mb-2">
-        <div style="padding: 0.5rem 0.6rem;">
-            <h6 style="font-weight: 700; font-size: 0.75rem; margin-bottom: 0.3rem;"><i class="fas fa-align-left"></i> Synopsis</h6>
-            <p style="line-height: 1.5; color: var(--text-light); font-size: 0.72rem; margin: 0;">{{ book.description }}</p>
-        </div>
+</div>
+
+<!-- ===== CONTENU PRINCIPAL ===== -->
+<div style="padding-top: 0.5rem; background: var(--bg-page);">
+
+    <!-- Actions principales -->
+    <div class="ys-actions">
+        {% if not book.is_paid or has_access %}
+            <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="ys-btn-read">
+                <i class="fas fa-book-open"></i> Lire maintenant
+            </a>
+        {% else %}
+            {% if has_free_preview %}
+            <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="ys-btn-read">
+                <i class="fas fa-eye"></i> Lire un extrait
+            </a>
+            {% endif %}
+            <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="ys-btn-outline" style="background: #E63946; color: white; border-color: #E63946;">
+                <i class="fas fa-shopping-cart"></i> Acheter &mdash; {{ book.get_final_price|floatformat:0 }} FC
+            </a>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            <button type="button" class="ys-btn-outline" onclick="toggleFavorite(event, '{{ book.pk }}')" id="favBtn">
+                <i class="fas fa-{% if is_favorite %}heart{% else %}plus{% endif %}"></i>
+                <span id="favText">{% if is_favorite %}En favori{% else %}Ajouter{% endif %}</span>
+            </button>
+        {% else %}
+            <a href="{% url 'users:login' %}" class="ys-btn-outline">
+                <i class="fas fa-sign-in-alt"></i> Se connecter pour lire
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Boutons secondaires -->
+    <div class="ys-secondary-actions">
+        {% if not book.is_paid or has_access %}
+            {% if user.is_authenticated %}
+            <button type="button" class="ys-btn-sm" onclick="saveForOffline('{{ book.pk }}', '{{ book.get_file_url|escapejs }}')" id="offlineBtn">
+                <i class="fas fa-cloud-download-alt"></i> <span id="offlineText">Hors-ligne</span>
+            </button>
+            {% endif %}
+        {% endif %}
+        <button type="button" class="ys-btn-sm" data-bs-toggle="modal" data-bs-target="#printOrderModal">
+            <i class="fas fa-print"></i> Commander l'imprimé
+        </button>
+        {% if book.in_library %}
+        <span class="ys-btn-sm" style="background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981;">
+            <i class="fas fa-check-circle"></i> Dans votre bibliothèque
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- CTA Inscription -->
+    {% if not user.is_authenticated %}
+    <div class="ys-cta-banner">
+        <i class="fas fa-book-reader cta-icon"></i>
+        <span class="cta-text">Lire cet ouvrage en entier et explorer l'ensemble de notre catalogue !</span>
+        <a href="{% url 'users:signup' %}" class="cta-btn">S'inscrire</a>
     </div>
     {% endif %}
-    
-    <!-- Author compact -->
-    {% if book.author_bio or book.author %}
-    <div class="card-premium mb-2">
-        <div style="padding: 0.5rem 0.6rem;">
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; font-size: 0.8rem; flex-shrink: 0;">
-                    <i class="fas fa-user"></i>
+
+    <!-- ===== LAYOUT DESKTOP: description + sidebar ===== -->
+    <div class="ys-desktop-layout">
+        <div>
+            <!-- Description -->
+            {% if book.description %}
+            <div class="ys-section">
+                <h6 class="ys-section-head"><i class="fas fa-align-left"></i> Description</h6>
+                <p class="ys-description-text">{{ book.description }}</p>
+
+                <!-- Tags mots-clés -->
+                <div class="ys-keyword-tags">
+                    {% if book.get_genre_display and book.genre != 'other' %}
+                        <span class="ys-keyword-tag">{{ book.get_genre_display }}</span>
+                    {% endif %}
+                    {% if book.language %}
+                        <span class="ys-keyword-tag">{{ book.get_language_display }}</span>
+                    {% endif %}
+                    {% if book.is_paid %}
+                        <span class="ys-keyword-tag">Payant</span>
+                    {% else %}
+                        <span class="ys-keyword-tag">Gratuit</span>
+                    {% endif %}
                 </div>
+            </div>
+            {% endif %}
+
+            <!-- Auteur -->
+            {% if authors or book.author %}
+            <div class="ys-section" style="padding-bottom: 0;">
+                <h6 class="ys-section-head"><i class="fas fa-user-edit"></i> À propos de l'auteur</h6>
+            </div>
+            <div class="ys-author-card" style="margin-top: 0.35rem;">
+                <div class="ys-author-avatar"><i class="fas fa-user"></i></div>
                 <div>
                     {% if authors %}
-                        <a href="{% url 'catalogue:author_detail' authors.0.id %}" style="font-weight: 700; font-size: 0.72rem; margin: 0; color: var(--primary); text-decoration: none;">{{ authors.0.get_full_name }}</a>
+                        <a href="{% url 'catalogue:author_detail' authors.0.id %}" class="ys-author-name">{{ authors.0.get_full_name }}</a>
                     {% else %}
-                        <h6 style="font-weight: 700; font-size: 0.72rem; margin: 0;">{{ book.author }}</h6>
+                        <span class="ys-author-name">{{ book.author }}</span>
                     {% endif %}
-                    <p style="margin: 0; color: var(--text-light); font-size: 0.6rem; line-height: 1.3;">{{ book.author_bio|default:"Auteur BNC"|truncatewords:20 }}</p>
+                    <p class="ys-author-bio">{{ book.author_bio|default:"Auteur sur BNC — Bibliothèque Numérique Calures"|truncatewords:25 }}</p>
                 </div>
             </div>
-        </div>
-    </div>
-    {% endif %}
-    
-    <!-- Reviews Section compact -->
-    <div class="card-premium mb-2">
-        <div style="padding: 0.5rem 0.6rem;">
-            <h6 style="font-weight: 700; font-size: 0.75rem; margin-bottom: 0.4rem;"><i class="fas fa-comments"></i> Avis ({{ book.reviews_count|default:0 }})</h6>
-            
-            {% if user.is_authenticated %}
-            <div style="margin-bottom: 0.5rem; padding: 0.4rem; background: rgba(91,95,241,0.05); border-radius: var(--radius-sm);">
-                <form method="POST" action="{% url 'catalogue:add_review' book.pk %}" style="display: flex; flex-direction: column; gap: 0.3rem;">
-                    {% csrf_token %}
-                    <div style="display: flex; align-items: center; gap: 0.4rem;">
-                        <span style="font-size: 0.6rem; font-weight: 600;">Note:</span>
-                        <span style="display: flex; gap: 0.15rem; font-size: 0.85rem;">
-                            {% for i in "12345" %}
-                            <label style="cursor: pointer; color: #DDD;"><input type="radio" name="rating" value="{{ i }}" style="display: none;"><i class="fas fa-star" onclick="setRating({{ i }})"></i></label>
-                            {% endfor %}
-                        </span>
-                    </div>
-                    <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Votre avis..." style="font-size: 0.65rem; border-radius: var(--radius-sm); padding: 0.25rem 0.4rem;"></textarea>
-                    <button type="submit" class="btn btn-premium btn-sm" style="font-size: 0.6rem; padding: 0.2rem 0.5rem; align-self: flex-end;"><i class="fas fa-paper-plane"></i> Publier</button>
-                </form>
-            </div>
             {% endif %}
-            
-            <!-- Reviews List -->
-            {% if book.reviews.all %}
-                <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                    {% for review in book.reviews.all %}
-                    <div style="padding: 0.4rem 0.5rem; background: var(--light); border-radius: var(--radius-sm); border-left: 3px solid var(--primary);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.15rem;">
-                            <div style="display: flex; align-items: center; gap: 0.3rem;">
-                                <strong style="font-size: 0.65rem;">{{ review.user.get_full_name|default:review.user.username }}</strong>
-                                <span style="color: #FFD700; font-size: 0.55rem;">{% for i in "12345" %}{% if review.rating >= i %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star" style="color:#ddd;"></i>{% endif %}{% endfor %}</span>
-                            </div>
-                            <small style="color: var(--text-light); font-size: 0.5rem;">{{ review.created_at|date:"d/m/Y" }}</small>
+
+            <!-- Avis lecteurs -->
+            <div class="ys-section">
+                <h6 class="ys-section-head"><i class="fas fa-comments"></i> Avis ({{ book.rating_count|default:0 }})</h6>
+
+                {% if user.is_authenticated and can_review %}
+                <div style="margin-bottom: 0.65rem; padding: 0.6rem; background: var(--bg-soft); border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <form method="POST" action="{% url 'catalogue:add_review' book.pk %}" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                        {% csrf_token %}
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <span style="font-size: 0.68rem; font-weight: 600; color: var(--text);">Note :</span>
+                            <span id="ratingStars" style="display: flex; gap: 0.15rem; font-size: 0.9rem;">
+                                {% for i in "12345" %}
+                                <label style="cursor: pointer; color: #DDD;"><input type="radio" name="rating" value="{{ forloop.counter }}" style="display: none;"><i class="fas fa-star" onclick="setRating({{ forloop.counter }})"></i></label>
+                                {% endfor %}
+                            </span>
                         </div>
-                        <p style="margin: 0; color: var(--text-light); font-size: 0.62rem; line-height: 1.3;">{{ review.comment }}</p>
+                        <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Partagez votre avis sur ce livre..." style="font-size: 0.75rem; border-radius: var(--radius-sm);"></textarea>
+                        <button type="submit" class="btn btn-premium btn-sm" style="font-size: 0.68rem; padding: 0.3rem 0.65rem; align-self: flex-end;">
+                            <i class="fas fa-paper-plane"></i> Publier
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                {% if reviews %}
+                    <div style="display: flex; flex-direction: column; gap: 0.45rem;">
+                        {% for review in reviews %}
+                        <div class="ys-review-card">
+                            <div class="ys-review-header">
+                                <div style="display: flex; align-items: center; gap: 0.35rem;">
+                                    <span class="ys-review-author">{{ review.user.get_full_name|default:review.user.username }}</span>
+                                    <span style="color: #FFD700; font-size: 0.6rem;">
+                                        {% for i in "12345" %}{% if review.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star" style="color:#ddd;"></i>{% endif %}{% endfor %}
+                                    </span>
+                                </div>
+                                <span class="ys-review-date">{{ review.created_at|date:"d/m/Y" }}</span>
+                            </div>
+                            <p class="ys-review-text">{{ review.comment }}</p>
+                        </div>
+                        {% endfor %}
                     </div>
+                {% else %}
+                    <p style="text-align: center; color: var(--text-light); font-size: 0.75rem; padding: 1rem 0;">
+                        <i class="fas fa-comment-slash" style="font-size: 1.2rem; display: block; margin-bottom: 0.3rem; opacity: 0.4;"></i>
+                        Aucun avis pour le moment. Soyez le premier !
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar métadonnées (desktop: colonne droite, mobile: inline) -->
+        <div class="ys-meta-sidebar">
+            {% if authors %}
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">Écrit par</div>
+                <div>
+                    {% for a in authors %}
+                    <span class="ys-meta-value">{{ a.get_full_name }}</span>
                     {% endfor %}
                 </div>
-            {% else %}
-                <p style="text-align: center; color: var(--text-light); font-size: 0.65rem; padding: 0.5rem;"><i class="fas fa-comment-slash"></i> Aucun avis. Soyez le premier!</p>
+            </div>
             {% endif %}
+            {% if book.publication_date %}
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">Date de publication</div>
+                <span class="ys-meta-value">{{ book.publication_date|date:"d F Y" }}</span>
+            </div>
+            {% endif %}
+            {% if book.language %}
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">Langue</div>
+                <span class="ys-meta-value">{{ book.get_language_display }}</span>
+            </div>
+            {% endif %}
+            {% if book.pages_count %}
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">Pages</div>
+                <span class="ys-meta-value">{{ book.pages_count }}</span>
+            </div>
+            {% endif %}
+            {% if book.isbn %}
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">ISBN</div>
+                <span class="ys-meta-value">{{ book.isbn }}</span>
+            </div>
+            {% endif %}
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">Statut</div>
+                {% if not book.is_paid %}
+                    <span class="ys-meta-value" style="background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981;">Gratuit</span>
+                {% else %}
+                    <span class="ys-meta-value">{{ book.get_final_price|floatformat:0 }} FC</span>
+                {% endif %}
+            </div>
+            <div class="ys-meta-item">
+                <div class="ys-meta-label">Lectures</div>
+                <span class="ys-meta-value">{{ book.reads_count|default:0 }}</span>
+            </div>
         </div>
     </div>
-    
-    <!-- Related Books -->
+
+    <!-- ===== LIVRES SIMILAIRES (carousel YouScribe) ===== -->
     {% if related_books %}
-    <div class="mb-3 mt-2">
-        <h6 style="font-weight: 700; font-size: 0.75rem; margin-bottom: 0.5rem;"><i class="fas fa-book-reader"></i> Livres similaires</h6>
-        <div class="row g-2">
-            {% for related_book in related_books %}
-            <div class="col-6 col-sm-4 col-md-3">
-                <a href="{% url 'catalogue:book_detail' book_id=related_book.pk %}" class="book-card-premium">
+    <div class="ys-similar-section">
+        <div class="ys-similar-title">
+            Similaire à {{ book.title|truncatewords:4 }} <i class="fas fa-chevron-right chevron"></i>
+        </div>
+        <div class="ys-carousel-wrapper">
+            <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this, -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="ys-carousel">
+                {% for rb in related_books %}
+                <a href="{% url 'catalogue:book_detail' book_id=rb.pk %}" class="ys-card book-card-premium" style="text-decoration: none;">
                     <div class="book-cover">
-                        {% if related_book.cover %}
-                            <img src="{{ related_book.cover.url }}" alt="{{ related_book.title }}">
+                        {% if rb.cover %}
+                            <img src="{{ rb.cover.url }}" alt="{{ rb.title }}">
                         {% else %}
                             <div class="book-cover-placeholder"><i class="fas fa-book"></i></div>
                         {% endif %}
                     </div>
                     <div class="book-info">
-                        <h6 class="book-title">{{ related_book.title }}</h6>
-                        <p class="book-author">{{ related_book.author|truncatewords:3 }}</p>
+                        {% if rb.get_genre_display and rb.genre != 'other' %}
+                        <span style="font-size: 0.55rem; color: #E63946; font-weight: 700; display: flex; align-items: center; gap: 0.2rem;">
+                            <i class="fas fa-book-open" style="font-size: 0.45rem;"></i> {{ rb.get_genre_display }}
+                        </span>
+                        {% endif %}
+                        <h6 class="book-title">{{ rb.title|truncatewords:5 }}</h6>
+                        <p class="book-author">{{ rb.author|truncatewords:3 }}</p>
                     </div>
                 </a>
+                {% endfor %}
             </div>
-            {% endfor %}
+            <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this, 1)"><i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
     {% endif %}
+
 </div>
 
+<!-- ===== SCRIPTS ===== -->
 <script>
+function scrollCarousel(btn, direction) {
+    var carousel = btn.parentElement.querySelector('.ys-carousel');
+    var cardWidth = carousel.querySelector('.ys-card').offsetWidth + 14;
+    carousel.scrollBy({ left: direction * cardWidth * 3, behavior: 'smooth' });
+}
+
 function setRating(rating) {
-    document.querySelector(`input[value="${rating}"]`).checked = true;
-    const stars = document.querySelectorAll('label i.fa-star');
-    stars.forEach((star, index) => {
-        if (index < rating) {
-            star.style.color = '#FFD700';
-        } else {
-            star.style.color = '#DDD';
-        }
+    document.querySelector('input[name="rating"][value="' + rating + '"]').checked = true;
+    var stars = document.querySelectorAll('#ratingStars label i.fa-star');
+    stars.forEach(function(star, index) {
+        star.style.color = index < rating ? '#FFD700' : '#DDD';
     });
 }
 
 function toggleFavorite(event, bookId) {
     event.preventDefault();
-    const btn = document.getElementById('favBtn');
-    const text = document.getElementById('favText');
-    
-    const url = `/users/toggle-favorite/${bookId}/`;
-    fetch(url, {
+    var btn = document.getElementById('favBtn');
+    var text = document.getElementById('favText');
+    fetch('/users/toggle-favorite/' + bookId + '/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
-    .then(data => {
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
         if (data.favorited) {
-            btn.style.background = 'linear-gradient(135deg, #FF6B6B, #FF4757)';
-            btn.style.borderColor = '#FF4757';
+            btn.style.background = '#E63946';
+            btn.style.borderColor = '#E63946';
             btn.style.color = 'white';
             text.textContent = 'En favori';
         } else {
-            btn.style.background = 'rgba(91, 95, 241, 0.1)';
-            btn.style.borderColor = 'var(--primary)';
-            btn.style.color = 'var(--primary)';
-            text.textContent = 'Ajouter aux favoris';
+            btn.style.background = 'transparent';
+            btn.style.borderColor = '#E63946';
+            btn.style.color = '#E63946';
+            text.textContent = 'Ajouter';
         }
     });
 }
@@ -277,71 +744,127 @@ async function saveForOffline(bookId, pdfUrl) {
         alert("Le fichier PDF n'est pas disponible.");
         return;
     }
-    
-    const btn = document.getElementById('offlineBtn');
-    const text = document.getElementById('offlineText');
-    const icon = btn.querySelector('i');
-    
+    var btn = document.getElementById('offlineBtn');
+    var text = document.getElementById('offlineText');
+    var icon = btn.querySelector('i');
     icon.className = 'fas fa-spinner fa-spin';
-    text.textContent = 'Sauvegarde en cours...';
+    text.textContent = 'En cours...';
     btn.disabled = true;
-    
     try {
-        // Fetch the PDF as a blob
-        const response = await fetch(pdfUrl);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-        
-        // Save to IndexedDB
-        const dbName = 'BNC_OfflineBooks';
-        const request = indexedDB.open(dbName, 1);
-        
-        request.onupgradeneeded = function(event) {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains('books')) {
-                db.createObjectStore('books', { keyPath: 'id' });
-            }
+        var response = await fetch(pdfUrl);
+        if (!response.ok) throw new Error('Network error');
+        var blob = await response.blob();
+        var request = indexedDB.open('BNC_OfflineBooks', 1);
+        request.onupgradeneeded = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains('books')) db.createObjectStore('books', { keyPath: 'id' });
         };
-        
-        request.onsuccess = function(event) {
-            const db = event.target.result;
-            const transaction = db.transaction(['books'], 'readwrite');
-            const store = transaction.objectStore('books');
-            
-            store.put({
-                id: bookId,
-                blob: blob,
-                timestamp: new Date().getTime()
-            });
-            
-            transaction.oncomplete = function() {
+        request.onsuccess = function(e) {
+            var db = e.target.result;
+            var tx = db.transaction(['books'], 'readwrite');
+            tx.objectStore('books').put({ id: bookId, blob: blob, timestamp: Date.now() });
+            tx.oncomplete = function() {
                 icon.className = 'fas fa-check-circle';
-                text.textContent = 'Sauvegardé hors-ligne';
-                btn.style.background = 'var(--success)';
-                btn.style.color = 'white';
-                btn.style.borderColor = 'var(--success)';
-            };
-            
-            transaction.onerror = function() {
-                throw new Error('Transaction failed');
+                text.textContent = 'Sauvegardé';
+                btn.style.background = 'rgba(16,185,129,0.1)';
+                btn.style.borderColor = '#10B981';
+                btn.style.color = '#10B981';
             };
         };
-        
-        request.onerror = function() {
-            throw new Error('IndexedDB error');
-        };
-        
-    } catch (error) {
-        console.error('Error saving offline:', error);
+    } catch (err) {
         icon.className = 'fas fa-exclamation-triangle';
-        text.textContent = 'Erreur de sauvegarde';
+        text.textContent = 'Erreur';
         btn.disabled = false;
-        setTimeout(() => {
+        setTimeout(function() {
             icon.className = 'fas fa-cloud-download-alt';
-            text.textContent = 'Sauvegarder hors-ligne';
+            text.textContent = 'Hors-ligne';
         }, 3000);
     }
 }
+</script>
+
+<!-- Modal Commander l'imprimé -->
+<div class="modal fade" id="printOrderModal" tabindex="-1" aria-labelledby="printOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--radius-md); border: none; box-shadow: var(--shadow-xl);">
+            <div class="modal-header" style="background: linear-gradient(135deg, #1B2A4A, #E63946); color: white; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 0.75rem 1rem;">
+                <h5 class="modal-title" id="printOrderModalLabel" style="font-size: 0.95rem; font-weight: 700;">
+                    <i class="fas fa-print"></i> Commander la version imprimée
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body" style="padding: 1rem;">
+                <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.75rem;">
+                    Remplissez ce formulaire pour commander <strong>{{ book.title }}</strong> en version imprimée.
+                </p>
+                <form id="printOrderForm">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Nom complet *</label>
+                        <input type="text" name="full_name" class="form-control form-control-sm" required placeholder="Votre nom et prénom" style="font-size: 0.8rem;">
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Téléphone *</label>
+                        <input type="tel" name="phone" class="form-control form-control-sm" required placeholder="+237 6XX XXX XXX" style="font-size: 0.8rem;">
+                    </div>
+                    <div class="mb-2">
+                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Email *</label>
+                        <input type="email" name="email" class="form-control form-control-sm" required placeholder="votre@email.com" style="font-size: 0.8rem;">
+                    </div>
+                    <div class="mb-3">
+                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Ville *</label>
+                        <input type="text" name="city" class="form-control form-control-sm" required placeholder="Votre ville" style="font-size: 0.8rem;">
+                    </div>
+                    <button type="submit" class="btn btn-premium w-100" id="printOrderSubmitBtn" style="font-size: 0.85rem; padding: 0.5rem;">
+                        <i class="fas fa-paper-plane"></i> Envoyer la commande
+                    </button>
+                </form>
+                <div id="printOrderResult" style="display: none; margin-top: 0.75rem; text-align: center; padding: 0.75rem; border-radius: var(--radius-sm);"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('printOrderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var form = this;
+    var btn = document.getElementById('printOrderSubmitBtn');
+    var result = document.getElementById('printOrderResult');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
+    var formData = new FormData(form);
+    fetch("{% url 'catalogue:order_print' book_id=book.pk %}", {
+        method: 'POST',
+        headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') },
+        body: formData
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) {
+            form.style.display = 'none';
+            result.style.display = 'block';
+            result.style.background = 'rgba(16,185,129,0.1)';
+            result.style.color = '#10B981';
+            result.innerHTML = '<i class="fas fa-check-circle" style="font-size:1.5rem;display:block;margin-bottom:0.4rem;"></i><strong>' + data.message + '</strong>';
+        } else {
+            result.style.display = 'block';
+            result.style.background = 'rgba(239,68,68,0.1)';
+            result.style.color = '#EF4444';
+            result.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la commande';
+        }
+    })
+    .catch(function() {
+        result.style.display = 'block';
+        result.style.background = 'rgba(239,68,68,0.1)';
+        result.style.color = '#EF4444';
+        result.innerHTML = '<i class="fas fa-exclamation-circle"></i> Erreur réseau. Réessayez.';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la commande';
+    });
+});
 </script>
 
 {% endblock %}

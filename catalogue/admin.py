@@ -15,7 +15,7 @@ from .models import (
     BookSimilarity, UserPreference, UserRecommendation, RecommendationStatistic,
     SyncQueue, UserRecommendationFeedback,
     AudiobookMetadata, VideoMaterial, Podcast,
-    SiteConfiguration
+    SiteConfiguration, Donateur, LienSocial
 )
 from .proxy_models import (
     AudiobookProxy, VideoProxy, PodcastProxy, 
@@ -561,3 +561,21 @@ class SiteConfigurationAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(Donateur)
+class DonateurAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'montant', 'is_visible', 'order', 'created_at')
+    list_editable = ('is_visible', 'order')
+    list_filter = ('is_visible',)
+    search_fields = ('nom', 'message')
+    ordering = ('order', '-created_at')
+
+
+@admin.register(LienSocial)
+class LienSocialAdmin(admin.ModelAdmin):
+    list_display = ('platform', 'label', 'url', 'is_active', 'order')
+    list_editable = ('is_active', 'order')
+    list_filter = ('platform', 'is_active')
+    search_fields = ('label', 'url')
+    ordering = ('order',)

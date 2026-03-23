@@ -4,21 +4,23 @@
 {% block title %}Accueil - BNC | La Plus Belle Bibliothèque Numérique{% endblock %}
 
 {% block content %}
-<div class="container mt-0">
+<div style="background: var(--bg-page); min-height: 100vh;">
+
     <!-- Hero Section -->
-    <div class="hero-premium" style="background: linear-gradient(135deg, #5B5FF1 0%, #7B7FFF 50%, #00D4FF 100%); margin: -0.5rem -0.5rem 1rem -0.5rem; border-radius: 0 0 var(--radius-lg) var(--radius-lg);">
-        <div class="hero-content" style="text-align: center; padding: 1.5rem 0.75rem;">
-            <div style="margin-bottom: 0.5rem;">
-                <i class="fas fa-book-open" style="font-size: 2rem; text-shadow: 0 2px 8px rgba(0,0,0,0.2);"></i>
+    <div style="position: relative; background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1280&q=80'); background-size: cover; background-position: center top; overflow: hidden; min-height: 200px;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(27,42,74,0.92) 0%, rgba(27,42,74,0.80) 50%, rgba(230,57,70,0.75) 100%);"></div>
+        <div style="text-align: center; padding: 2rem 0.75rem 1.75rem; position: relative; z-index: 1; color: white;">
+            <div style="margin-bottom: 0.6rem;">
+                <i class="fas fa-book-open" style="font-size: 2.5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.25);"></i>
             </div>
-            <h1 style="text-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: clamp(1.1rem, 4vw, 1.75rem);">BNC - Bibliothèque Numérique</h1>
-            <p style="font-size: 0.9rem; margin-bottom: 1rem; opacity: 0.95;">Des milliers de livres numériques d'exception</p>
-            <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                <a href="{% url 'catalogue:catalogue' %}" class="btn" style="background: white; color: #5B5FF1; font-weight: 700; padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: var(--radius-sm); text-decoration: none;">
+            <h1 style="text-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: clamp(1.2rem, 4.5vw, 2rem); font-weight: 800; margin-bottom: 0.4rem;">BNC - Bibliothèque Numérique Calures</h1>
+            <p style="font-size: 0.95rem; margin-bottom: 1.25rem; opacity: 0.95; text-shadow: 0 1px 4px rgba(0,0,0,0.2);">Des milliers de livres numériques d'exception</p>
+            <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{% url 'catalogue:catalogue' %}" class="btn" style="background: white; color: #1B2A4A; font-weight: 700; padding: 0.55rem 1.4rem; font-size: 0.9rem; border-radius: 6px; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     <i class="fas fa-search"></i> Catalogue
                 </a>
                 {% if not user.is_authenticated %}
-                <a href="{% url 'users:login' %}" class="btn" style="background: rgba(255,255,255,0.2); border: 1.5px solid white; color: white; font-weight: 700; padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: var(--radius-sm); text-decoration: none;">
+                <a href="{% url 'users:login' %}" class="btn" style="background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.9); color: white; font-weight: 700; padding: 0.55rem 1.4rem; font-size: 0.9rem; border-radius: 6px; text-decoration: none; backdrop-filter: blur(4px);">
                     <i class="fas fa-sign-in-alt"></i> Connexion
                 </a>
                 {% endif %}
@@ -27,258 +29,320 @@
     </div>
 
     {% if citation %}
-    <!-- Bandeau citation hebdomadaire -->
-    <div id="citation-banner" class="citation-banner" style="display:none;">
+    <div id="citation-banner" class="citation-banner" style="display:none; margin: 0.75rem 1rem;">
         <div class="citation-collapsed" id="citation-collapsed">
             <i class="fas fa-quote-left" style="color: var(--primary); font-size: 0.8rem;"></i>
             <span class="citation-teaser">{{ citation.texte|truncatechars:50 }}</span>
             <i class="fas fa-chevron-down citation-chevron"></i>
         </div>
         <div class="citation-expanded" id="citation-expanded">
-            <button class="citation-close" id="citation-close" type="button" aria-label="Fermer">
-                <i class="fas fa-times"></i>
-            </button>
+            <button class="citation-close" id="citation-close" type="button" aria-label="Fermer"><i class="fas fa-times"></i></button>
             <i class="fas fa-quote-left citation-icon-big"></i>
             <p class="citation-texte">{{ citation.texte }}</p>
-            {% if citation.auteur %}
-            <p class="citation-auteur">— {{ citation.auteur }}</p>
-            {% endif %}
+            {% if citation.auteur %}<p class="citation-auteur">— {{ citation.auteur }}</p>{% endif %}
         </div>
     </div>
     <style>
-    .citation-banner {
-        margin: 0 0 1rem 0;
-        border-radius: var(--radius-md, 10px);
-        overflow: hidden;
-        border: 1px solid rgba(91,95,241,0.2);
-        background: rgba(91,95,241,0.04);
-        cursor: pointer;
-        transition: box-shadow 0.25s;
-        position: relative;
-    }
-    [data-bs-theme="dark"] .citation-banner {
-        background: rgba(91,95,241,0.08);
-        border-color: rgba(123,127,255,0.25);
-    }
-    .citation-banner:hover { box-shadow: 0 2px 12px rgba(91,95,241,0.15); }
-    .citation-collapsed {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.55rem 0.85rem;
-        font-size: 0.82rem;
-        color: var(--text-muted, #6b7280);
-    }
+    .citation-banner { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--bg-soft); cursor: pointer; transition: box-shadow 0.25s; position: relative; }
+    .citation-banner:hover { box-shadow: 0 2px 12px rgba(27,42,74,0.12); }
+    .citation-collapsed { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.85rem; font-size: 0.82rem; color: var(--text-secondary); }
     .citation-teaser { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     .citation-chevron { font-size: 0.7rem; transition: transform 0.25s; }
     .citation-banner.open .citation-chevron { transform: rotate(180deg); }
-    .citation-expanded {
-        display: none;
-        padding: 1rem 1.1rem 0.9rem;
-        position: relative;
-    }
-    .citation-banner.open .citation-collapsed { border-bottom: 1px solid rgba(91,95,241,0.15); }
+    .citation-expanded { display: none; padding: 1rem 1.1rem 0.9rem; }
+    .citation-banner.open .citation-collapsed { border-bottom: 1px solid rgba(27,42,74,0.12); }
     .citation-banner.open .citation-expanded { display: block; }
-    .citation-icon-big {
-        color: var(--primary, #5B5FF1);
-        font-size: 1.4rem;
-        opacity: 0.35;
-        display: block;
-        margin-bottom: 0.4rem;
-    }
-    .citation-texte {
-        font-style: italic;
-        font-size: 0.92rem;
-        line-height: 1.6;
-        margin: 0 0 0.35rem;
-        color: var(--text, inherit);
-    }
-    .citation-auteur {
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--primary, #5B5FF1);
-        margin: 0;
-    }
-    .citation-close {
-        position: absolute;
-        top: 0.55rem; right: 0.65rem;
-        background: none; border: none;
-        color: var(--text-muted, #9ca3af);
-        font-size: 0.75rem;
-        cursor: pointer;
-        padding: 0.25rem;
-        line-height: 1;
-    }
-    .citation-close:hover { color: var(--bs-danger, #dc3545); }
+    .citation-icon-big { color: var(--primary); font-size: 1.4rem; opacity: 0.35; display: block; margin-bottom: 0.4rem; }
+    .citation-texte { font-style: italic; font-size: 0.92rem; line-height: 1.6; margin: 0 0 0.35rem; }
+    .citation-auteur { font-size: 0.78rem; font-weight: 600; color: var(--primary); margin: 0; }
+    .citation-close { position: absolute; top: 0.55rem; right: 0.65rem; background: none; border: none; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; padding: 0.25rem; }
+    .citation-close:hover { color: #dc3545; }
     </style>
     <script>
     (function(){
         var STORAGE_KEY = 'bnc_citation_dismissed';
-        var WEEK_KEY    = '{{ citation.id }}_' + (function(){
-            var d = new Date(); return d.getFullYear() * 100 + Math.ceil((d - new Date(d.getFullYear(),0,1)) / 604800000);
-        })();
-        if (localStorage.getItem(STORAGE_KEY) === WEEK_KEY) return; // déjà fermé cette semaine
-
-        var banner   = document.getElementById('citation-banner');
+        var WEEK_KEY = '{{ citation.id }}_' + (function(){ var d = new Date(); return d.getFullYear() * 100 + Math.ceil((d - new Date(d.getFullYear(),0,1)) / 604800000); })();
+        if (localStorage.getItem(STORAGE_KEY) === WEEK_KEY) return;
+        var banner = document.getElementById('citation-banner');
         var collapsed = document.getElementById('citation-collapsed');
-        var closeBtn  = document.getElementById('citation-close');
-
+        var closeBtn = document.getElementById('citation-close');
         banner.style.display = '';
-
-        collapsed.addEventListener('click', function(){
-            banner.classList.toggle('open');
-        });
-        closeBtn.addEventListener('click', function(e){
-            e.stopPropagation();
-            banner.style.display = 'none';
-            localStorage.setItem(STORAGE_KEY, WEEK_KEY);
-        });
+        collapsed.addEventListener('click', function(){ banner.classList.toggle('open'); });
+        closeBtn.addEventListener('click', function(e){ e.stopPropagation(); banner.style.display = 'none'; localStorage.setItem(STORAGE_KEY, WEEK_KEY); });
     })();
     </script>
     {% endif %}
 
-    <!-- Featured Books Section -->
-    <div class="mb-3">
-        <h2 style="font-weight: 800; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem; font-size: 1.1rem;">
-            <i class="fas fa-fire" style="color: var(--accent);"></i> En vedette
-        </h2>
-        <div class="row g-2">
-            {% for book in featured_books %}
-            <div class="col-6 col-sm-6 col-md-4 col-lg-3 animate-in">
-                <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
-                    <div class="book-cover">
-                        {% if book.cover %}
-                            <img src="{{ book.cover.url }}" alt="{{ book.title }}">
-                        {% else %}
-                            <div class="book-cover-placeholder">
-                                <i class="fas fa-book"></i>
-                            </div>
-                        {% endif %}
-                        {% if book.is_paid %}
-                            <span class="book-badge badge-premium">Payant</span>
-                        {% else %}
-                            <span class="book-badge badge-free">Gratuit</span>
-                        {% endif %}
-                        {% if book.is_paid %}
-                        <div class="book-price-overlay">
-                            {% if book.discount_percentage > 0 %}
-                                <span class="price-original-sm">{{ book.price|floatformat:0 }} FC</span>
-                            {% endif %}
-                            {% if book.price > 0 %}
-                                <span class="price-final">{{ book.price|floatformat:0 }} FC</span>
-                            {% else %}
-                                <span class="price-final">Payant</span>
-                            {% endif %}
+    <div style="padding: 0 1rem; max-width: 1200px; margin: 0 auto;">
+
+    <!-- Section: Nouveautés -->
+    {% if newest_books %}
+    <div style="margin-top: 1.25rem; margin-bottom: 1.5rem;">
+        <h2 class="ys-section-title"><i class="fas fa-sparkles" style="color: var(--secondary); margin-right: 0.3rem;"></i>Nouveautés</h2>
+        <div class="ys-carousel-wrapper">
+            <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this, -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="ys-carousel">
+                {% for book in newest_books %}
+                <div class="ys-card">
+                    <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
+                        <div class="book-cover">
+                            {% if book.cover %}<img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                            {% else %}<div class="book-cover-placeholder"><i class="fas fa-book"></i></div>{% endif %}
+                            {% if book.is_paid %}<span class="book-badge badge-premium">Payant</span>
+                            {% else %}<span class="book-badge badge-free">Gratuit</span>{% endif %}
                         </div>
-                        {% endif %}
+                        <div class="book-info">
+                            <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
+                            <h6 class="book-title">{{ book.title }}</h6>
+                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this, 1)"><i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
-    
-    <!-- Stats Section -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
-        <div class="card-premium" style="text-align: center; padding: 0.75rem 0.5rem;">
-            <div style="font-size: 1.5rem; color: var(--primary); margin-bottom: 0.25rem;"><i class="fas fa-book"></i></div>
-            <h5 style="font-weight: 700; margin: 0; font-size: 0.95rem;">{{ total_books|default:"1000+" }}</h5>
-            <p style="color: var(--text-light); margin: 0; font-size: 0.7rem;">Livres</p>
-        </div>
-        <div class="card-premium" style="text-align: center; padding: 0.75rem 0.5rem;">
-            <div style="font-size: 1.5rem; color: var(--secondary); margin-bottom: 0.25rem;"><i class="fas fa-users"></i></div>
-            <h5 style="font-weight: 700; margin: 0; font-size: 0.95rem;">{{ total_users|default:"5000+" }}</h5>
-            <p style="color: var(--text-light); margin: 0; font-size: 0.7rem;">Lecteurs</p>
-        </div>
-        <div class="card-premium" style="text-align: center; padding: 0.75rem 0.5rem;">
-            <div style="font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem;"><i class="fas fa-star"></i></div>
-            <h5 style="font-weight: 700; margin: 0; font-size: 0.95rem;">4.8/5</h5>
-            <p style="color: var(--text-light); margin: 0; font-size: 0.7rem;">Note</p>
-        </div>
-    </div>
-    
-    <!-- Features Section -->
-    <div class="mb-3">
-        <h2 style="font-weight: 800; margin-bottom: 1rem; text-align: center; font-size: 1.1rem;">Pourquoi BNC?</h2>
-        <div class="row g-2">
-            <div class="col-6 col-md-6">
-                <div class="card-premium" style="padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-mobile-alt"></i></div>
-                    <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Lecteur optimisé</h6><p style="color: var(--text-light); margin: 0; font-size: 0.65rem;">Fluide sur tous appareils</p></div>
+    {% endif %}
+
+    <!-- Section: Les plus populaires -->
+    {% if popular_books %}
+    <div style="margin-bottom: 1.5rem;">
+        <h2 class="ys-section-title"><i class="fas fa-fire" style="color: #E63946; margin-right: 0.3rem;"></i>Les plus populaires</h2>
+        <div class="ys-carousel-wrapper">
+            <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this, -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="ys-carousel">
+                {% for book in popular_books %}
+                <div class="ys-card">
+                    <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
+                        <div class="book-cover">
+                            {% if book.cover %}<img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                            {% else %}<div class="book-cover-placeholder"><i class="fas fa-book"></i></div>{% endif %}
+                            {% if book.is_paid %}<span class="book-badge badge-premium">Payant</span>
+                            {% else %}<span class="book-badge badge-free">Gratuit</span>{% endif %}
+                        </div>
+                        <div class="book-info">
+                            <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
+                            <h6 class="book-title">{{ book.title }}</h6>
+                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                        </div>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            <div class="col-6 col-md-6">
-                <div class="card-premium" style="padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #00D4FF, #FF6B6B); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-moon"></i></div>
-                    <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Mode sombre</h6><p style="color: var(--text-light); margin: 0; font-size: 0.65rem;">Confort en toute situation</p></div>
-                </div>
-            </div>
-            <div class="col-6 col-md-6">
-                <div class="card-premium" style="padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-search"></i></div>
-                    <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Recherche avancée</h6><p style="color: var(--text-light); margin: 0; font-size: 0.65rem;">Trouvez vite vos livres</p></div>
-                </div>
-            </div>
-            <div class="col-6 col-md-6">
-                <div class="card-premium" style="padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #F59E0B, #EF4444); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-heart"></i></div>
-                    <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Favoris personnels</h6><p style="color: var(--text-light); margin: 0; font-size: 0.65rem;">Sauvegardez vos préférés</p></div>
-                </div>
-            </div>
+            <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this, 1)"><i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
-    
+    {% endif %}
+
+    <!-- Section: Livres gratuits -->
+    {% if free_books %}
+    <div style="margin-bottom: 1.5rem;">
+        <h2 class="ys-section-title"><i class="fas fa-gift" style="color: #10B981; margin-right: 0.3rem;"></i>Gratuits</h2>
+        <div class="ys-carousel-wrapper">
+            <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this, -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="ys-carousel">
+                {% for book in free_books %}
+                <div class="ys-card">
+                    <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
+                        <div class="book-cover">
+                            {% if book.cover %}<img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                            {% else %}<div class="book-cover-placeholder"><i class="fas fa-book"></i></div>{% endif %}
+                            <span class="book-badge badge-free">Gratuit</span>
+                        </div>
+                        <div class="book-info">
+                            <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
+                            <h6 class="book-title">{{ book.title }}</h6>
+                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this, 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section: Les mieux notés -->
+    {% if featured_books %}
+    <div style="margin-bottom: 1.5rem;">
+        <h2 class="ys-section-title"><i class="fas fa-star" style="color: #F59E0B; margin-right: 0.3rem;"></i>Les mieux notés</h2>
+        <div class="ys-carousel-wrapper">
+            <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this, -1)"><i class="fas fa-chevron-left"></i></button>
+            <div class="ys-carousel">
+                {% for book in featured_books %}
+                <div class="ys-card">
+                    <div class="book-card-premium" onclick="window.location.href='{% url 'catalogue:book_detail' book_id=book.pk %}'">
+                        <div class="book-cover">
+                            {% if book.cover %}<img src="{{ book.cover.url }}" alt="{{ book.title }}">
+                            {% else %}<div class="book-cover-placeholder"><i class="fas fa-book"></i></div>{% endif %}
+                            {% if book.is_paid %}<span class="book-badge badge-premium">Payant</span>
+                            {% else %}<span class="book-badge badge-free">Gratuit</span>{% endif %}
+                        </div>
+                        <div class="book-info">
+                            <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
+                            <h6 class="book-title">{{ book.title }}</h6>
+                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this, 1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Stats compacts -->
+    <div style="display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap;">
+        <div style="text-align: center; padding: 0.75rem 1.5rem; background: var(--bg-soft); border-radius: 8px;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--primary);">{{ total_books|default:"0" }}</div>
+            <div style="font-size: 0.7rem; color: var(--text);">Livres</div>
+        </div>
+        <div style="text-align: center; padding: 0.75rem 1.5rem; background: var(--bg-soft-alt); border-radius: 8px;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--secondary);">{{ total_users|default:"0" }}</div>
+            <div style="font-size: 0.7rem; color: var(--text);">Lecteurs</div>
+        </div>
+        <div style="text-align: center; padding: 0.75rem 1.5rem; background: var(--bg-soft-alt); border-radius: 8px;">
+            <div style="font-size: 1.3rem; font-weight: 800; color: #10B981;">4.8/5</div>
+            <div style="font-size: 0.7rem; color: var(--text);">Note</div>
+        </div>
+    </div>
+
     <!-- CTA Section -->
     {% if not user.is_authenticated %}
-    <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: var(--radius-md); padding: 1.5rem 1rem; text-align: center; color: white; margin-bottom: 1.5rem;">
-        <h4 style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">Prêt à explorer?</h4>
+    <div style="background: linear-gradient(135deg, #1B2A4A, #E63946); border-radius: 10px; padding: 1.5rem 1rem; text-align: center; color: white; margin-bottom: 1.5rem;">
+        <h4 style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">Prêt à explorer ?</h4>
         <p style="opacity: 0.95; margin-bottom: 0.75rem; font-size: 0.85rem;">Explorez la plus belle collection de livres numériques</p>
-        <a href="{% url 'users:login' %}" class="btn" style="background: white; color: var(--primary); font-weight: 700; padding: 0.4rem 1.25rem; font-size: 0.85rem;">
+        <a href="{% url 'users:login' %}" class="btn" style="background: white; color: #1B2A4A; font-weight: 700; padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 6px; text-decoration: none;">
             <i class="fas fa-arrow-right"></i> Commencer
         </a>
     </div>
     {% endif %}
+
+    <!-- Qu'est-ce que BNC ? -->
+    <div style="background: var(--bg-soft); border-radius: 10px; padding: 1.25rem 1rem; margin-bottom: 1.5rem;">
+        <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-question-circle" style="color: var(--primary);"></i> Qu'est-ce que BNC ?
+        </h2>
+        <p style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 0.6rem; color: var(--text);">
+            <strong>BNC (Bibliothèque Numérique Calures)</strong> est une plateforme de lecture en ligne dédiée aux passionnés de littérature. Elle offre un accès simple et rapide à des milliers de livres numériques — romans, essais, poésie, littérature africaine et bien plus encore.
+        </p>
+        <p style="font-size: 0.85rem; line-height: 1.7; margin: 0; color: var(--text);">
+            Notre mission : <strong>rendre la lecture accessible à tous</strong> et promouvoir la richesse culturelle à travers le livre numérique.
+        </p>
+    </div>
+
+    <!-- Pourquoi BNC ? -->
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-weight: 800; margin-bottom: 1rem; text-align: center; font-size: 1.1rem;">Pourquoi BNC ?</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1B2A4A, #E63946); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-mobile-alt"></i></div>
+                <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Lecteur optimisé</h6><p style="color: var(--text); margin: 0; font-size: 0.65rem;">Fluide sur tous appareils</p></div>
+            </div>
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #E63946, #1B2A4A); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-moon"></i></div>
+                <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Mode sombre</h6><p style="color: var(--text); margin: 0; font-size: 0.65rem;">Confort en toute situation</p></div>
+            </div>
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #10B981, #059669); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-search"></i></div>
+                <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Recherche avancée</h6><p style="color: var(--text); margin: 0; font-size: 0.65rem;">Trouvez vite vos livres</p></div>
+            </div>
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #F59E0B, #EF4444); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-heart"></i></div>
+                <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Favoris personnels</h6><p style="color: var(--text); margin: 0; font-size: 0.65rem;">Sauvegardez vos préférés</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Des livres qui vous touchent de près -->
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-heart" style="color: #FF6B6B;"></i> Des livres qui vous touchent de près
+        </h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">🌍</div>
+                <h6 style="font-weight: 700; font-size: 0.78rem; margin: 0 0 0.2rem;">Culture & Identité</h6>
+                <p style="font-size: 0.65rem; color: var(--text); margin: 0;">Explorez vos racines à travers des récits authentiques</p>
+            </div>
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">💡</div>
+                <h6 style="font-weight: 700; font-size: 0.78rem; margin: 0 0 0.2rem;">Développement personnel</h6>
+                <p style="font-size: 0.65rem; color: var(--text); margin: 0;">Des ouvrages pour grandir et s'épanouir au quotidien</p>
+            </div>
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">📖</div>
+                <h6 style="font-weight: 700; font-size: 0.78rem; margin: 0 0 0.2rem;">Romans & Nouvelles</h6>
+                <p style="font-size: 0.65rem; color: var(--text); margin: 0;">Des histoires qui parlent de vous, de nous, d'ici</p>
+            </div>
+            <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">🎓</div>
+                <h6 style="font-weight: 700; font-size: 0.78rem; margin: 0 0 0.2rem;">Éducation & Savoir</h6>
+                <p style="font-size: 0.65rem; color: var(--text); margin: 0;">Apprenez, progressez, construisez votre avenir</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soutenir BNC -->
+    <div style="background: var(--bg-soft-alt); border-radius: 10px; padding: 1.25rem 1rem; margin-bottom: 1.5rem;">
+        <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-hand-holding-heart" style="color: #E63946;"></i> Soutenir BNC
+        </h2>
+        <p style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 0.75rem; color: var(--text);">
+            BNC est un projet communautaire. Votre don nous aide à acquérir de nouveaux livres, maintenir la plateforme et la rendre accessible à tous.
+        </p>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+            <a href="#" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #E63946; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                <i class="fas fa-heart"></i> Faire un don
+            </a>
+            <a href="#" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #1B2A4A; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                <i class="fas fa-mobile-alt"></i> Mobile Money
+            </a>
+        </div>
+        <div style="background: var(--bg-card); border-radius: 8px; padding: 0.75rem; border: 1px solid var(--border);">
+            <p style="font-size: 0.75rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--primary);"><i class="fas fa-star" style="color: #F59E0B;"></i> Nos donateurs</p>
+            <p style="font-size: 0.7rem; color: var(--text); margin: 0; line-height: 1.6;">Merci à tous ceux qui soutiennent BNC ! Chaque contribution compte pour faire vivre la lecture numérique en Afrique.</p>
+        </div>
+    </div>
+
+    <!-- Nous contacter -->
+    <div style="background: var(--bg-soft); border-radius: 10px; padding: 1.25rem 1rem; margin-bottom: 1.5rem;">
+        <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-envelope" style="color: var(--primary);"></i> Nous contacter
+        </h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+            <a href="mailto:contact@bnc-calures.com" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;">
+                <i class="fas fa-envelope" style="color: #E63946; font-size: 1rem;"></i>
+                <div><strong>Email</strong><br><span style="font-size: 0.65rem;">contact@bnc-calures.com</span></div>
+            </a>
+            <a href="https://wa.me/243000000000" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1rem;"></i>
+                <div><strong>WhatsApp</strong><br><span style="font-size: 0.65rem;">+243 000 000 000</span></div>
+            </a>
+            <a href="https://facebook.com/bnccalures" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-facebook" style="color: #1877F2; font-size: 1rem;"></i>
+                <div><strong>Facebook</strong><br><span style="font-size: 0.65rem;">BNC Calures</span></div>
+            </a>
+            <a href="https://twitter.com/bnccalures" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-twitter" style="color: #1DA1F2; font-size: 1rem;"></i>
+                <div><strong>Twitter / X</strong><br><span style="font-size: 0.65rem;">@bnccalures</span></div>
+            </a>
+        </div>
+    </div>
+
+    </div>
 </div>
 
+<!-- Carousel JS -->
 <script>
-function toggleFavorite(event, bookId) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const btn = event.currentTarget;
-    const url = `/users/toggle-favorite/${bookId}/`;
-    
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.favorited) {
-            btn.style.background = 'linear-gradient(135deg, #FF6B6B, #FF4757)';
-            btn.style.color = 'white';
-        } else {
-            btn.style.background = 'rgba(255, 107, 107, 0.15)';
-            btn.style.color = '#FF6B6B';
-        }
-    })
-    .catch(error => console.error('Error:', error));
+function scrollCarousel(btn, direction) {
+    var carousel = btn.parentElement.querySelector('.ys-carousel');
+    var cardWidth = carousel.querySelector('.ys-card').offsetWidth + 14;
+    carousel.scrollBy({ left: direction * cardWidth * 3, behavior: 'smooth' });
 }
-
-// Intersection Observer for animations
-const elements = document.querySelectorAll('.animate-in');
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animation = 'slideUp 0.6s ease-out';
-        }
-    });
-}, { threshold: 0.1 });
-
-elements.forEach(element => observer.observe(element));
 </script>
 
 {% endblock %}

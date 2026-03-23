@@ -247,7 +247,7 @@
     .grid-card:hover {
         transform: translateY(-3px);
         border-color: var(--primary);
-        box-shadow: 0 8px 24px rgba(91,95,241,0.15);
+        box-shadow: 0 8px 24px rgba(27,42,74,0.15);
     }
     .grid-card:hover .grid-card-img img { transform: scale(1.05); }
     @keyframes cardPopIn {
@@ -355,7 +355,7 @@
                 {% if hero_event.image %}
                 <img src="{{ hero_event.image.url }}" alt="{{ hero_event.title }}">
                 {% else %}
-                <div class="slide-placeholder" style="background: linear-gradient(135deg, {% if hero_event.is_happening_now %}#DC2626, #991B1B{% elif hero_event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                <div class="slide-placeholder" style="background: linear-gradient(135deg, {% if hero_event.is_happening_now %}#DC2626, #991B1B{% elif hero_event.is_upcoming %}#1B2A4A, #E63946{% else %}#374151, #4B5563{% endif %});">
                     <i class="fas fa-newspaper"></i>
                 </div>
                 {% endif %}
@@ -386,7 +386,7 @@
                 {% if event.image %}
                 <img src="{{ event.image.url }}" alt="{{ event.title }}">
                 {% else %}
-                <div class="slide-placeholder" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                <div class="slide-placeholder" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#1B2A4A, #E63946{% else %}#374151, #4B5563{% endif %});">
                     <i class="fas fa-newspaper"></i>
                 </div>
                 {% endif %}
@@ -445,7 +445,7 @@
                 {% if event.image %}
                 <img src="{{ event.image.url }}" alt="{{ event.title }}">
                 {% else %}
-                <div class="placeholder-img" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                <div class="placeholder-img" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#1B2A4A, #E63946{% else %}#374151, #4B5563{% endif %});">
                     <i class="fas fa-newspaper"></i>
                 </div>
                 {% endif %}
@@ -490,7 +490,7 @@
                         {% if event.image %}
                         <img src="{{ event.image.url }}" alt="{{ event.title }}">
                         {% else %}
-                        <div class="placeholder-grid" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#5B5FF1, #00D4FF{% else %}#374151, #4B5563{% endif %});">
+                        <div class="placeholder-grid" style="background: linear-gradient(135deg, {% if event.is_happening_now %}#DC2626, #991B1B{% elif event.is_upcoming %}#1B2A4A, #E63946{% else %}#374151, #4B5563{% endif %});">
                             <i class="fas fa-newspaper"></i>
                         </div>
                         {% endif %}

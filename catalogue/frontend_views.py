@@ -14,7 +14,7 @@ import uuid
 
 from catalogue.models import (
     Book, ReadingSession, Payment, Author, Favorite, Review,
-    Highlight, Note, Event
+    Highlight, Note, Event, PrintOrder
 )
 from .forms import ReviewForm
 
@@ -109,8 +109,8 @@ def catalogue_view(request):
     ).prefetch_related('authors').distinct()
     
     # Filtres
-    search = request.GET.get('search', '')
-    genre = request.GET.get('genre', '')
+    search = request.GET.get('q', '') or request.GET.get('search', '')
+    genre = request.GET.get('genre', '') or request.GET.get('category', '')
     language = request.GET.get('language', '')
     is_paid = request.GET.get('is_paid', '')
     
@@ -118,8 +118,10 @@ def catalogue_view(request):
         books = books.filter(
             Q(title__icontains=search) |
             Q(description__icontains=search) |
-            Q(isbn__icontains=search)
-        )
+            Q(isbn__icontains=search) |
+            Q(authors__first_name__icontains=search) |
+            Q(authors__last_name__icontains=search)
+        ).distinct()
     
     if genre:
         books = books.filter(genre=genre)
@@ -230,6 +232,14 @@ def book_detail_view(request, book_id):
             can_review = True
         is_purchased = completed_payment
 
+    # Livres similaires (même genre, excluant le livre actuel)
+    related_books = Book.objects.filter(
+        is_published=True, genre=book.genre
+    ).exclude(pk=book.pk).order_by('-reads_count')[:10] if book.genre else Book.objects.none()
+    if related_books.count() < 4:
+        related_books = Book.objects.filter(
+            is_published=True
+        ).exclude(pk=book.pk).order_by('-reads_count')[:10]
 
     context = {
         'book': book,
@@ -244,6 +254,7 @@ def book_detail_view(request, book_id):
         'average_rating': average_rating,
         'has_free_preview': book.is_paid and book.free_pages_count > 0,
         'free_pages_count': book.free_pages_count if book.is_paid else 0,
+        'related_books': related_books,
     }
     
     return render(request, 'catalogue/book_detail.html', context)
@@ -326,8 +337,8 @@ def read_book_view(request, book_id):
     """Vue pour lire un livre - Lecteur moderne."""
     # 3. Contrôle d'Accès (Gatekeeping)
     if not request.user.is_authenticated:
-        messages.info(request, 'Veuillez créer un compte pour accéder à ce contenu')
-        return redirect('users:signup')
+        messages.info(request, 'Veuillez vous connecter pour accéder à ce contenu')
+        return redirect('users:login')
 
     book = get_object_or_404(Book, id=book_id, is_published=True)
     
@@ -958,3 +969,31 @@ def redirect_old_book_url(request, book_id):
     """Redirection pour l'ancienne URL /catalogue/books/{id}/ vers /fr/books/book/{id}/"""
     from django.shortcuts import redirect
     return redirect('catalogue:book_detail', book_id=book_id)
+
+
+@require_http_methods(["POST"])
+def order_print_view(request, book_id):
+    """Vue pour commander la version imprimée d'un livre."""
+    book = get_object_or_404(Book, id=book_id, is_published=True)
+    
+    full_name = request.POST.get('full_name', '').strip()
+    phone = request.POST.get('phone', '').strip()
+    email = request.POST.get('email', '').strip()
+    city = request.POST.get('city', '').strip()
+    
+    if not all([full_name, phone, email, city]):
+        return JsonResponse({'success': False, 'error': 'Tous les champs sont obligatoires.'}, status=400)
+    
+    order = PrintOrder.objects.create(
+        book=book,
+        user=request.user if request.user.is_authenticated else None,
+        full_name=full_name,
+        phone=phone,
+        email=email,
+        city=city,
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message': f'Votre commande pour "{book.title}" a été enregistrée. Nous vous contacterons bientôt.'
+    })

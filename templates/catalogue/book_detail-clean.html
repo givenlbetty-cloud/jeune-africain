@@ -19,7 +19,7 @@
         <div class="col-md-4">
             <div style="position: sticky; top: 100px;">
                 <!-- Book Cover -->
-                <div style="background: linear-gradient(135deg, #5B5FF1, #00D4FF); border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+                <div style="background: linear-gradient(135deg, #1B2A4A, #E63946); border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
                     {% if book.cover %}
                     <img src="{{ book.cover.url }}" alt="{{ book.title }}" style="width: 100%; display: block;">
                     {% else %}
@@ -48,7 +48,7 @@
                 <div style="background: white; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-top: 20px; text-align: center;">
                     <div class="row">
                         <div class="col">
-                            <div style="font-size: 1.5rem; font-weight: 700; color: #5B5FF1;">{{ book.views_count|default:"0" }}</div>
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #1B2A4A;">{{ book.views_count|default:"0" }}</div>
                             <div style="font-size: 0.85rem; color: #999;">Lectures</div>
                         </div>
                         <div class="col">
@@ -97,7 +97,7 @@
                     <div class="col-md-6">
                         <div style="font-size: 0.85rem; color: #999; font-weight: 600; text-transform: uppercase;">Catégorie</div>
                         <div style="margin-top: 5px;">
-                            <a href="{% url 'catalogue:catalogue' %}?category={{ book.category.id }}" class="badge" style="background: #5B5FF1; color: white; padding: 6px 12px; font-size: 0.95rem;">
+                            <a href="{% url 'catalogue:catalogue' %}?category={{ book.category.id }}" class="badge" style="background: #1B2A4A; color: white; padding: 6px 12px; font-size: 0.95rem;">
                                 {{ book.category.name }}
                             </a>
                         </div>
@@ -134,7 +134,7 @@
         <div class="row g-4">
             {% if book.author.avatar %}
             <div class="col-md-3 text-center">
-                <img src="{{ book.author.avatar.url }}" alt="{{ book.author.name }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #5B5FF1;">
+                <img src="{{ book.author.avatar.url }}" alt="{{ book.author.name }}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #1B2A4A;">
             </div>
             {% endif %}
             <div class="col-md-9">
@@ -206,8 +206,8 @@
         </form>
     </div>
     {% else %}
-    <div style="background: #e3f2fd; border: 2px dashed #5B5FF1; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 40px;">
-        <i class="fas fa-user-circle" style="font-size: 3rem; color: #5B5FF1; margin-bottom: 20px; display: block;"></i>
+    <div style="background: #e3f2fd; border: 2px dashed #1B2A4A; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 40px;">
+        <i class="fas fa-user-circle" style="font-size: 3rem; color: #1B2A4A; margin-bottom: 20px; display: block;"></i>
         <h4 class="mb-2">Connectez-vous pour partager un avis</h4>
         <p class="text-secondary mb-3">Rejoignez notre communauté de lecteurs passionnés.</p>
         <a href="{% url 'users:login' %}" class="btn btn-primary-custom">Se connecter</a>
@@ -226,7 +226,7 @@
                         {% if related_book.cover %}
                         <img src="{{ related_book.cover.url }}" alt="{{ related_book.title }}" class="card-img-top">
                         {% else %}
-                        <div style="background: linear-gradient(135deg, #5B5FF1, #00D4FF); height: 250px; display: flex; align-items: center; justify-content: center;">
+                        <div style="background: linear-gradient(135deg, #1B2A4A, #E63946); height: 250px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-book" style="font-size: 3rem; color: white; opacity: 0.5;"></i>
                         </div>
                         {% endif %}

@@ -7,13 +7,23 @@
 <style>
     /* ===== HERO ===== */
     .about-hero {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 60%, #2d3a8c 100%);
+        background-image: url('https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80');
+        background-size: cover;
+        background-position: center;
         color: white;
         padding: 3rem 0 2.5rem;
         text-align: center;
         position: relative;
         overflow: hidden;
     }
+    .about-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(27,42,74,0.92) 0%, rgba(230,57,70,0.7) 100%);
+        z-index: 0;
+    }
+    .about-hero .container { position: relative; z-index: 1; }
     .about-hero::before {
         content: '';
         position: absolute;
@@ -50,7 +60,7 @@
     .about-card-icon {
         width: 48px; height: 48px;
         border-radius: var(--radius-md);
-        background: linear-gradient(135deg, var(--primary), #7B7FFF);
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
         display: flex; align-items: center; justify-content: center;
         color: white; font-size: 1.1rem;
         margin-bottom: 1rem;
@@ -60,7 +70,7 @@
 
     /* ===== STAT STRIP ===== */
     .stat-strip {
-        background: linear-gradient(135deg, var(--primary), #7B7FFF);
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
         border-radius: var(--radius-lg);
         padding: 1.5rem;
         color: white;
@@ -112,6 +122,7 @@
     [data-bs-theme="dark"] .about-card p,
     [data-bs-theme="dark"] .vm-block p,
     [data-bs-theme="dark"] .staff-cta p { color: #9090b8; }
+    [data-bs-theme="dark"] .vm-block h4 { color: #5B8DD8; }
 </style>
 {% endblock %}
 
@@ -255,6 +266,70 @@
         <a href="{% url 'staff' %}" class="btn btn-premium">
             <i class="fas fa-id-badge me-2"></i> Voir le staff technique
         </a>
+    </div>
+
+    <!-- SOUTENIR BNC -->
+    <div class="about-card mb-4" style="background: var(--bg-soft-alt);">
+        <div class="text-center mb-3">
+            <div class="about-card-icon" style="margin: 0 auto 0.75rem; background: linear-gradient(135deg, #E63946, #c0392b);">
+                <i class="fas fa-hand-holding-heart"></i>
+            </div>
+            <h4 class="mb-2">Soutenir BNC</h4>
+            <p style="font-size: 0.85rem; max-width: 500px; margin: 0 auto 1rem;">BNC est un projet communautaire. Votre don nous aide à acquérir de nouveaux livres, maintenir la plateforme et la rendre accessible à tous.</p>
+        </div>
+        <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+            <a href="#" class="btn btn-sm" style="background: #E63946; color: white; font-weight: 700; font-size: 0.8rem;">
+                <i class="fas fa-heart me-1"></i> Faire un don
+            </a>
+            <a href="#" class="btn btn-sm" style="background: #1B2A4A; color: white; font-weight: 700; font-size: 0.8rem;">
+                <i class="fas fa-mobile-alt me-1"></i> Mobile Money
+            </a>
+        </div>
+        <div style="background: var(--bg-soft); border-radius: 8px; padding: 0.75rem; text-align: center;">
+            <p style="font-size: 0.78rem; font-weight: 700; margin: 0 0 0.35rem; color: #1B2A4A;"><i class="fas fa-star" style="color: #F59E0B;"></i> Nos donateurs</p>
+            <p style="font-size: 0.75rem; color: var(--text); margin: 0;">Merci à tous ceux qui soutiennent BNC ! Chaque contribution compte pour faire vivre la lecture numérique en Afrique.</p>
+        </div>
+    </div>
+
+    <!-- NOUS CONTACTER -->
+    <div class="about-card mb-4">
+        <div class="text-center mb-3">
+            <div class="about-card-icon" style="margin: 0 auto 0.75rem;">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h4 class="mb-2">Nous contacter</h4>
+            <p style="font-size: 0.85rem; max-width: 500px; margin: 0 auto;">Une question, une suggestion, un partenariat ? Contactez-nous via vos canaux préférés.</p>
+        </div>
+        <div class="row g-2 mt-2">
+            <div class="col-6 col-md-3">
+                <a href="mailto:contact@bnc-calures.com" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
+                    <i class="fas fa-envelope" style="color: #E63946; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
+                    <strong style="font-size: 0.75rem;">Email</strong>
+                    <span style="font-size: 0.6rem;">contact@bnc-calures.com</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="https://wa.me/243000000000" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
+                    <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
+                    <strong style="font-size: 0.75rem;">WhatsApp</strong>
+                    <span style="font-size: 0.6rem;">+243 000 000 000</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="https://facebook.com/bnccalures" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
+                    <i class="fab fa-facebook" style="color: #1877F2; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
+                    <strong style="font-size: 0.75rem;">Facebook</strong>
+                    <span style="font-size: 0.6rem;">BNC Calures</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="https://twitter.com/bnccalures" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
+                    <i class="fab fa-twitter" style="color: #1DA1F2; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
+                    <strong style="font-size: 0.75rem;">Twitter / X</strong>
+                    <span style="font-size: 0.6rem;">@bnccalures</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- CTA CATALOGUE -->

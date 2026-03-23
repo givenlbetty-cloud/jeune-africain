@@ -30,12 +30,16 @@ def get_citation_semaine():
 
 
 def home(request):
-    """Page d'accueil."""
-    books = Book.objects.filter(is_published=True)[:6]
+    """Page d'accueil avec sections thématiques style YouScribe."""
+    published = Book.objects.filter(is_published=True).prefetch_related('authors')
+    
     context = {
-        'featured_books': books,
-        'total_books': Book.objects.filter(is_published=True).count(),
-        'total_authors': Book.objects.filter(is_published=True).values('authorbook__author').distinct().count(),
+        'newest_books': published.order_by('-created_at')[:12],
+        'popular_books': published.order_by('-reads_count')[:12],
+        'free_books': published.filter(is_paid=False).order_by('-created_at')[:12],
+        'featured_books': published.order_by('-rating')[:12],
+        'total_books': published.count(),
+        'total_users': CustomUser.objects.count(),
         'citation': get_citation_semaine(),
     }
     return render(request, 'home.html', context)

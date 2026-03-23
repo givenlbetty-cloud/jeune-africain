@@ -6,15 +6,16 @@
 {% block content %}
 <div class="container mt-0">
     <!-- Hero Section -->
-    <div class="hero-premium" style="background: linear-gradient(135deg, #5B5FF1 0%, #7B7FFF 50%, #00D4FF 100%); margin: -1rem -1rem 2rem -1rem; border-radius: 0 0 var(--radius-xl) var(--radius-xl);">
-        <div class="hero-content" style="text-align: center; padding: 3rem 1rem;">
+    <div class="hero-premium" style="position: relative; background-image: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1280&q=80'); background-size: cover; background-position: center top; margin: -1rem -1rem 2rem -1rem; border-radius: 0 0 var(--radius-xl) var(--radius-xl); overflow: hidden;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(27,42,74,0.92) 0%, rgba(27,42,74,0.80) 50%, rgba(230,57,70,0.75) 100%);"></div>
+        <div class="hero-content" style="text-align: center; padding: 3rem 1rem; position: relative; z-index: 1;">
             <div style="margin-bottom: 1rem;">
                 <i class="fas fa-book-open" style="font-size: 3rem; text-shadow: 0 4px 12px rgba(0,0,0,0.2);"></i>
             </div>
-            <h1 style="text-shadow: 0 2px 8px rgba(0,0,0,0.15);">BNC - La Meilleure Bibliothèque du Monde</h1>
+            <h1 style="text-shadow: 0 2px 8px rgba(0,0,0,0.15);">BNC - Bibliothèque Numérique Calures</h1>
             <p style="font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.95;">Découvrez des milliers de livres numériques d'exception</p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="{% url 'catalogue:catalogue' %}" class="btn" style="background: white; color: #5B5FF1; font-weight: 700; padding: 0.75rem 2rem; border-radius: var(--radius-md); text-decoration: none;">
+                <a href="{% url 'catalogue:catalogue' %}" class="btn" style="background: white; color: #1B2A4A; font-weight: 700; padding: 0.75rem 2rem; border-radius: var(--radius-md); text-decoration: none;">
                     <i class="fas fa-search"></i> Parcourir le catalogue
                 </a>
                 {% if not user.is_authenticated %}
@@ -112,7 +113,7 @@
             </div>
             <div class="col-12 col-md-6">
                 <div class="card-premium" style="padding: 2rem; display: flex; gap: 1.5rem; align-items: flex-start;">
-                    <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #00D4FF, #FF6B6B); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1.5rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--secondary), var(--primary)); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1.5rem;">
                         <i class="fas fa-moon"></i>
                     </div>
                     <div>
