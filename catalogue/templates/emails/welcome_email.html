@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Bienvenue sur BNC Digital Library" %}</title>
+    <title>{% trans "Bienvenue sur Calures Éditions" %}</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -69,13 +69,13 @@
     <div class="email-container">
         <div class="header">
             <h1>{% trans "Bienvenue!" %}</h1>
-            <p>{% trans "BNC Digital Library" %}</p>
+            <p>{% trans "Calures Éditions" %}</p>
         </div>
         
         <div class="content">
             <p>{% blocktrans with name=user.first_name %}Bonjour {{ name }},{% endblocktrans %}</p>
             
-            <p>{% trans "Merci de vous être inscrit sur BNC Digital Library! Nous sommes heureux de vous compter parmi nos utilisateurs." %}</p>
+            <p>{% trans "Merci de vous être inscrit sur Calures Éditions! Nous sommes heureux de vous compter parmi nos utilisateurs." %}</p>
             
             <p>{% trans "Votre compte est maintenant actif et prêt à être utilisé. Vous pouvez commencer à explorer notre vaste collection de livres numériques." %}</p>
             
@@ -103,14 +103,14 @@
             
             <a href="{{ activation_url }}" class="button">{% trans "Complétez Votre Profil" %}</a>
             
-            <p>{% trans "Si vous avez des questions, n'hésitez pas à nous contacter au support@bnc-library.com" %}</p>
+            <p>{% trans "Si vous avez des questions, n'hésitez pas à nous contacter au contact@calures.org" %}</p>
             
             <p>{% trans "Bonne lecture!" %}<br>
-            <strong>{% trans "L'équipe BNC" %}</strong></p>
+            <strong>{% trans "L'équipe Calures" %}</strong></p>
         </div>
         
         <div class="footer">
-            <p>© {% now "Y" %} BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+            <p>© {% now "Y" %} Calures Éditions. {% trans "Tous droits réservés." %}</p>
             <p>
                 <a href="{{ site_url }}/unsubscribe/" style="color: #667eea; text-decoration: none;">{% trans "Se désinscrire" %}</a>
             </p>

@@ -1,7 +1,7 @@
 {% extends 'base-premium.html' %}
 {% load static %}
 
-{% block title %}Accueil - BNC | La Plus Belle Bibliothèque Numérique{% endblock %}
+{% block title %}Calures Éditions — La Littérature Congolaise à Portée de Main{% endblock %}
 
 {% block content %}
 <div style="background: var(--bg-page); min-height: 100vh;">
@@ -13,8 +13,8 @@
             <div style="margin-bottom: 0.6rem;">
                 <i class="fas fa-book-open" style="font-size: 2.5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.25);"></i>
             </div>
-            <h1 style="text-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: clamp(1.2rem, 4.5vw, 2rem); font-weight: 800; margin-bottom: 0.4rem;">BNC - Bibliothèque Numérique Calures</h1>
-            <p style="font-size: 0.95rem; margin-bottom: 1.25rem; opacity: 0.95; text-shadow: 0 1px 4px rgba(0,0,0,0.2);">Des milliers de livres numériques d'exception</p>
+            <h1 style="text-shadow: 0 2px 8px rgba(0,0,0,0.2); font-size: clamp(1.2rem, 4.5vw, 2rem); font-weight: 800; margin-bottom: 0.4rem;">Calures Éditions</h1>
+            <p style="font-size: 0.95rem; margin-bottom: 1.25rem; opacity: 0.95; text-shadow: 0 1px 4px rgba(0,0,0,0.2);">Découvrez la littérature congolaise — Romans, essais, poésie &amp; savoirs d’Afrique centrale</p>
             <div style="display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;">
                 <a href="{% url 'catalogue:catalogue' %}" class="btn" style="background: white; color: #1B2A4A; font-weight: 700; padding: 0.55rem 1.4rem; font-size: 0.9rem; border-radius: 6px; text-decoration: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
                     <i class="fas fa-search"></i> Catalogue
@@ -213,30 +213,30 @@
     <!-- CTA Section -->
     {% if not user.is_authenticated %}
     <div style="background: linear-gradient(135deg, #1B2A4A, #E63946); border-radius: 10px; padding: 1.5rem 1rem; text-align: center; color: white; margin-bottom: 1.5rem;">
-        <h4 style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">Prêt à explorer ?</h4>
-        <p style="opacity: 0.95; margin-bottom: 0.75rem; font-size: 0.85rem;">Explorez la plus belle collection de livres numériques</p>
+        <h4 style="font-weight: 700; margin-bottom: 0.5rem; font-size: 1rem;">Prêt à explorer la littérature congolaise ?</h4>
+        <p style="opacity: 0.95; margin-bottom: 0.75rem; font-size: 0.85rem;">Rejoignez Calures Éditions et accédez à des centaines d’œuvres d’auteurs congolais</p>
         <a href="{% url 'users:login' %}" class="btn" style="background: white; color: #1B2A4A; font-weight: 700; padding: 0.5rem 1.25rem; font-size: 0.85rem; border-radius: 6px; text-decoration: none;">
             <i class="fas fa-arrow-right"></i> Commencer
         </a>
     </div>
     {% endif %}
 
-    <!-- Qu'est-ce que BNC ? -->
+    <!-- Qu'est-ce que Calures Éditions ? -->
     <div style="background: var(--bg-soft); border-radius: 10px; padding: 1.25rem 1rem; margin-bottom: 1.5rem;">
         <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-question-circle" style="color: var(--primary);"></i> Qu'est-ce que BNC ?
+            <i class="fas fa-question-circle" style="color: var(--primary);"></i> Qu’est-ce que Calures Éditions ?
         </h2>
         <p style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 0.6rem; color: var(--text);">
-            <strong>BNC (Bibliothèque Numérique Calures)</strong> est une plateforme de lecture en ligne dédiée aux passionnés de littérature. Elle offre un accès simple et rapide à des milliers de livres numériques — romans, essais, poésie, littérature africaine et bien plus encore.
+            <strong>Calures Éditions</strong> est une maison d’édition numérique dédiée à la <strong>littérature congolaise</strong>. Notre plateforme offre un accès simple et rapide à des centaines d’œuvres — romans, essais, poésie, nouvelles et littérature jeunesse — écrites par des auteurs du Congo et d’Afrique centrale.
         </p>
         <p style="font-size: 0.85rem; line-height: 1.7; margin: 0; color: var(--text);">
-            Notre mission : <strong>rendre la lecture accessible à tous</strong> et promouvoir la richesse culturelle à travers le livre numérique.
+            Notre mission : <strong>donner une visibilité mondiale aux écrivains congolais</strong> et rendre la richesse littéraire du Congo accessible à tous, partout dans le monde.
         </p>
     </div>
 
-    <!-- Pourquoi BNC ? -->
+    <!-- Pourquoi Calures Éditions ? -->
     <div style="margin-bottom: 1.5rem;">
-        <h2 style="font-weight: 800; margin-bottom: 1rem; text-align: center; font-size: 1.1rem;">Pourquoi BNC ?</h2>
+        <h2 style="font-weight: 800; margin-bottom: 1rem; text-align: center; font-size: 1.1rem;">Pourquoi Calures Éditions ?</h2>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
             <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1B2A4A, #E63946); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-mobile-alt"></i></div>
@@ -286,13 +286,13 @@
         </div>
     </div>
 
-    <!-- Soutenir BNC -->
+    <!-- Soutenir Calures Éditions -->
     <div style="background: var(--bg-soft-alt); border-radius: 10px; padding: 1.25rem 1rem; margin-bottom: 1.5rem;">
         <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="fas fa-hand-holding-heart" style="color: #E63946;"></i> Soutenir BNC
+            <i class="fas fa-hand-holding-heart" style="color: #E63946;"></i> Soutenir Calures Éditions
         </h2>
         <p style="font-size: 0.85rem; line-height: 1.7; margin-bottom: 0.75rem; color: var(--text);">
-            BNC est un projet communautaire. Votre don nous aide à acquérir de nouveaux livres, maintenir la plateforme et la rendre accessible à tous.
+            Calures Éditions est un projet au service de la littérature congolaise. Votre soutien nous aide à publier de nouveaux auteurs, maintenir la plateforme et rendre les œuvres accessibles à tous.
         </p>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
             <a href="#" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #E63946; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
@@ -304,7 +304,7 @@
         </div>
         <div style="background: var(--bg-card); border-radius: 8px; padding: 0.75rem; border: 1px solid var(--border);">
             <p style="font-size: 0.75rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--primary);"><i class="fas fa-star" style="color: #F59E0B;"></i> Nos donateurs</p>
-            <p style="font-size: 0.7rem; color: var(--text); margin: 0; line-height: 1.6;">Merci à tous ceux qui soutiennent BNC ! Chaque contribution compte pour faire vivre la lecture numérique en Afrique.</p>
+            <p style="font-size: 0.7rem; color: var(--text); margin: 0; line-height: 1.6;">Merci à tous ceux qui soutiennent Calures Éditions ! Chaque contribution compte pour faire vivre la littérature congolaise.</p>
         </div>
     </div>
 
@@ -313,22 +313,34 @@
         <h2 style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem;">
             <i class="fas fa-envelope" style="color: var(--primary);"></i> Nous contacter
         </h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
-            <a href="mailto:contact@bnc-calures.com" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem;">
+            <a href="mailto:contact@calures.org" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;">
                 <i class="fas fa-envelope" style="color: #E63946; font-size: 1rem;"></i>
-                <div><strong>Email</strong><br><span style="font-size: 0.65rem;">contact@bnc-calures.com</span></div>
+                <div><strong>Email</strong><br><span style="font-size: 0.65rem;">contact@calures.org</span></div>
             </a>
-            <a href="https://wa.me/243000000000" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
-                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1rem;"></i>
-                <div><strong>WhatsApp</strong><br><span style="font-size: 0.65rem;">+243 000 000 000</span></div>
-            </a>
-            <a href="https://facebook.com/bnccalures" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+            <a href="https://facebook.com/calureseditions" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
                 <i class="fab fa-facebook" style="color: #1877F2; font-size: 1rem;"></i>
-                <div><strong>Facebook</strong><br><span style="font-size: 0.65rem;">BNC Calures</span></div>
+                <div><strong>Facebook</strong><br><span style="font-size: 0.65rem;">Calures Éditions</span></div>
             </a>
-            <a href="https://twitter.com/bnccalures" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
-                <i class="fab fa-twitter" style="color: #1DA1F2; font-size: 1rem;"></i>
-                <div><strong>Twitter / X</strong><br><span style="font-size: 0.65rem;">@bnccalures</span></div>
+            <a href="https://x.com/Calures_" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-x-twitter" style="color: #000000; font-size: 1rem;"></i>
+                <div><strong>X (Twitter)</strong><br><span style="font-size: 0.65rem;">@Calures_</span></div>
+            </a>
+            <a href="https://instagram.com/calureseditions01" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-instagram" style="color: #E4405F; font-size: 1rem;"></i>
+                <div><strong>Instagram</strong><br><span style="font-size: 0.65rem;">@calureseditions01</span></div>
+            </a>
+            <a href="https://youtube.com/@calureseditions" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-youtube" style="color: #FF0000; font-size: 1rem;"></i>
+                <div><strong>YouTube</strong><br><span style="font-size: 0.65rem;">Calures Éditions</span></div>
+            </a>
+            <a href="https://linkedin.com/company/calures-editions" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fab fa-linkedin" style="color: #0A66C2; font-size: 1rem;"></i>
+                <div><strong>LinkedIn</strong><br><span style="font-size: 0.65rem;">Calures Éditions</span></div>
+            </a>
+            <a href="https://www.calures.org" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+                <i class="fas fa-globe" style="color: var(--primary); font-size: 1rem;"></i>
+                <div><strong>Site Web</strong><br><span style="font-size: 0.65rem;">www.calures.org</span></div>
             </a>
         </div>
     </div>

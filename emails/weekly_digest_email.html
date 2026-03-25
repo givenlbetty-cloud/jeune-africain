@@ -2,12 +2,12 @@
 {% load i18n %}
 
 {% block subject %}
-{% trans "Votre digest hebdomadaire de lecture - BNC Digital Library" %}
+{% trans "Votre digest hebdomadaire de lecture - Calures Éditions" %}
 {% endblock %}
 
 {% block content %}
 <div class="header">
-    <div class="logo">📚 BNC Digital Library</div>
+    <div class="logo">📚 Calures Éditions</div>
 </div>
 
 <div class="content">
@@ -15,7 +15,7 @@
 
     <p>{% trans "Bonjour" %} {{ user.first_name }},</p>
 
-    <p>{% trans "Voici un résumé de votre activité de lecteur cette semaine sur BNC Digital Library." %}</p>
+    <p>{% trans "Voici un résumé de votre activité de lecteur cette semaine sur Calures Éditions." %}</p>
 
     <h2>📊 {% trans "Statistiques de cette semaine" %}</h2>
 
@@ -98,7 +98,7 @@
         {% trans "Fréquence des emails:" %}
         <a href="{{ email_settings_url }}">{% trans "Modifier les préférences" %}</a>
     </p>
-    <p>© 2025 BNC Digital Library. {% trans "Tous droits réservés." %}</p>
+    <p>© 2025 Calures Éditions. {% trans "Tous droits réservés." %}</p>
     <p>
         <a href="{{ privacy_url }}">{% trans "Politique de confidentialité" %}</a> |
         <a href="{{ terms_url }}">{% trans "Conditions d'utilisation" %}</a>

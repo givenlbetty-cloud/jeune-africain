@@ -1,581 +1,542 @@
 {% extends 'base-premium.html' %}
 {% load static %}
 
-{% block title %}{{ book.title }} - BNC{% endblock %}
+{% block title %}{{ book.title }} - Calures Éditions{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ===== HERO SOMBRE (YouScribe style) ===== */
-    .ys-detail-hero {
-        position: relative;
-        background: linear-gradient(180deg, #1B2A4A 0%, #0F1D36 100%);
-        padding: 0 0 1.5rem;
-    }
-    .ys-detail-hero::after {
-        content: '';
-        position: absolute;
-        bottom: -20px;
-        left: 0; right: 0;
-        height: 20px;
-        background: var(--bg-page);
-        border-radius: 20px 20px 0 0;
-    }
-    .ys-breadcrumb {
-        padding: 0.6rem 1rem 0;
-        font-size: 0.72rem;
-    }
-    .ys-breadcrumb a { color: rgba(255,255,255,0.65); text-decoration: none; }
-    .ys-breadcrumb a:hover { color: rgba(255,255,255,0.95); }
-    .ys-breadcrumb .sep { color: rgba(255,255,255,0.4); margin: 0 0.3rem; }
-    .ys-breadcrumb .current { color: rgba(255,255,255,0.45); }
+/* ========== PAGE DETAIL – DESIGN PRO ========== */
 
-    .ys-detail-body {
-        display: flex;
-        gap: 1rem;
-        padding: 0.75rem 1rem 0;
-        align-items: flex-start;
-    }
-    .ys-detail-cover {
-        flex: 0 0 130px;
-        min-width: 130px;
-    }
-    .ys-detail-cover img {
-        width: 100%;
-        border-radius: 6px;
-        box-shadow: 0 8px 28px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
-        display: block;
-    }
-    .ys-detail-cover .cover-placeholder {
-        width: 100%;
-        height: 190px;
-        background: rgba(255,255,255,0.08);
-        border-radius: 6px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: rgba(255,255,255,0.3);
-        font-size: 2.5rem;
-    }
-    .ys-detail-info {
-        flex: 1;
-        min-width: 0;
-        color: white;
-    }
-    .ys-detail-title {
-        font-size: clamp(1rem, 3.5vw, 1.45rem);
-        font-weight: 800;
-        line-height: 1.25;
-        margin: 0 0 0.5rem;
-        color: white;
-    }
-    .ys-detail-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.3rem;
-        margin-bottom: 0.55rem;
-    }
-    .ys-detail-badges .badge-tag {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.55rem;
-        border-radius: 4px;
-        font-weight: 600;
-        background: rgba(255,255,255,0.15);
-        color: rgba(255,255,255,0.9);
-        border: 1px solid rgba(255,255,255,0.2);
-    }
-    .ys-detail-author {
-        font-size: 0.82rem;
-        color: rgba(255,255,255,0.8);
-        margin-bottom: 0.2rem;
-    }
-    .ys-detail-author a {
-        color: white;
-        font-weight: 700;
-        text-decoration: none;
-    }
-    .ys-detail-author a:hover { text-decoration: underline; }
-    .ys-detail-publisher {
-        font-size: 0.75rem;
-        color: rgba(255,255,255,0.6);
-    }
-    .ys-detail-publisher strong { color: rgba(255,255,255,0.85); font-weight: 700; }
-    .ys-share-btns {
-        position: absolute;
-        top: 0.6rem;
-        right: 0.75rem;
-        display: flex;
-        gap: 0.4rem;
-    }
-    .ys-share-btn {
-        width: 34px; height: 34px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.12);
-        border: 1px solid rgba(255,255,255,0.2);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: background 0.2s;
-        text-decoration: none;
-    }
-    .ys-share-btn:hover { background: rgba(255,255,255,0.25); color: white; }
+/* --- Hero bandeau sombre compact --- */
+.bd-hero {
+    background: linear-gradient(135deg, #1B2A4A 0%, #0F1D36 60%, rgba(230,57,70,0.25) 100%);
+    padding: 0.65rem 0 0;
+}
+.bd-hero-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+.bd-breadcrumb {
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+}
+.bd-breadcrumb a { color: rgba(255,255,255,0.6); text-decoration: none; }
+.bd-breadcrumb a:hover { color: white; }
+.bd-breadcrumb .sep { color: rgba(255,255,255,0.3); }
+.bd-breadcrumb .current { color: rgba(255,255,255,0.4); }
 
-    /* ===== ACTIONS (sous le hero) ===== */
-    .ys-actions {
-        padding: 0.75rem 1rem 0;
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
+/* --- Main layout : cover + content + sidebar --- */
+.bd-main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+}
+.bd-grid {
+    display: grid;
+    grid-template-columns: 155px 1fr;
+    gap: 1.25rem;
+    margin-top: -2rem; /* cover chevauche le hero */
+    position: relative;
+    z-index: 2;
+}
+@media (min-width: 768px) {
+    .bd-grid {
+        grid-template-columns: 200px 1fr 220px;
+        gap: 1.5rem;
+        margin-top: -2.5rem;
     }
-    .ys-btn-read {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        background: #E63946;
-        color: white;
-        font-weight: 700;
-        font-size: 0.95rem;
-        padding: 0.7rem 1rem;
-        border-radius: 30px;
-        border: none;
-        text-decoration: none;
-        text-align: center;
-        transition: background 0.2s, transform 0.15s;
-        box-shadow: 0 4px 14px rgba(230,57,70,0.35);
-    }
-    .ys-btn-read:hover { background: #d32f3d; color: white; transform: translateY(-1px); }
-    .ys-btn-outline {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        background: transparent;
-        color: #E63946;
-        font-weight: 700;
-        font-size: 0.85rem;
-        padding: 0.55rem 1rem;
-        border-radius: 30px;
-        border: 2px solid #E63946;
-        text-decoration: none;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .ys-btn-outline:hover { background: #E63946; color: white; }
+}
 
-    /* ===== CTA ABONNEMENT ===== */
-    .ys-cta-banner {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: var(--bg-soft);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        padding: 0.85rem 1rem;
-        margin: 0.75rem 1rem;
-    }
-    .ys-cta-banner .cta-icon {
-        flex-shrink: 0;
-        font-size: 1.5rem;
-        color: var(--text-light);
-    }
-    .ys-cta-banner .cta-text {
-        flex: 1;
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: var(--text);
-        line-height: 1.4;
-    }
-    .ys-cta-banner .cta-btn {
-        flex-shrink: 0;
-        background: #1B2A4A;
-        color: white;
-        font-weight: 700;
-        font-size: 0.78rem;
-        padding: 0.45rem 0.85rem;
-        border-radius: 6px;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-    [data-bs-theme="dark"] .ys-cta-banner .cta-btn {
-        background: #E63946;
-    }
+/* --- Cover --- */
+.bd-cover {
+    position: sticky;
+    top: 60px;
+}
+.bd-cover img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.15);
+    display: block;
+}
+.bd-cover-placeholder {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: var(--bg-soft);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 2.5rem;
+    border: 1px solid var(--border);
+}
+.bd-cover-actions {
+    margin-top: 0.65rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.bd-btn-read {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    background: #E63946;
+    color: white;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 0.55rem 0.5rem;
+    border-radius: 25px;
+    border: none;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.bd-btn-read:hover { background: #d32f3d; color: white; transform: translateY(-1px); }
+.bd-btn-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+    background: transparent;
+    color: #E63946;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 25px;
+    border: 2px solid #E63946;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.bd-btn-add:hover { background: #E63946; color: white; }
 
-    /* ===== DESCRIPTION & SECTIONS ===== */
-    .ys-section {
-        padding: 1rem 1rem 0;
-    }
-    .ys-section-head {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-size: 0.9rem;
-        font-weight: 700;
-        margin-bottom: 0.6rem;
-        color: var(--text);
-    }
-    .ys-section-head i { color: var(--text-light); font-size: 0.85rem; }
-    .ys-description-text {
-        font-size: 0.85rem;
-        line-height: 1.75;
-        color: var(--text-light);
-        margin: 0;
-    }
-    .ys-keyword-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-        margin-top: 0.75rem;
-    }
-    .ys-keyword-tag {
-        font-size: 0.72rem;
-        font-weight: 600;
-        padding: 0.2rem 0.6rem;
-        border-radius: 4px;
-        color: #E63946;
-        border: 1px solid rgba(230,57,70,0.35);
-        background: rgba(230,57,70,0.06);
-        text-decoration: none;
-    }
+/* --- Content central --- */
+.bd-content { min-width: 0; }
+.bd-title {
+    font-size: clamp(1.1rem, 3.2vw, 1.55rem);
+    font-weight: 800;
+    line-height: 1.3;
+    margin: 0 0 0.4rem;
+    color: var(--text);
+}
+.bd-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+.bd-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.18rem 0.5rem;
+    border-radius: 4px;
+    background: var(--bg-soft-alt);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+.bd-author-line {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.15rem;
+}
+.bd-author-line a { color: var(--primary); font-weight: 700; text-decoration: none; }
+.bd-author-line a:hover { text-decoration: underline; }
+.bd-publisher-line {
+    font-size: 0.77rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+.bd-publisher-line strong { font-weight: 700; color: var(--text-secondary); }
 
-    /* ===== SIDEBAR MÉTADONNÉES ===== */
-    .ys-meta-sidebar {
-        padding: 0 1rem;
-        margin-top: 0.75rem;
-    }
-    .ys-meta-item {
-        padding: 0.55rem 0;
-        border-bottom: 1px solid var(--border);
-    }
-    .ys-meta-item:last-child { border: none; }
-    .ys-meta-label {
-        font-size: 0.68rem;
-        color: var(--text-light);
-        font-weight: 600;
-        margin-bottom: 0.15rem;
-    }
-    .ys-meta-value {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: var(--text);
-        display: inline-block;
-        padding: 0.15rem 0.5rem;
-        background: var(--bg-soft);
-        border: 1px solid var(--border);
-        border-radius: 4px;
-    }
+/* Rating */
+.bd-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.75rem;
+}
+.bd-rating .stars { color: #FFB800; font-size: 0.8rem; }
+.bd-rating .stars .dim { color: var(--border); }
+.bd-rating .score { font-size: 0.78rem; font-weight: 700; color: var(--text); }
+.bd-rating .count { font-size: 0.68rem; color: var(--text-light); }
 
-    /* ===== AUTEUR ===== */
-    .ys-author-card {
-        display: flex;
-        gap: 0.7rem;
-        align-items: center;
-        padding: 0.85rem 1rem;
-        background: var(--bg-soft);
-        border-radius: var(--radius-md);
-        margin: 0 1rem;
-    }
-    .ys-author-avatar {
-        width: 48px; height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #1B2A4A, #E63946);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.1rem;
-        flex-shrink: 0;
-    }
-    .ys-author-name { font-weight: 700; font-size: 0.88rem; color: var(--text); margin: 0; text-decoration: none; }
-    .ys-author-name:hover { color: var(--primary); }
-    .ys-author-bio { font-size: 0.75rem; color: var(--text-light); margin: 0.1rem 0 0; line-height: 1.45; }
+/* CTA inline (desktop compact) */
+.bd-inline-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+.bd-inline-cta .cta-icon { font-size: 1.3rem; color: var(--text-light); flex-shrink: 0; }
+.bd-inline-cta .cta-msg { flex: 1; font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+.bd-inline-cta .cta-link {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    background: #1B2A4A;
+    color: white;
+    text-decoration: none;
+}
+[data-bs-theme="dark"] .bd-inline-cta .cta-link { background: #E63946; }
 
-    /* ===== AVIS ===== */
-    .ys-review-card {
-        padding: 0.55rem 0.65rem;
-        background: var(--bg-soft);
-        border-radius: var(--radius-sm);
-        border-left: 3px solid #1B2A4A;
-    }
-    [data-bs-theme="dark"] .ys-review-card {
-        border-left-color: #5B8DD8;
-    }
-    .ys-review-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.2rem;
-    }
-    .ys-review-author { font-size: 0.72rem; font-weight: 700; color: var(--text); }
-    .ys-review-date { font-size: 0.6rem; color: var(--text-light); }
-    .ys-review-text { font-size: 0.72rem; color: var(--text-light); line-height: 1.5; margin: 0; }
+/* Description */
+.bd-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.45rem;
+}
+.bd-section-title i { color: var(--text-light); font-size: 0.82rem; }
+.bd-description {
+    font-size: 0.84rem;
+    line-height: 1.8;
+    color: var(--text-light);
+    margin: 0 0 0.6rem;
+}
+.bd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+}
+.bd-tag {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+    color: #E63946;
+    border: 1px solid rgba(230,57,70,0.3);
+    background: rgba(230,57,70,0.05);
+}
 
-    /* ===== SIMILAIRES CAROUSEL ===== */
-    .ys-similar-section {
-        padding: 0.75rem 1rem 1.5rem;
-    }
-    .ys-similar-title {
-        font-weight: 800;
-        font-size: 0.95rem;
-        margin-bottom: 0.65rem;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-    .ys-similar-title a {
-        color: var(--text);
-        text-decoration: none;
-    }
-    .ys-similar-title .chevron { color: var(--text-light); font-size: 0.75rem; }
+/* Author card compact */
+.bd-author-card {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.7rem;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+.bd-author-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1B2A4A, #E63946);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+.bd-author-card .name { font-weight: 700; font-size: 0.82rem; color: var(--text); text-decoration: none; display: block; }
+.bd-author-card .name:hover { color: var(--primary); }
+.bd-author-card .bio { font-size: 0.72rem; color: var(--text-light); line-height: 1.4; margin: 0.1rem 0 0; }
 
-    /* ===== BOUTONS SECONDAIRES COMPACTS ===== */
-    .ys-secondary-actions {
-        display: flex;
-        gap: 0.4rem;
-        flex-wrap: wrap;
-        padding: 0 1rem;
-        margin-top: 0.3rem;
-    }
-    .ys-btn-sm {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        font-size: 0.72rem;
-        font-weight: 600;
-        padding: 0.35rem 0.7rem;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        background: var(--bg-card);
-        color: var(--text);
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    .ys-btn-sm:hover { border-color: var(--primary); color: var(--primary); }
-    .ys-btn-sm i { font-size: 0.7rem; }
+/* Reviews */
+.bd-review {
+    padding: 0.55rem 0.65rem;
+    background: var(--bg-soft);
+    border-radius: 8px;
+    border-left: 3px solid #1B2A4A;
+    margin-bottom: 0.4rem;
+}
+[data-bs-theme="dark"] .bd-review { border-left-color: #5B8DD8; }
+.bd-review-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.15rem;
+}
+.bd-review-user { font-size: 0.72rem; font-weight: 700; color: var(--text); }
+.bd-review-date { font-size: 0.6rem; color: var(--text-light); }
+.bd-review-stars { color: #FFB800; font-size: 0.58rem; margin-left: 0.3rem; }
+.bd-review-stars .dim { color: var(--border); }
+.bd-review-text { font-size: 0.72rem; color: var(--text-light); line-height: 1.5; margin: 0; }
 
-    /* ===== RESPONSIVE DESKTOP ===== */
-    @media (min-width: 768px) {
-        .ys-detail-cover { flex: 0 0 200px; min-width: 200px; }
-        .ys-detail-cover .cover-placeholder { height: 290px; }
-        .ys-detail-body { padding: 1rem 2rem 0; }
-        .ys-breadcrumb { padding: 0.75rem 2rem 0; }
-        .ys-desktop-layout {
-            display: grid;
-            grid-template-columns: 1fr 280px;
-            gap: 1.5rem;
-            padding: 0 1rem;
-        }
-        .ys-actions, .ys-section, .ys-similar-section { padding-left: 0; padding-right: 0; }
-        .ys-meta-sidebar { padding: 0; margin-top: 0; }
-        .ys-cta-banner { margin: 0.75rem 0; }
-        .ys-author-card { margin: 0; }
-        .ys-secondary-actions { padding: 0; }
-    }
+/* Review form */
+.bd-review-form {
+    padding: 0.6rem;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.65rem;
+}
 
-    /* ===== DARK MODE ===== */
-    [data-bs-theme="dark"] .ys-detail-hero {
-        background: linear-gradient(180deg, #0F0F1E 0%, #1A1A2E 100%);
-    }
-    [data-bs-theme="dark"] .ys-detail-hero::after {
-        background: var(--bg-page);
-    }
+/* --- Sidebar metadata --- */
+.bd-sidebar {
+    display: none;
+}
+@media (min-width: 768px) {
+    .bd-sidebar { display: block; }
+}
+.bd-sidebar-mobile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+@media (min-width: 768px) {
+    .bd-sidebar-mobile { display: none; }
+}
+.bd-meta-item {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border);
+}
+.bd-meta-item:last-child { border: none; }
+.bd-meta-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-light);
+    margin-bottom: 0.1rem;
+}
+.bd-meta-val {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.bd-meta-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    background: var(--bg-soft-alt);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+}
+.bd-meta-badge.free {
+    background: rgba(16,185,129,0.1);
+    border-color: #10B981;
+    color: #10B981;
+}
+
+/* Sidebar small actions */
+.bd-side-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--border);
+}
+.bd-side-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.35rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.bd-side-btn:hover { border-color: var(--primary); color: var(--primary); }
+.bd-side-btn i { font-size: 0.65rem; }
+
+/* --- Similar books section --- */
+.bd-similar {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+}
+.bd-similar-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text);
+}
+.bd-similar-title .chevron { color: var(--text-light); font-size: 0.7rem; }
+
+/* --- Dark mode hero --- */
+[data-bs-theme="dark"] .bd-hero {
+    background: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 60%, rgba(230,57,70,0.15) 100%);
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- ===== HERO SOMBRE ===== -->
-<div class="ys-detail-hero">
-    <!-- Breadcrumb -->
-    <div class="ys-breadcrumb">
-        <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
-        <span class="sep">&rsaquo;</span>
-        <a href="{% url 'catalogue:catalogue' %}">Catalogue</a>
-        {% if book.get_genre_display %}
-        <span class="sep">&rsaquo;</span>
-        <a href="{% url 'catalogue:catalogue' %}?genre={{ book.genre }}">{{ book.get_genre_display }}</a>
-        {% endif %}
-        <span class="sep">&rsaquo;</span>
-        <span class="current">{{ book.title|truncatewords:4 }}</span>
+<!-- ===== HERO COMPACT ===== -->
+<div class="bd-hero">
+    <div class="bd-hero-inner">
+        <nav class="bd-breadcrumb">
+            <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
+            <span class="sep">&rsaquo;</span>
+            <a href="{% url 'catalogue:catalogue' %}">Catalogue</a>
+            {% if book.get_genre_display and book.genre != 'other' %}
+            <span class="sep">&rsaquo;</span>
+            <a href="{% url 'catalogue:catalogue' %}?genre={{ book.genre }}">{{ book.get_genre_display }}</a>
+            {% endif %}
+        </nav>
     </div>
+    <div style="height: 2.5rem;"></div>
+</div>
 
-    <!-- Share buttons -->
-    <div class="ys-share-btns">
-        <a href="javascript:void(0)" class="ys-share-btn" onclick="navigator.share ? navigator.share({title: '{{ book.title|escapejs }}', url: window.location.href}) : navigator.clipboard.writeText(window.location.href)" title="Partager">
-            <i class="fas fa-share-alt"></i>
-        </a>
-    </div>
+<!-- ===== MAIN GRID ===== -->
+<div class="bd-main">
+    <div class="bd-grid">
 
-    <!-- Cover + Info -->
-    <div class="ys-detail-body">
-        <div class="ys-detail-cover">
+        <!-- COL 1: Cover + Action buttons -->
+        <div class="bd-cover">
             {% if book.cover %}
                 <img src="{{ book.cover.url }}" alt="{{ book.title }}">
             {% else %}
-                <div class="cover-placeholder"><i class="fas fa-book"></i></div>
+                <div class="bd-cover-placeholder"><i class="fas fa-book"></i></div>
             {% endif %}
+
+            <div class="bd-cover-actions">
+                {% if not book.is_paid or has_access %}
+                    <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="bd-btn-read">
+                        <i class="fas fa-book-open"></i> Lire
+                    </a>
+                {% else %}
+                    {% if has_free_preview %}
+                    <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="bd-btn-read">
+                        <i class="fas fa-eye"></i> Lire un extrait
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="bd-btn-read" style="background: #1B2A4A;">
+                        <i class="fas fa-shopping-cart"></i> {{ book.get_final_price|floatformat:0 }} FC
+                    </a>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                <button type="button" class="bd-btn-add" onclick="toggleFavorite(event, '{{ book.pk }}')" id="favBtn">
+                    <i class="fas fa-{% if is_favorite %}heart{% else %}plus{% endif %}"></i>
+                    <span id="favText">{% if is_favorite %}En favori{% else %}Ajouter{% endif %}</span>
+                </button>
+                {% else %}
+                <a href="{% url 'users:login' %}" class="bd-btn-add">
+                    <i class="fas fa-sign-in-alt"></i> Connexion
+                </a>
+                {% endif %}
+            </div>
         </div>
-        <div class="ys-detail-info">
-            <h1 class="ys-detail-title">{{ book.title }}</h1>
+
+        <!-- COL 2: Content -->
+        <div class="bd-content">
+            <h1 class="bd-title">{{ book.title }}</h1>
 
             <!-- Badges -->
-            <div class="ys-detail-badges">
-                {% if book.pages_count %}<span class="badge-tag">{{ book.pages_count }} pages</span>{% endif %}
-                {% if book.language %}<span class="badge-tag">{{ book.get_language_display }}</span>{% endif %}
-                {% if book.get_genre_display %}<span class="badge-tag">{{ book.get_genre_display }}</span>{% endif %}
-                {% if book.publication_date %}<span class="badge-tag">{{ book.publication_date|date:"Y" }}</span>{% endif %}
-                {% if book.is_premium %}<span class="badge-tag"><i class="fas fa-crown" style="color: #F59E0B;"></i> Premium</span>{% endif %}
+            <div class="bd-badges">
+                {% if book.get_genre_display and book.genre != 'other' %}<span class="bd-badge">{{ book.get_genre_display }}</span>{% endif %}
+                {% if book.publication_date %}<span class="bd-badge">{{ book.publication_date|date:"Y" }}</span>{% endif %}
+                {% if not book.is_paid %}<span class="bd-badge" style="background:rgba(16,185,129,0.1); color:#10B981;">Gratuit</span>{% endif %}
             </div>
 
-            <!-- Auteur -->
-            <p class="ys-detail-author">
+            <!-- Author line -->
+            <p class="bd-author-line">
                 Écrit par
                 {% if authors %}
                     {% for a in authors %}<a href="{% url 'catalogue:author_detail' a.id %}">{{ a.get_full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %} &rsaquo;
                 {% else %}
-                    <strong>{{ book.author }}</strong> &rsaquo;
+                    <strong>{{ book.author }}</strong>
                 {% endif %}
             </p>
+            <p class="bd-publisher-line">Publié par <strong>Calures Éditions</strong> &rsaquo;</p>
 
             <!-- Rating -->
-            <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.35rem; flex-wrap: wrap;">
-                <span style="color: #FFD700; font-size: 0.78rem;">
-                    {% for i in "12345" %}
-                        {% if book.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star" style="opacity:0.3;"></i>{% endif %}
-                    {% endfor %}
+            <div class="bd-rating">
+                <span class="stars">
+                    {% for i in "12345" %}{% if book.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}
                 </span>
-                <span style="font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.9);">{{ book.rating|default:"0" }}/5</span>
-                <span style="font-size: 0.68rem; color: rgba(255,255,255,0.55);">({{ book.rating_count|default:0 }} avis)</span>
+                <span class="score">{{ book.rating|default:"0" }}/5</span>
+                <span class="count">({{ book.rating_count|default:0 }} avis)</span>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- ===== CONTENU PRINCIPAL ===== -->
-<div style="padding-top: 0.5rem; background: var(--bg-page);">
+            <!-- Mobile metadata (hidden on desktop) -->
+            <div class="bd-sidebar-mobile">
+                {% if book.publication_date %}<span class="bd-meta-badge">{{ book.publication_date|date:"d M Y" }}</span>{% endif %}
+                {% if book.language %}<span class="bd-meta-badge">{{ book.get_language_display }}</span>{% endif %}
+                {% if not book.is_paid %}<span class="bd-meta-badge free">Gratuit</span>{% else %}<span class="bd-meta-badge">{{ book.get_final_price|floatformat:0 }} FC</span>{% endif %}
+                <span class="bd-meta-badge"><i class="fas fa-eye" style="font-size:0.6rem; margin-right:0.2rem;"></i> {{ book.reads_count|default:0 }}</span>
+            </div>
 
-    <!-- Actions principales -->
-    <div class="ys-actions">
-        {% if not book.is_paid or has_access %}
-            <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="ys-btn-read">
-                <i class="fas fa-book-open"></i> Lire maintenant
-            </a>
-        {% else %}
-            {% if has_free_preview %}
-            <a href="{% url 'catalogue:read_book' book_id=book.pk %}" class="ys-btn-read">
-                <i class="fas fa-eye"></i> Lire un extrait
-            </a>
+            <!-- CTA Banner (non-auth only) -->
+            {% if not user.is_authenticated %}
+            <div class="bd-inline-cta">
+                <i class="fas fa-book-reader cta-icon"></i>
+                <span class="cta-msg">Lire cet ouvrage en entier et explorer notre catalogue !</span>
+                <a href="{% url 'users:signup' %}" class="cta-link">S'inscrire</a>
+            </div>
             {% endif %}
-            <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="ys-btn-outline" style="background: #E63946; color: white; border-color: #E63946;">
-                <i class="fas fa-shopping-cart"></i> Acheter &mdash; {{ book.get_final_price|floatformat:0 }} FC
-            </a>
-        {% endif %}
 
-        {% if user.is_authenticated %}
-            <button type="button" class="ys-btn-outline" onclick="toggleFavorite(event, '{{ book.pk }}')" id="favBtn">
-                <i class="fas fa-{% if is_favorite %}heart{% else %}plus{% endif %}"></i>
-                <span id="favText">{% if is_favorite %}En favori{% else %}Ajouter{% endif %}</span>
-            </button>
-        {% else %}
-            <a href="{% url 'users:login' %}" class="ys-btn-outline">
-                <i class="fas fa-sign-in-alt"></i> Se connecter pour lire
-            </a>
-        {% endif %}
-    </div>
-
-    <!-- Boutons secondaires -->
-    <div class="ys-secondary-actions">
-        {% if not book.is_paid or has_access %}
-            {% if user.is_authenticated %}
-            <button type="button" class="ys-btn-sm" onclick="saveForOffline('{{ book.pk }}', '{{ book.get_file_url|escapejs }}')" id="offlineBtn">
-                <i class="fas fa-cloud-download-alt"></i> <span id="offlineText">Hors-ligne</span>
-            </button>
-            {% endif %}
-        {% endif %}
-        <button type="button" class="ys-btn-sm" data-bs-toggle="modal" data-bs-target="#printOrderModal">
-            <i class="fas fa-print"></i> Commander l'imprimé
-        </button>
-        {% if book.in_library %}
-        <span class="ys-btn-sm" style="background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981;">
-            <i class="fas fa-check-circle"></i> Dans votre bibliothèque
-        </span>
-        {% endif %}
-    </div>
-
-    <!-- CTA Inscription -->
-    {% if not user.is_authenticated %}
-    <div class="ys-cta-banner">
-        <i class="fas fa-book-reader cta-icon"></i>
-        <span class="cta-text">Lire cet ouvrage en entier et explorer l'ensemble de notre catalogue !</span>
-        <a href="{% url 'users:signup' %}" class="cta-btn">S'inscrire</a>
-    </div>
-    {% endif %}
-
-    <!-- ===== LAYOUT DESKTOP: description + sidebar ===== -->
-    <div class="ys-desktop-layout">
-        <div>
-            <!-- Description -->
+            <!-- ===== DESCRIPTION ===== -->
             {% if book.description %}
-            <div class="ys-section">
-                <h6 class="ys-section-head"><i class="fas fa-align-left"></i> Description</h6>
-                <p class="ys-description-text">{{ book.description }}</p>
-
-                <!-- Tags mots-clés -->
-                <div class="ys-keyword-tags">
-                    {% if book.get_genre_display and book.genre != 'other' %}
-                        <span class="ys-keyword-tag">{{ book.get_genre_display }}</span>
-                    {% endif %}
-                    {% if book.language %}
-                        <span class="ys-keyword-tag">{{ book.get_language_display }}</span>
-                    {% endif %}
-                    {% if book.is_paid %}
-                        <span class="ys-keyword-tag">Payant</span>
-                    {% else %}
-                        <span class="ys-keyword-tag">Gratuit</span>
-                    {% endif %}
+            <div style="margin-bottom: 1rem;">
+                <h6 class="bd-section-title"><i class="fas fa-align-left"></i> Description</h6>
+                <p class="bd-description">{{ book.description }}</p>
+                <div class="bd-tags">
+                    {% if book.get_genre_display and book.genre != 'other' %}<span class="bd-tag">{{ book.get_genre_display }}</span>{% endif %}
                 </div>
             </div>
             {% endif %}
 
-            <!-- Auteur -->
+            <!-- ===== AUTHOR CARD ===== -->
             {% if authors or book.author %}
-            <div class="ys-section" style="padding-bottom: 0;">
-                <h6 class="ys-section-head"><i class="fas fa-user-edit"></i> À propos de l'auteur</h6>
-            </div>
-            <div class="ys-author-card" style="margin-top: 0.35rem;">
-                <div class="ys-author-avatar"><i class="fas fa-user"></i></div>
+            <div class="bd-author-card">
+                <div class="bd-author-avatar"><i class="fas fa-user"></i></div>
                 <div>
                     {% if authors %}
-                        <a href="{% url 'catalogue:author_detail' authors.0.id %}" class="ys-author-name">{{ authors.0.get_full_name }}</a>
+                        <a href="{% url 'catalogue:author_detail' authors.0.id %}" class="name">{{ authors.0.get_full_name }}</a>
                     {% else %}
-                        <span class="ys-author-name">{{ book.author }}</span>
+                        <span class="name">{{ book.author }}</span>
                     {% endif %}
-                    <p class="ys-author-bio">{{ book.author_bio|default:"Auteur sur BNC — Bibliothèque Numérique Calures"|truncatewords:25 }}</p>
+                    <p class="bio">{{ book.author_bio|default:"Auteur publié par Calures Éditions — Bibliothèque Numérique Congolaise"|truncatewords:20 }}</p>
                 </div>
             </div>
             {% endif %}
 
-            <!-- Avis lecteurs -->
-            <div class="ys-section">
-                <h6 class="ys-section-head"><i class="fas fa-comments"></i> Avis ({{ book.rating_count|default:0 }})</h6>
+            <!-- ===== REVIEWS ===== -->
+            <div style="margin-bottom: 1rem;">
+                <h6 class="bd-section-title"><i class="fas fa-comments"></i> Avis ({{ book.rating_count|default:0 }})</h6>
 
                 {% if user.is_authenticated and can_review %}
-                <div style="margin-bottom: 0.65rem; padding: 0.6rem; background: var(--bg-soft); border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                    <form method="POST" action="{% url 'catalogue:add_review' book.pk %}" style="display: flex; flex-direction: column; gap: 0.35rem;">
+                <div class="bd-review-form">
+                    <form method="POST" action="{% url 'catalogue:add_review' book.pk %}" style="display:flex; flex-direction:column; gap:0.3rem;">
                         {% csrf_token %}
-                        <div style="display: flex; align-items: center; gap: 0.4rem;">
-                            <span style="font-size: 0.68rem; font-weight: 600; color: var(--text);">Note :</span>
-                            <span id="ratingStars" style="display: flex; gap: 0.15rem; font-size: 0.9rem;">
+                        <div style="display:flex; align-items:center; gap:0.35rem;">
+                            <span style="font-size:0.68rem; font-weight:600; color:var(--text);">Note :</span>
+                            <span id="ratingStars" style="display:flex; gap:0.1rem; font-size:0.88rem;">
                                 {% for i in "12345" %}
-                                <label style="cursor: pointer; color: #DDD;"><input type="radio" name="rating" value="{{ forloop.counter }}" style="display: none;"><i class="fas fa-star" onclick="setRating({{ forloop.counter }})"></i></label>
+                                <label style="cursor:pointer; color:#DDD;"><input type="radio" name="rating" value="{{ forloop.counter }}" style="display:none;"><i class="fas fa-star" onclick="setRating({{ forloop.counter }})"></i></label>
                                 {% endfor %}
                             </span>
                         </div>
-                        <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Partagez votre avis sur ce livre..." style="font-size: 0.75rem; border-radius: var(--radius-sm);"></textarea>
-                        <button type="submit" class="btn btn-premium btn-sm" style="font-size: 0.68rem; padding: 0.3rem 0.65rem; align-self: flex-end;">
+                        <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Partagez votre avis..." style="font-size:0.75rem; border-radius:8px;"></textarea>
+                        <button type="submit" class="btn btn-premium btn-sm" style="font-size:0.68rem; padding:0.28rem 0.6rem; align-self:flex-end;">
                             <i class="fas fa-paper-plane"></i> Publier
                         </button>
                     </form>
@@ -583,288 +544,211 @@
                 {% endif %}
 
                 {% if reviews %}
-                    <div style="display: flex; flex-direction: column; gap: 0.45rem;">
-                        {% for review in reviews %}
-                        <div class="ys-review-card">
-                            <div class="ys-review-header">
-                                <div style="display: flex; align-items: center; gap: 0.35rem;">
-                                    <span class="ys-review-author">{{ review.user.get_full_name|default:review.user.username }}</span>
-                                    <span style="color: #FFD700; font-size: 0.6rem;">
-                                        {% for i in "12345" %}{% if review.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star" style="color:#ddd;"></i>{% endif %}{% endfor %}
-                                    </span>
-                                </div>
-                                <span class="ys-review-date">{{ review.created_at|date:"d/m/Y" }}</span>
+                <div>
+                    {% for review in reviews %}
+                    <div class="bd-review">
+                        <div class="bd-review-head">
+                            <div style="display:flex; align-items:center;">
+                                <span class="bd-review-user">{{ review.user.get_full_name|default:review.user.username }}</span>
+                                <span class="bd-review-stars">{% for i in "12345" %}{% if review.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}</span>
                             </div>
-                            <p class="ys-review-text">{{ review.comment }}</p>
+                            <span class="bd-review-date">{{ review.created_at|date:"d/m/Y" }}</span>
                         </div>
-                        {% endfor %}
+                        <p class="bd-review-text">{{ review.comment }}</p>
                     </div>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <p style="text-align: center; color: var(--text-light); font-size: 0.75rem; padding: 1rem 0;">
-                        <i class="fas fa-comment-slash" style="font-size: 1.2rem; display: block; margin-bottom: 0.3rem; opacity: 0.4;"></i>
-                        Aucun avis pour le moment. Soyez le premier !
-                    </p>
+                <p style="text-align:center; color:var(--text-light); font-size:0.75rem; padding:1rem 0;">
+                    <i class="fas fa-comment-slash" style="font-size:1.1rem; display:block; margin-bottom:0.25rem; opacity:0.35;"></i>
+                    Aucun avis. Soyez le premier !
+                </p>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Sidebar métadonnées (desktop: colonne droite, mobile: inline) -->
-        <div class="ys-meta-sidebar">
+        <!-- COL 3: Sidebar (desktop only) -->
+        <div class="bd-sidebar">
             {% if authors %}
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">Écrit par</div>
-                <div>
-                    {% for a in authors %}
-                    <span class="ys-meta-value">{{ a.get_full_name }}</span>
-                    {% endfor %}
-                </div>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">Écrit par</div>
+                {% for a in authors %}<span class="bd-meta-badge">{{ a.get_full_name }}</span> {% endfor %}
             </div>
             {% endif %}
             {% if book.publication_date %}
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">Date de publication</div>
-                <span class="ys-meta-value">{{ book.publication_date|date:"d F Y" }}</span>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">Date de publication</div>
+                <span class="bd-meta-badge">{{ book.publication_date|date:"d F Y" }}</span>
             </div>
             {% endif %}
             {% if book.language %}
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">Langue</div>
-                <span class="ys-meta-value">{{ book.get_language_display }}</span>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">Langue</div>
+                <span class="bd-meta-badge">{{ book.get_language_display }}</span>
             </div>
             {% endif %}
             {% if book.pages_count %}
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">Pages</div>
-                <span class="ys-meta-value">{{ book.pages_count }}</span>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">Pages</div>
+                <span class="bd-meta-badge">{{ book.pages_count }}</span>
             </div>
             {% endif %}
             {% if book.isbn %}
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">ISBN</div>
-                <span class="ys-meta-value">{{ book.isbn }}</span>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">ISBN</div>
+                <span class="bd-meta-val" style="font-size:0.68rem;">{{ book.isbn }}</span>
             </div>
             {% endif %}
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">Statut</div>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">Prix</div>
                 {% if not book.is_paid %}
-                    <span class="ys-meta-value" style="background: rgba(16,185,129,0.1); border-color: #10B981; color: #10B981;">Gratuit</span>
+                    <span class="bd-meta-badge free">Gratuit</span>
                 {% else %}
-                    <span class="ys-meta-value">{{ book.get_final_price|floatformat:0 }} FC</span>
+                    <span class="bd-meta-badge">{{ book.get_final_price|floatformat:0 }} FC</span>
                 {% endif %}
             </div>
-            <div class="ys-meta-item">
-                <div class="ys-meta-label">Lectures</div>
-                <span class="ys-meta-value">{{ book.reads_count|default:0 }}</span>
+            <div class="bd-meta-item">
+                <div class="bd-meta-label">Lectures</div>
+                <span class="bd-meta-val">{{ book.reads_count|default:0 }}</span>
+            </div>
+
+            <!-- Side actions -->
+            <div class="bd-side-actions">
+                {% if not book.is_paid or has_access %}
+                    {% if user.is_authenticated %}
+                    <button type="button" class="bd-side-btn" onclick="saveForOffline('{{ book.pk }}', '{{ book.get_file_url|escapejs }}')" id="offlineBtn">
+                        <i class="fas fa-cloud-download-alt"></i> <span id="offlineText">Hors-ligne</span>
+                    </button>
+                    {% endif %}
+                {% endif %}
+                <button type="button" class="bd-side-btn" data-bs-toggle="modal" data-bs-target="#printOrderModal">
+                    <i class="fas fa-print"></i> Commander l'imprimé
+                </button>
+                <button type="button" class="bd-side-btn" onclick="navigator.share ? navigator.share({title:'{{ book.title|escapejs }}',url:window.location.href}) : navigator.clipboard.writeText(window.location.href).then(()=>alert('Lien copié !'))">
+                    <i class="fas fa-share-alt"></i> Partager
+                </button>
+                {% if book.in_library %}
+                <span class="bd-side-btn" style="background:rgba(16,185,129,0.08); border-color:#10B981; color:#10B981;">
+                    <i class="fas fa-check-circle"></i> Dans votre bibliothèque
+                </span>
+                {% endif %}
             </div>
         </div>
     </div>
-
-    <!-- ===== LIVRES SIMILAIRES (carousel YouScribe) ===== -->
-    {% if related_books %}
-    <div class="ys-similar-section">
-        <div class="ys-similar-title">
-            Similaire à {{ book.title|truncatewords:4 }} <i class="fas fa-chevron-right chevron"></i>
-        </div>
-        <div class="ys-carousel-wrapper">
-            <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this, -1)"><i class="fas fa-chevron-left"></i></button>
-            <div class="ys-carousel">
-                {% for rb in related_books %}
-                <a href="{% url 'catalogue:book_detail' book_id=rb.pk %}" class="ys-card book-card-premium" style="text-decoration: none;">
-                    <div class="book-cover">
-                        {% if rb.cover %}
-                            <img src="{{ rb.cover.url }}" alt="{{ rb.title }}">
-                        {% else %}
-                            <div class="book-cover-placeholder"><i class="fas fa-book"></i></div>
-                        {% endif %}
-                    </div>
-                    <div class="book-info">
-                        {% if rb.get_genre_display and rb.genre != 'other' %}
-                        <span style="font-size: 0.55rem; color: #E63946; font-weight: 700; display: flex; align-items: center; gap: 0.2rem;">
-                            <i class="fas fa-book-open" style="font-size: 0.45rem;"></i> {{ rb.get_genre_display }}
-                        </span>
-                        {% endif %}
-                        <h6 class="book-title">{{ rb.title|truncatewords:5 }}</h6>
-                        <p class="book-author">{{ rb.author|truncatewords:3 }}</p>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-            <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this, 1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
-    </div>
-    {% endif %}
-
 </div>
+
+<!-- ===== LIVRES SIMILAIRES (carousel) ===== -->
+{% if related_books %}
+<div class="bd-similar">
+    <div class="bd-similar-title">
+        Similaire à {{ book.title|truncatewords:4 }} <i class="fas fa-chevron-right chevron"></i>
+    </div>
+    <div class="ys-carousel-wrapper">
+        <button class="ys-arrow ys-arrow-left" onclick="scrollCarousel(this,-1)"><i class="fas fa-chevron-left"></i></button>
+        <div class="ys-carousel">
+            {% for rb in related_books %}
+            <a href="{% url 'catalogue:book_detail' book_id=rb.pk %}" class="ys-card book-card-premium" style="text-decoration:none;">
+                <div class="book-cover">
+                    {% if rb.cover %}<img src="{{ rb.cover.url }}" alt="{{ rb.title }}">{% else %}<div class="book-cover-placeholder"><i class="fas fa-book"></i></div>{% endif %}
+                </div>
+                <div class="book-info">
+                    {% if rb.get_genre_display and rb.genre != 'other' %}
+                    <span style="font-size:0.55rem; color:#E63946; font-weight:700;"><i class="fas fa-book-open" style="font-size:0.45rem;"></i> {{ rb.get_genre_display }}</span>
+                    {% endif %}
+                    <h6 class="book-title">{{ rb.title|truncatewords:5 }}</h6>
+                    <p class="book-author">{{ rb.author|truncatewords:3 }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <button class="ys-arrow ys-arrow-right" onclick="scrollCarousel(this,1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+</div>
+{% endif %}
 
 <!-- ===== SCRIPTS ===== -->
 <script>
-function scrollCarousel(btn, direction) {
-    var carousel = btn.parentElement.querySelector('.ys-carousel');
-    var cardWidth = carousel.querySelector('.ys-card').offsetWidth + 14;
-    carousel.scrollBy({ left: direction * cardWidth * 3, behavior: 'smooth' });
+function scrollCarousel(btn, dir) {
+    var c = btn.parentElement.querySelector('.ys-carousel');
+    var w = c.querySelector('.ys-card').offsetWidth + 14;
+    c.scrollBy({left: dir * w * 3, behavior:'smooth'});
 }
-
-function setRating(rating) {
-    document.querySelector('input[name="rating"][value="' + rating + '"]').checked = true;
-    var stars = document.querySelectorAll('#ratingStars label i.fa-star');
-    stars.forEach(function(star, index) {
-        star.style.color = index < rating ? '#FFD700' : '#DDD';
+function setRating(r) {
+    document.querySelector('input[name="rating"][value="'+r+'"]').checked = true;
+    document.querySelectorAll('#ratingStars label i').forEach(function(s,i){ s.style.color = i < r ? '#FFB800' : '#DDD'; });
+}
+function toggleFavorite(e, id) {
+    e.preventDefault();
+    fetch('/users/toggle-favorite/'+id+'/', {
+        method:'POST',
+        headers:{'X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]')?.value||'','Content-Type':'application/json'}
+    }).then(function(r){return r.json();}).then(function(d){
+        var b=document.getElementById('favBtn'), t=document.getElementById('favText');
+        if(d.favorited){b.style.background='#E63946';b.style.borderColor='#E63946';b.style.color='white';t.textContent='En favori';}
+        else{b.style.background='transparent';b.style.borderColor='#E63946';b.style.color='#E63946';t.textContent='Ajouter';}
     });
 }
-
-function toggleFavorite(event, bookId) {
-    event.preventDefault();
-    var btn = document.getElementById('favBtn');
-    var text = document.getElementById('favText');
-    fetch('/users/toggle-favorite/' + bookId + '/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.favorited) {
-            btn.style.background = '#E63946';
-            btn.style.borderColor = '#E63946';
-            btn.style.color = 'white';
-            text.textContent = 'En favori';
-        } else {
-            btn.style.background = 'transparent';
-            btn.style.borderColor = '#E63946';
-            btn.style.color = '#E63946';
-            text.textContent = 'Ajouter';
-        }
-    });
-}
-
-async function saveForOffline(bookId, pdfUrl) {
-    if (!pdfUrl || pdfUrl === 'None') {
-        alert("Le fichier PDF n'est pas disponible.");
-        return;
-    }
-    var btn = document.getElementById('offlineBtn');
-    var text = document.getElementById('offlineText');
-    var icon = btn.querySelector('i');
-    icon.className = 'fas fa-spinner fa-spin';
-    text.textContent = 'En cours...';
-    btn.disabled = true;
-    try {
-        var response = await fetch(pdfUrl);
-        if (!response.ok) throw new Error('Network error');
-        var blob = await response.blob();
-        var request = indexedDB.open('BNC_OfflineBooks', 1);
-        request.onupgradeneeded = function(e) {
-            var db = e.target.result;
-            if (!db.objectStoreNames.contains('books')) db.createObjectStore('books', { keyPath: 'id' });
-        };
-        request.onsuccess = function(e) {
-            var db = e.target.result;
-            var tx = db.transaction(['books'], 'readwrite');
-            tx.objectStore('books').put({ id: bookId, blob: blob, timestamp: Date.now() });
-            tx.oncomplete = function() {
-                icon.className = 'fas fa-check-circle';
-                text.textContent = 'Sauvegardé';
-                btn.style.background = 'rgba(16,185,129,0.1)';
-                btn.style.borderColor = '#10B981';
-                btn.style.color = '#10B981';
-            };
-        };
-    } catch (err) {
-        icon.className = 'fas fa-exclamation-triangle';
-        text.textContent = 'Erreur';
-        btn.disabled = false;
-        setTimeout(function() {
-            icon.className = 'fas fa-cloud-download-alt';
-            text.textContent = 'Hors-ligne';
-        }, 3000);
-    }
+async function saveForOffline(id, url) {
+    if(!url||url==='None'){alert("Fichier non disponible.");return;}
+    var b=document.getElementById('offlineBtn'),t=document.getElementById('offlineText'),ic=b.querySelector('i');
+    ic.className='fas fa-spinner fa-spin';t.textContent='...';b.disabled=true;
+    try{
+        var r=await fetch(url);if(!r.ok)throw 0;var bl=await r.blob();
+        var rq=indexedDB.open('Calures_Offline',1);
+        rq.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('books'))db.createObjectStore('books',{keyPath:'id'});};
+        rq.onsuccess=function(e){var tx=e.target.result.transaction(['books'],'readwrite');tx.objectStore('books').put({id:id,blob:bl,ts:Date.now()});
+            tx.oncomplete=function(){ic.className='fas fa-check-circle';t.textContent='Sauvegardé';b.style.borderColor='#10B981';b.style.color='#10B981';};};
+    }catch(x){ic.className='fas fa-exclamation-triangle';t.textContent='Erreur';b.disabled=false;setTimeout(function(){ic.className='fas fa-cloud-download-alt';t.textContent='Hors-ligne';},3000);}
 }
 </script>
 
 <!-- Modal Commander l'imprimé -->
 <div class="modal fade" id="printOrderModal" tabindex="-1" aria-labelledby="printOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: var(--radius-md); border: none; box-shadow: var(--shadow-xl);">
-            <div class="modal-header" style="background: linear-gradient(135deg, #1B2A4A, #E63946); color: white; border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 0.75rem 1rem;">
-                <h5 class="modal-title" id="printOrderModalLabel" style="font-size: 0.95rem; font-weight: 700;">
-                    <i class="fas fa-print"></i> Commander la version imprimée
-                </h5>
+        <div class="modal-content" style="border-radius:var(--radius-md); border:none; box-shadow:var(--shadow-xl);">
+            <div class="modal-header" style="background:linear-gradient(135deg,#1B2A4A,#E63946); color:white; border-radius:var(--radius-md) var(--radius-md) 0 0; padding:0.75rem 1rem;">
+                <h5 class="modal-title" id="printOrderModalLabel" style="font-size:0.95rem; font-weight:700;"><i class="fas fa-print"></i> Commander la version imprimée</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
-            <div class="modal-body" style="padding: 1rem;">
-                <p style="font-size: 0.8rem; color: var(--text-light); margin-bottom: 0.75rem;">
-                    Remplissez ce formulaire pour commander <strong>{{ book.title }}</strong> en version imprimée.
-                </p>
+            <div class="modal-body" style="padding:1rem;">
+                <p style="font-size:0.8rem; color:var(--text-light); margin-bottom:0.75rem;">Commandez <strong>{{ book.title }}</strong> en version imprimée.</p>
                 <form id="printOrderForm">
                     {% csrf_token %}
                     <div class="mb-2">
-                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Nom complet *</label>
-                        <input type="text" name="full_name" class="form-control form-control-sm" required placeholder="Votre nom et prénom" style="font-size: 0.8rem;">
+                        <label style="font-size:0.75rem; font-weight:600; margin-bottom:0.2rem; display:block;">Nom complet *</label>
+                        <input type="text" name="full_name" class="form-control form-control-sm" required placeholder="Votre nom" style="font-size:0.8rem;">
                     </div>
                     <div class="mb-2">
-                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Téléphone *</label>
-                        <input type="tel" name="phone" class="form-control form-control-sm" required placeholder="+237 6XX XXX XXX" style="font-size: 0.8rem;">
+                        <label style="font-size:0.75rem; font-weight:600; margin-bottom:0.2rem; display:block;">Téléphone *</label>
+                        <input type="tel" name="phone" class="form-control form-control-sm" required placeholder="+243 8XX XXX XXX" style="font-size:0.8rem;">
                     </div>
                     <div class="mb-2">
-                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Email *</label>
-                        <input type="email" name="email" class="form-control form-control-sm" required placeholder="votre@email.com" style="font-size: 0.8rem;">
+                        <label style="font-size:0.75rem; font-weight:600; margin-bottom:0.2rem; display:block;">Email *</label>
+                        <input type="email" name="email" class="form-control form-control-sm" required placeholder="votre@email.com" style="font-size:0.8rem;">
                     </div>
                     <div class="mb-3">
-                        <label style="font-size: 0.75rem; font-weight: 600; margin-bottom: 0.2rem; display: block;">Ville *</label>
-                        <input type="text" name="city" class="form-control form-control-sm" required placeholder="Votre ville" style="font-size: 0.8rem;">
+                        <label style="font-size:0.75rem; font-weight:600; margin-bottom:0.2rem; display:block;">Ville *</label>
+                        <input type="text" name="city" class="form-control form-control-sm" required placeholder="Votre ville" style="font-size:0.8rem;">
                     </div>
-                    <button type="submit" class="btn btn-premium w-100" id="printOrderSubmitBtn" style="font-size: 0.85rem; padding: 0.5rem;">
+                    <button type="submit" class="btn btn-premium w-100" id="printOrderSubmitBtn" style="font-size:0.85rem; padding:0.5rem;">
                         <i class="fas fa-paper-plane"></i> Envoyer la commande
                     </button>
                 </form>
-                <div id="printOrderResult" style="display: none; margin-top: 0.75rem; text-align: center; padding: 0.75rem; border-radius: var(--radius-sm);"></div>
+                <div id="printOrderResult" style="display:none; margin-top:0.75rem; text-align:center; padding:0.75rem; border-radius:var(--radius-sm);"></div>
             </div>
         </div>
     </div>
 </div>
-
 <script>
-document.getElementById('printOrderForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    var form = this;
-    var btn = document.getElementById('printOrderSubmitBtn');
-    var result = document.getElementById('printOrderResult');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi en cours...';
-    var formData = new FormData(form);
-    fetch("{% url 'catalogue:order_print' book_id=book.pk %}", {
-        method: 'POST',
-        headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') },
-        body: formData
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.success) {
-            form.style.display = 'none';
-            result.style.display = 'block';
-            result.style.background = 'rgba(16,185,129,0.1)';
-            result.style.color = '#10B981';
-            result.innerHTML = '<i class="fas fa-check-circle" style="font-size:1.5rem;display:block;margin-bottom:0.4rem;"></i><strong>' + data.message + '</strong>';
-        } else {
-            result.style.display = 'block';
-            result.style.background = 'rgba(239,68,68,0.1)';
-            result.style.color = '#EF4444';
-            result.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la commande';
-        }
-    })
-    .catch(function() {
-        result.style.display = 'block';
-        result.style.background = 'rgba(239,68,68,0.1)';
-        result.style.color = '#EF4444';
-        result.innerHTML = '<i class="fas fa-exclamation-circle"></i> Erreur réseau. Réessayez.';
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Envoyer la commande';
-    });
+document.getElementById('printOrderForm').addEventListener('submit',function(e){
+    e.preventDefault();var f=this,b=document.getElementById('printOrderSubmitBtn'),r=document.getElementById('printOrderResult');
+    b.disabled=true;b.innerHTML='<i class="fas fa-spinner fa-spin"></i> Envoi...';
+    var fd=new FormData(f);
+    fetch("{% url 'catalogue:order_print' book_id=book.pk %}",{method:'POST',headers:{'X-CSRFToken':fd.get('csrfmiddlewaretoken')},body:fd})
+    .then(function(x){return x.json();}).then(function(d){
+        if(d.success){f.style.display='none';r.style.display='block';r.style.background='rgba(16,185,129,0.1)';r.style.color='#10B981';r.innerHTML='<i class="fas fa-check-circle" style="font-size:1.5rem;display:block;margin-bottom:0.4rem;"></i><strong>'+d.message+'</strong>';}
+        else{r.style.display='block';r.style.background='rgba(239,68,68,0.1)';r.style.color='#EF4444';r.innerHTML='<i class="fas fa-exclamation-circle"></i> '+d.error;b.disabled=false;b.innerHTML='<i class="fas fa-paper-plane"></i> Envoyer';}
+    }).catch(function(){r.style.display='block';r.style.background='rgba(239,68,68,0.1)';r.style.color='#EF4444';r.innerHTML='Erreur réseau.';b.disabled=false;b.innerHTML='<i class="fas fa-paper-plane"></i> Envoyer';});
 });
 </script>
-
 {% endblock %}
