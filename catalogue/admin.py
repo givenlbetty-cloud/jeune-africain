@@ -252,7 +252,7 @@ class CategoryAdmin(admin.ModelAdmin):
     ordering = ('name',)
     
     def book_count(self, obj):
-        count = obj.bookcategory_set.count()
+        count = obj.books.count()
         return format_html('<strong>{}</strong>', count)
     book_count.short_description = "Livres"
 
