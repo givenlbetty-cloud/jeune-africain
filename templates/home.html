@@ -295,10 +295,10 @@
             Calures Éditions est un projet au service de la littérature congolaise. Votre soutien nous aide à publier de nouveaux auteurs, maintenir la plateforme et rendre les œuvres accessibles à tous.
         </p>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-            <a href="#" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #E63946; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+            <a href="javascript:void(0)" onclick="document.getElementById('donModal').style.display='flex'" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #E63946; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none; cursor: pointer;">
                 <i class="fas fa-heart"></i> Faire un don
             </a>
-            <a href="#" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #1B2A4A; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+            <a href="javascript:void(0)" onclick="document.getElementById('donModal').style.display='flex'" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #1B2A4A; color: white; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; text-decoration: none; cursor: pointer;">
                 <i class="fas fa-mobile-alt"></i> Mobile Money
             </a>
         </div>
@@ -345,6 +345,33 @@
         </div>
     </div>
 
+    </div>
+</div>
+
+<!-- Modal Don -->
+<div id="donModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; padding:1rem;" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:var(--bg-card,#fff); border-radius:16px; max-width:400px; width:100%; padding:1.5rem; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <button onclick="this.parentElement.parentElement.style.display='none'" style="position:absolute; top:0.75rem; right:0.75rem; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--text-light,#999);"><i class="fas fa-times"></i></button>
+        <div style="text-align:center; margin-bottom:1rem;">
+            <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,#E63946,#c0392b); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem; color:white; font-size:1.3rem;"><i class="fas fa-hand-holding-heart"></i></div>
+            <h5 style="font-weight:800; margin:0 0 0.3rem; font-size:1rem;">Soutenir Calures Éditions</h5>
+            <p style="font-size:0.78rem; color:var(--text-light,#666); margin:0;">Votre don aide à publier de nouveaux auteurs congolais</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <a href="tel:+243000000000" style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-soft,#f5f5f5); border-radius:10px; padding:0.75rem; text-decoration:none; color:var(--text,#333); border:1px solid var(--border,#eee);">
+                <i class="fas fa-mobile-alt" style="font-size:1.3rem; color:#FF6B00;"></i>
+                <div><strong style="font-size:0.82rem;">Orange Money</strong><br><span style="font-size:0.7rem; color:var(--text-light,#888);">+243 000 000 000</span></div>
+            </a>
+            <a href="tel:+243000000000" style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-soft,#f5f5f5); border-radius:10px; padding:0.75rem; text-decoration:none; color:var(--text,#333); border:1px solid var(--border,#eee);">
+                <i class="fas fa-mobile-alt" style="font-size:1.3rem; color:#E60000;"></i>
+                <div><strong style="font-size:0.82rem;">Airtel Money</strong><br><span style="font-size:0.7rem; color:var(--text-light,#888);">+243 000 000 000</span></div>
+            </a>
+            <a href="tel:+243000000000" style="display:flex; align-items:center; gap:0.75rem; background:var(--bg-soft,#f5f5f5); border-radius:10px; padding:0.75rem; text-decoration:none; color:var(--text,#333); border:1px solid var(--border,#eee);">
+                <i class="fas fa-mobile-alt" style="font-size:1.3rem; color:#4CAF50;"></i>
+                <div><strong style="font-size:0.82rem;">M-Pesa</strong><br><span style="font-size:0.7rem; color:var(--text-light,#888);">+243 000 000 000</span></div>
+            </a>
+        </div>
+        <p style="text-align:center; font-size:0.68rem; color:var(--text-light,#999); margin:0.75rem 0 0;">Contactez-nous à <strong>contact@calures.org</strong> pour d'autres moyens de paiement.</p>
     </div>
 </div>
 

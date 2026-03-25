@@ -545,6 +545,9 @@ def toggle_favorite_view(request, book_id):
     favorite, created = Favorite.objects.get_or_create(user=request.user, book=book)
     if not created:
         favorite.delete()
+    # AJAX request → JSON response
+    if request.headers.get('Content-Type') == 'application/json' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'favorited': created})
     referer = request.META.get('HTTP_REFERER')
     if referer:
         return redirect(referer)

@@ -433,9 +433,10 @@
                 {% endif %}
 
                 {% if user.is_authenticated %}
-                <button type="button" class="bd-btn-add" onclick="toggleFavorite(event, '{{ book.pk }}')" id="favBtn">
-                    <i class="fas fa-{% if is_favorite %}heart{% else %}plus{% endif %}"></i>
-                    <span id="favText">{% if is_favorite %}En favori{% else %}Ajouter{% endif %}</span>
+                <button type="button" class="bd-btn-add" onclick="toggleFavorite(event, '{{ book.pk }}')" id="favBtn"
+                    {% if is_favorite %}style="background:#E63946; border-color:#E63946; color:white;"{% endif %}>
+                    <i class="fas fa-{% if is_favorite %}check{% else %}plus{% endif %}"></i>
+                    <span id="favText">{% if is_favorite %}Dans ma bibliothèque{% else %}Ma bibliothèque{% endif %}</span>
                 </button>
                 {% else %}
                 <a href="{% url 'users:login' %}" class="bd-btn-add">
@@ -679,13 +680,17 @@ function setRating(r) {
 }
 function toggleFavorite(e, id) {
     e.preventDefault();
-    fetch('/users/toggle-favorite/'+id+'/', {
+    fetch('{% url "catalogue:toggle_favorite" book_id=book.pk %}', {
         method:'POST',
         headers:{'X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]')?.value||'','Content-Type':'application/json'}
-    }).then(function(r){return r.json();}).then(function(d){
-        var b=document.getElementById('favBtn'), t=document.getElementById('favText');
-        if(d.favorited){b.style.background='#E63946';b.style.borderColor='#E63946';b.style.color='white';t.textContent='En favori';}
-        else{b.style.background='transparent';b.style.borderColor='#E63946';b.style.color='#E63946';t.textContent='Ajouter';}
+    }).then(function(r){
+        if(r.redirected){ window.location.href=r.url; return; }
+        return r.json();
+    }).then(function(d){
+        if(!d) return;
+        var b=document.getElementById('favBtn'), t=document.getElementById('favText'), ic=b.querySelector('i');
+        if(d.favorited){b.style.background='#E63946';b.style.borderColor='#E63946';b.style.color='white';ic.className='fas fa-check';t.textContent='Dans ma bibliothèque';}
+        else{b.style.background='transparent';b.style.borderColor='#E63946';b.style.color='#E63946';ic.className='fas fa-plus';t.textContent='Ma bibliothèque';}
     });
 }
 async function saveForOffline(id, url) {
