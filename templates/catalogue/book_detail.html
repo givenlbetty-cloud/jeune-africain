@@ -7,15 +7,33 @@
 <style>
 /* ========== PAGE DETAIL – DESIGN PRO ========== */
 
-/* --- Hero bandeau sombre compact --- */
+/* --- Hero with blurred cover background --- */
 .bd-hero {
-    background: linear-gradient(135deg, #1B2A4A 0%, #0F1D36 60%, rgba(230,57,70,0.25) 100%);
+    position: relative;
+    overflow: hidden;
     padding: 0.65rem 0 0;
+}
+.bd-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--hero-bg, none) center/cover no-repeat;
+    filter: blur(25px);
+    transform: scale(1.15);
+    opacity: 0.6;
+}
+.bd-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(27,42,74,0.88) 0%, rgba(15,29,54,0.93) 60%, rgba(230,57,70,0.18) 100%);
 }
 .bd-hero-inner {
     max-width: 960px;
     margin: 0 auto;
     padding: 0 1rem;
+    position: relative;
+    z-index: 1;
 }
 .bd-breadcrumb {
     font-size: 0.7rem;
@@ -29,6 +47,60 @@
 .bd-breadcrumb a:hover { color: white; }
 .bd-breadcrumb .sep { color: rgba(255,255,255,0.3); }
 .bd-breadcrumb .current { color: rgba(255,255,255,0.4); }
+
+/* Hero book info */
+.bd-hero-title {
+    font-size: clamp(1.15rem, 3.5vw, 1.65rem);
+    font-weight: 800;
+    line-height: 1.3;
+    color: white;
+    margin: 0.5rem 0 0.3rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.bd-hero-author {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 0.15rem;
+}
+.bd-hero-author a { color: white; font-weight: 700; text-decoration: none; }
+.bd-hero-author a:hover { text-decoration: underline; }
+.bd-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.35rem;
+}
+.bd-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.18rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.9);
+    border: 1px solid rgba(255,255,255,0.15);
+}
+.bd-hero-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.bd-hero-rating .stars { color: #FFB800; font-size: 0.8rem; }
+.bd-hero-rating .stars .dim { color: rgba(255,255,255,0.25); }
+.bd-hero-rating .score { font-size: 0.78rem; font-weight: 700; color: white; }
+.bd-hero-rating .count { font-size: 0.68rem; color: rgba(255,255,255,0.6); }
+
+/* Mobile actions (share only) */
+.bd-mobile-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+@media (min-width: 768px) {
+    .bd-mobile-actions { display: none; }
+}
 
 /* --- Main layout : cover + content + sidebar --- */
 .bd-main {
@@ -381,15 +453,15 @@
 .bd-similar-title .chevron { color: var(--text-light); font-size: 0.7rem; }
 
 /* --- Dark mode hero --- */
-[data-bs-theme="dark"] .bd-hero {
-    background: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 60%, rgba(230,57,70,0.15) 100%);
+[data-bs-theme="dark"] .bd-hero::after {
+    background: linear-gradient(135deg, rgba(15,15,30,0.9) 0%, rgba(26,26,46,0.93) 60%, rgba(230,57,70,0.12) 100%);
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- ===== HERO COMPACT ===== -->
-<div class="bd-hero">
+<!-- ===== HERO WITH BLURRED COVER ===== -->
+<div class="bd-hero" {% if book.cover %}style="--hero-bg: url('{{ book.cover.url }}')"{% endif %}>
     <div class="bd-hero-inner">
         <nav class="bd-breadcrumb">
             <a href="{% url 'home' %}"><i class="fas fa-home"></i></a>
@@ -400,8 +472,29 @@
             <a href="{% url 'catalogue:catalogue' %}?genre={{ book.genre }}">{{ book.get_genre_display }}</a>
             {% endif %}
         </nav>
+        <h1 class="bd-hero-title">{{ book.title }}</h1>
+        <p class="bd-hero-author">
+            Écrit par
+            {% if authors %}
+                {% for a in authors %}<a href="{% url 'catalogue:author_detail' a.id %}">{{ a.get_full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+            {% else %}
+                <strong style="color:white;">{{ book.author }}</strong>
+            {% endif %}
+        </p>
+        <div class="bd-hero-badges">
+            {% if book.get_genre_display and book.genre != 'other' %}<span class="bd-hero-badge">{{ book.get_genre_display }}</span>{% endif %}
+            {% if book.publication_date %}<span class="bd-hero-badge">{{ book.publication_date|date:"Y" }}</span>{% endif %}
+            {% if not book.is_paid %}<span class="bd-hero-badge" style="background:rgba(16,185,129,0.2); border-color:rgba(16,185,129,0.3); color:#6EE7B7;">Gratuit</span>{% endif %}
+        </div>
+        <div class="bd-hero-rating">
+            <span class="stars">
+                {% for i in "12345" %}{% if book.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}
+            </span>
+            <span class="score">{{ book.rating|default:"0" }}/5</span>
+            <span class="count">({{ book.rating_count|default:0 }} avis)</span>
+        </div>
     </div>
-    <div style="height: 2.5rem;"></div>
+    <div style="height: 3.5rem;"></div>
 </div>
 
 <!-- ===== MAIN GRID ===== -->
@@ -448,41 +541,19 @@
 
         <!-- COL 2: Content -->
         <div class="bd-content">
-            <h1 class="bd-title">{{ book.title }}</h1>
-
-            <!-- Badges -->
-            <div class="bd-badges">
-                {% if book.get_genre_display and book.genre != 'other' %}<span class="bd-badge">{{ book.get_genre_display }}</span>{% endif %}
-                {% if book.publication_date %}<span class="bd-badge">{{ book.publication_date|date:"Y" }}</span>{% endif %}
-                {% if not book.is_paid %}<span class="bd-badge" style="background:rgba(16,185,129,0.1); color:#10B981;">Gratuit</span>{% endif %}
-            </div>
-
-            <!-- Author line -->
-            <p class="bd-author-line">
-                Écrit par
-                {% if authors %}
-                    {% for a in authors %}<a href="{% url 'catalogue:author_detail' a.id %}">{{ a.get_full_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %} &rsaquo;
-                {% else %}
-                    <strong>{{ book.author }}</strong>
-                {% endif %}
-            </p>
-            <p class="bd-publisher-line">Publié par <strong>Calures Éditions</strong> &rsaquo;</p>
-
-            <!-- Rating -->
-            <div class="bd-rating">
-                <span class="stars">
-                    {% for i in "12345" %}{% if book.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}
-                </span>
-                <span class="score">{{ book.rating|default:"0" }}/5</span>
-                <span class="count">({{ book.rating_count|default:0 }} avis)</span>
-            </div>
-
             <!-- Mobile metadata (hidden on desktop) -->
             <div class="bd-sidebar-mobile">
                 {% if book.publication_date %}<span class="bd-meta-badge">{{ book.publication_date|date:"d M Y" }}</span>{% endif %}
                 {% if book.language %}<span class="bd-meta-badge">{{ book.get_language_display }}</span>{% endif %}
                 {% if not book.is_paid %}<span class="bd-meta-badge free">Gratuit</span>{% else %}<span class="bd-meta-badge">{{ book.get_final_price|floatformat:0 }} FC</span>{% endif %}
                 <span class="bd-meta-badge"><i class="fas fa-eye" style="font-size:0.6rem; margin-right:0.2rem;"></i> {{ book.reads_count|default:0 }}</span>
+            </div>
+
+            <!-- Mobile actions: share only (hidden on desktop) -->
+            <div class="bd-mobile-actions">
+                <button type="button" class="bd-side-btn" onclick="navigator.share ? navigator.share({title:'{{ book.title|escapejs }}',url:window.location.href}) : navigator.clipboard.writeText(window.location.href).then(()=>alert('Lien copié !'))">
+                    <i class="fas fa-share-alt"></i> Partager
+                </button>
             </div>
 
             <!-- CTA Banner (non-auth only) -->
