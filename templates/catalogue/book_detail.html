@@ -491,14 +491,56 @@
     background: linear-gradient(135deg, rgba(15,15,30,0.9) 0%, rgba(26,26,46,0.93) 60%, rgba(230,57,70,0.12) 100%);
 }
 
-/* ===== MOBILE-ONLY: description centrée ===== */
+/* ===== MOBILE-ONLY ===== */
 @media only screen and (max-width: 767px) {
+    /* Layout une colonne */
+    .bd-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+        margin-top: -1.5rem !important;
+    }
+
+    /* Couverture centrée et agrandie */
+    .bd-cover {
+        position: relative !important;
+        top: auto !important;
+        text-align: center !important;
+        margin-bottom: 0.5rem !important;
+    }
+    .bd-cover img {
+        width: 220px !important;
+        max-width: 60vw !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+    .bd-cover-actions {
+        max-width: 220px !important;
+        margin: 0.5rem auto 0 !important;
+    }
+
+    /* Supprime le CTA encombrant */
+    .bd-inline-cta { display: none !important; }
+
+    /* Metadata badges centrés */
+    .bd-sidebar-mobile {
+        justify-content: center !important;
+        -webkit-box-pack: center !important;
+        margin-top: 0.75rem !important;
+    }
+
+    /* Actions mobile centrées */
+    .bd-mobile-actions {
+        justify-content: center !important;
+        -webkit-box-pack: center !important;
+    }
+
+    /* Description mise en valeur */
     .bd-description {
         font-size: 15px !important;
-        line-height: 1.85 !important;
+        line-height: 1.8 !important;
         color: #222 !important;
         background: #f5f5f7 !important;
-        padding: 14px 16px !important;
+        padding: 12px 14px !important;
         border-radius: 10px !important;
         border-left: 3px solid #E63946 !important;
         -webkit-text-size-adjust: 100%;
@@ -508,8 +550,25 @@
         color: #e0e0e0 !important;
         border-left-color: #5B8DD8 !important;
     }
-    .bd-desc-toggle {
-        text-align: center !important;
+    .bd-desc-toggle { text-align: center !important; }
+
+    /* Avis : pleine largeur, compact */
+    .bd-review {
+        padding: 8px 10px !important;
+        border-radius: 8px !important;
+        margin-bottom: 6px !important;
+        border-left: 2px solid #1B2A4A !important;
+    }
+    [data-bs-theme="dark"] .bd-review { border-left-color: #5B8DD8 !important; }
+    .bd-review-text {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+    }
+    .bd-review-user { font-size: 11px !important; }
+    .bd-review-date { font-size: 10px !important; }
+    .bd-review-stars { font-size: 9px !important; }
+    .bd-review-form {
+        padding: 8px !important;
     }
 }
 </style>
