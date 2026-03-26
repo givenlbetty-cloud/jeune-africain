@@ -528,10 +528,13 @@ class Payment(models.Model):
     METHOD_CHOICES = [
         ("credit_card", _("Carte de crédit")),
         ("paypal", _("PayPal")),
+        ("mobile_money", _("Mobile Money")),
+        ("card", _("Carte bancaire")),
         ("airtel_money", _("Airtel Money")),
         ("mpesa", _("M-Pesa")),
         ("orange_money", _("Orange Money RDC")),
         ("bank_transfer", _("Virement bancaire")),
+        ("moneroo", _("Moneroo")),
         ("other", _("Autre")),
     ]
     
@@ -570,7 +573,7 @@ class Payment(models.Model):
     )
     payment_method = models.CharField(
         _("Méthode de paiement"),
-        max_length=20,
+        max_length=50,
         choices=METHOD_CHOICES,
         default="credit_card"
     )

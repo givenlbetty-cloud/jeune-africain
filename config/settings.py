@@ -499,6 +499,15 @@ PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID', '')
 PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET', '')
 PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox')  # 'sandbox' or 'live'
 
+# Moneroo Configuration (unified payment gateway for RDC)
+MONEROO_API_KEY = os.getenv('MONEROO_API_KEY', '')
+MONEROO_SECRET_KEY = os.getenv('MONEROO_SECRET_KEY', '')
+USE_MONEROO_FOR_ALL = os.getenv('USE_MONEROO_FOR_ALL', 'True') == 'True'
+
+# Flutterwave Configuration (fallback mobile money)
+FLUTTERWAVE_SECRET_KEY = os.getenv('FLUTTERWAVE_SECRET_KEY', '')
+FLUTTERWAVE_PUBLIC_KEY = os.getenv('FLUTTERWAVE_PUBLIC_KEY', '')
+
 # Mobile Money Configuration (Airtel Money, M-Pesa, Orange Money RDC)
 AIRTEL_CLIENT_ID = os.getenv('AIRTEL_CLIENT_ID', '')
 AIRTEL_CLIENT_SECRET = os.getenv('AIRTEL_CLIENT_SECRET', '')

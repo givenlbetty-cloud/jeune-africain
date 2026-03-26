@@ -24,13 +24,15 @@ logger = logging.getLogger(__name__)
 # MONEROO CONFIGURATION
 # ════════════════════════════════════════════════════════════════════════
 
-MONEROO_PUBLIC_KEY = os.getenv('MONEROO_PUBLIC_KEY')
-MONEROO_SECRET_KEY = os.getenv('MONEROO_SECRET_KEY')
+from django.conf import settings as django_settings
+
+MONEROO_API_KEY = getattr(django_settings, 'MONEROO_API_KEY', '') or os.getenv('MONEROO_API_KEY', '')
+MONEROO_SECRET_KEY = getattr(django_settings, 'MONEROO_SECRET_KEY', '') or os.getenv('MONEROO_SECRET_KEY', '')
 MONEROO_API_URL = 'https://api.moneroo.io/v1'
 
 # Validate configuration
-if not all([MONEROO_PUBLIC_KEY, MONEROO_SECRET_KEY]):
-    logger.warning("⚠️  MONEROO credentials not configured - check .env file")
+if not MONEROO_API_KEY:
+    logger.warning("MONEROO_API_KEY not configured - check .env file")
 
 
 # ════════════════════════════════════════════════════════════════════════
@@ -133,9 +135,14 @@ def initiate_moneroo_payment(request):
         
         # Prepare Moneroo API payload
         payload = {
-            'public_key': MONEROO_PUBLIC_KEY,
             'amount': float(amount),
             'currency': currency,
+            'customer': {
+                'email': request.user.email,
+                'first_name': request.user.first_name or 'Client',
+                'last_name': request.user.last_name or 'BNC',
+                'phone': phone,
+            },
             'customer_email': request.user.email,
             'customer_phone': phone,
             'order_id': reference,
@@ -150,7 +157,7 @@ def initiate_moneroo_payment(request):
         try:
             headers = {
                 'Content-Type': 'application/json',
-                'Authorization': f'Bearer {MONEROO_PUBLIC_KEY}'
+                'Authorization': f'Bearer {MONEROO_API_KEY}'
             }
             
             response = requests.post(

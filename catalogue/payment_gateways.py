@@ -259,7 +259,7 @@ class MonerooPaymentGateway(PaymentGateway):
     
     def __init__(self, payment):
         super().__init__(payment)
-        self.api_key = os.getenv('MONEROO_API_KEY')
+        self.api_key = getattr(settings, 'MONEROO_API_KEY', '') or os.getenv('MONEROO_API_KEY', '')
         self.api_url = 'https://api.moneroo.io/v1'
         
     def initiate_payment(self):
@@ -335,10 +335,10 @@ class MonerooPaymentGateway(PaymentGateway):
                 timeout=10
             )
             
-            # DEBUG LOGGING
-            print(f"MONEROO REQUEST: {payload}")
-            print(f"MONEROO RESPONSE STATUS: {response.status_code}")
-            print(f"MONEROO RESPONSE BODY: {response.text}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Moneroo response status: {response.status_code}")
+            logger.debug(f"Moneroo response body: {response.text}")
             
             if response.status_code in [200, 201]:
                 data = response.json()
@@ -373,7 +373,7 @@ def get_payment_gateway(payment):
     method = payment.payment_method.upper()
     
     # Check if we should use Moneroo for everything (except Bank Transfer)
-    use_moneroo = os.getenv('USE_MONEROO_FOR_ALL', 'True') == 'True'
+    use_moneroo = getattr(settings, 'USE_MONEROO_FOR_ALL', False) or os.getenv('USE_MONEROO_FOR_ALL', 'True') == 'True'
     
     if use_moneroo and method not in ['BANK_TRANSFER', 'CASH']:
         return MonerooPaymentGateway(payment)
