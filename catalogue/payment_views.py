@@ -15,7 +15,7 @@ from catalogue.payment_gateways import get_payment_gateway
 
 
 @login_required(login_url='users:login')
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def initiate_payment_view(request, book_id):
     """Initier un paiement pour un livre"""
     book = get_object_or_404(Book, id=book_id, is_published=True)
@@ -24,22 +24,40 @@ def initiate_payment_view(request, book_id):
     existing = Payment.objects.filter(
         user=request.user,
         book=book,
-        status='COMPLETED'
+        status='completed'
     ).exists()
     
     if existing:
+        if request.method == 'GET':
+            messages.info(request, 'Vous avez déjà acheté ce livre.')
+            return redirect('catalogue:read_book', book_id=book.id)
         return JsonResponse({
             'success': False,
             'error': 'Vous avez déjà acheté ce livre.'
         }, status=400)
     
+    # GET: afficher la page de confirmation / choix de méthode de paiement
+    if request.method == 'GET':
+        final_price = book.get_final_price() if hasattr(book, 'get_final_price') else book.price
+        context = {
+            'book': book,
+            'final_price': final_price,
+            'payment_methods': [
+                {'value': 'mobile_money', 'label': 'Mobile Money (M-Pesa, Airtel, Orange)', 'icon': 'fas fa-mobile-alt'},
+                {'value': 'credit_card', 'label': 'Carte bancaire (Visa, Mastercard)', 'icon': 'fas fa-credit-card'},
+            ],
+        }
+        return render(request, 'payment/checkout_confirm.html', context)
+    
+    # POST: créer le paiement et rediriger vers Moneroo
     # Récupérer la méthode de paiement
-    payment_method = request.POST.get('payment_method', 'CREDIT_CARD').upper()
+    payment_method = request.POST.get('payment_method', 'mobile_money')
+    phone_number = request.POST.get('phone_number', '')
     
     # Créer le paiement
     import uuid
     transaction_id = f"BNC_{uuid.uuid4().hex[:16].upper()}"
-    final_price = book.get_final_price() if hasattr(book, 'get_final_price') else float(book.price)
+    final_price = book.get_final_price() if hasattr(book, 'get_final_price') else book.price
     
     payment = Payment.objects.create(
         user=request.user,
@@ -48,7 +66,8 @@ def initiate_payment_view(request, book_id):
         currency='CDF',
         transaction_id=transaction_id,
         payment_method=payment_method,
-        status='PENDING'
+        status='pending',
+        phone_number=phone_number,
     )
     
     # Initialiser la passerelle de paiement
@@ -57,24 +76,18 @@ def initiate_payment_view(request, book_id):
     
     if result['success']:
         if result.get('url'):
-            # Redirection vers URL externe (Stripe, PayPal)
-            return JsonResponse({
-                'success': True,
-                'redirect_url': result['url']
-            })
+            # Redirection vers Moneroo / passerelle externe
+            return redirect(result['url'])
         else:
-            # Infos de paiement (virement bancaire, etc.)
             return render(request, 'payment/checkout.html', {
                 'payment': payment,
                 'gateway_result': result
             })
     else:
-        payment.status = 'FAILED'
+        payment.status = 'failed'
         payment.save()
-        return JsonResponse({
-            'success': False,
-            'error': result.get('error', 'Erreur lors de l\'initialisation du paiement')
-        }, status=400)
+        messages.error(request, result.get('error', 'Erreur lors du paiement. Veuillez réessayer.'))
+        return redirect('catalogue:book_detail', book_id=book.id)
 
 
 @login_required(login_url='users:login')
