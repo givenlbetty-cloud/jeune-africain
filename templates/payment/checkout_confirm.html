@@ -4,20 +4,55 @@
 {% block title %}Acheter « {{ book.title }} » — Calures Éditions{% endblock %}
 
 {% block content %}
+<style>
+    .checkout-card { background: #ffffff; color: #1a1a1a; }
+    .checkout-header i, .checkout-header h2 { color: #1B2A4A; }
+    .checkout-book-info { background: #f0f3f8; }
+    .checkout-book-info h5 { color: #1a1a1a; }
+    .checkout-book-info p { color: #555; }
+    .checkout-methods span { color: #666; }
+    .checkout-cancel { color: #666; border-color: #ccc; }
+    .checkout-cancel:hover { background: #f5f5f5; color: #333; }
+    .checkout-security { color: #888; }
+
+    @media (prefers-color-scheme: dark) {
+        .checkout-card { background: #1e1e2e; color: #e0e0e0; }
+        .checkout-header i, .checkout-header h2 { color: #8ab4f8; }
+        .checkout-book-info { background: #2a2a3e; }
+        .checkout-book-info h5 { color: #f0f0f0; }
+        .checkout-book-info p { color: #bbb; }
+        .checkout-methods span { color: #aaa; }
+        .checkout-cancel { color: #bbb; border-color: #555; background: transparent; }
+        .checkout-cancel:hover { background: #2a2a3e; color: #fff; }
+        .checkout-security { color: #999; }
+    }
+
+    /* Also support class-based dark mode (.dark, [data-theme="dark"]) */
+    .dark .checkout-card, [data-theme="dark"] .checkout-card { background: #1e1e2e; color: #e0e0e0; }
+    .dark .checkout-header i, [data-theme="dark"] .checkout-header i,
+    .dark .checkout-header h2, [data-theme="dark"] .checkout-header h2 { color: #8ab4f8; }
+    .dark .checkout-book-info, [data-theme="dark"] .checkout-book-info { background: #2a2a3e; }
+    .dark .checkout-book-info h5, [data-theme="dark"] .checkout-book-info h5 { color: #f0f0f0; }
+    .dark .checkout-book-info p, [data-theme="dark"] .checkout-book-info p { color: #bbb; }
+    .dark .checkout-methods span, [data-theme="dark"] .checkout-methods span { color: #aaa; }
+    .dark .checkout-cancel, [data-theme="dark"] .checkout-cancel { color: #bbb; border-color: #555; background: transparent; }
+    .dark .checkout-security, [data-theme="dark"] .checkout-security { color: #999; }
+</style>
+
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-6 col-md-8">
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 checkout-card">
                 <div class="card-body p-4 p-md-5">
 
                     <!-- Header -->
-                    <div class="text-center mb-4">
-                        <i class="fas fa-shopping-cart fa-2x" style="color: #1B2A4A;"></i>
-                        <h2 class="mt-3 mb-1" style="color: #1B2A4A;">Confirmer l'achat</h2>
+                    <div class="text-center mb-4 checkout-header">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                        <h2 class="mt-3 mb-1">Confirmer l'achat</h2>
                     </div>
 
                     <!-- Book Info -->
-                    <div class="d-flex align-items-center p-3 mb-4 rounded" style="background: #f8f9fa;">
+                    <div class="d-flex align-items-center p-3 mb-4 rounded checkout-book-info">
                         {% if book.cover %}
                         <img src="{{ book.cover.url }}" alt="{{ book.title }}" 
                              style="width: 60px; height: 80px; object-fit: cover; border-radius: 6px;" class="me-3">
@@ -29,7 +64,7 @@
                         {% endif %}
                         <div>
                             <h5 class="mb-1">{{ book.title }}</h5>
-                            <p class="mb-0 text-muted">
+                            <p class="mb-0">
                                 {% for ab in book.authorbook_set.all %}
                                     {{ ab.author.get_full_name }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
@@ -52,7 +87,7 @@
                         <input type="hidden" name="payment_method" value="mobile_money">
 
                         <!-- Accepted Methods Info -->
-                        <div class="d-flex justify-content-center gap-3 mb-4 text-muted">
+                        <div class="d-flex justify-content-center gap-3 mb-4 checkout-methods">
                             <span><i class="fas fa-mobile-alt me-1"></i> M-Pesa</span>
                             <span><i class="fas fa-mobile-alt me-1"></i> Airtel</span>
                             <span><i class="fas fa-mobile-alt me-1"></i> Orange</span>
@@ -67,13 +102,13 @@
                     </form>
 
                     <!-- Cancel -->
-                    <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn btn-outline-secondary w-100 mt-2">
+                    <a href="{% url 'catalogue:book_detail' book_id=book.pk %}" class="btn w-100 mt-2 checkout-cancel">
                         Annuler
                     </a>
 
                     <!-- Security Badge -->
-                    <div class="text-center mt-4">
-                        <small class="text-muted">
+                    <div class="text-center mt-4 checkout-security">
+                        <small class="checkout-security">
                             <i class="fas fa-shield-alt me-1"></i> Paiement sécurisé via Moneroo
                         </small>
                     </div>
