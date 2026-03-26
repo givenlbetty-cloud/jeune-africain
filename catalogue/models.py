@@ -2478,10 +2478,39 @@ class PrintOrder(models.Model):
 class Donateur(models.Model):
     """Donateur qui soutient BNC."""
     
+    STATUS_CHOICES = [
+        ("pending", _("En attente")),
+        ("completed", _("Complété")),
+        ("failed", _("Échoué")),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nom = models.CharField(_("Nom"), max_length=200)
+    contact = models.CharField(
+        _("Contact (téléphone ou email)"),
+        max_length=200,
+        blank=True,
+        help_text="Numéro de téléphone ou email du donateur"
+    )
     message = models.CharField(_("Message (optionnel)"), max_length=300, blank=True)
     montant = models.DecimalField(_("Montant (FC)"), max_digits=12, decimal_places=2, null=True, blank=True)
+    
+    # Paiement Moneroo
+    transaction_id = models.CharField(
+        _("ID de transaction"),
+        max_length=255,
+        blank=True,
+        unique=True,
+        null=True,
+        help_text="Référence unique du paiement Moneroo"
+    )
+    status = models.CharField(
+        _("Statut du paiement"),
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="pending"
+    )
+    
     is_visible = models.BooleanField(_("Visible publiquement"), default=True)
     order = models.IntegerField(_("Ordre d'affichage"), default=0)
     created_at = models.DateTimeField(auto_now_add=True)

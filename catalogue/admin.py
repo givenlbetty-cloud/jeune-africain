@@ -565,11 +565,12 @@ class SiteConfigurationAdmin(admin.ModelAdmin):
 
 @admin.register(Donateur)
 class DonateurAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'montant', 'is_visible', 'order', 'created_at')
+    list_display = ('nom', 'contact', 'montant', 'status', 'is_visible', 'order', 'created_at')
     list_editable = ('is_visible', 'order')
-    list_filter = ('is_visible',)
-    search_fields = ('nom', 'message')
+    list_filter = ('is_visible', 'status')
+    search_fields = ('nom', 'contact', 'message', 'transaction_id')
     ordering = ('order', '-created_at')
+    readonly_fields = ('transaction_id', 'status', 'created_at')
 
 
 @admin.register(LienSocial)

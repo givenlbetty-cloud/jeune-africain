@@ -172,10 +172,15 @@ def initiate_moneroo_payment(request):
             data = response.json()
             
             # Extract payment URL
-            payment_url = data.get('data', {}).get('payment_url') or data.get('payment_url')
+            payment_url = (
+                data.get('data', {}).get('checkout_url')
+                or data.get('data', {}).get('payment_url')
+                or data.get('checkout_url')
+                or data.get('payment_url')
+            )
             
             if not payment_url:
-                logger.error(f"No payment URL in Moneroo response: {data}")
+                logger.error(f"No payment/checkout URL in Moneroo response: {data}")
                 return JsonResponse(
                     {'error': 'Payment gateway error - no URL returned'},
                     status=500

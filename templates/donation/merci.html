@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Merci pour votre don — Calures Éditions{% endblock %}
+
+{% block content %}
+<style>
+    .merci-card { background: #ffffff; color: #1a1a1a; }
+    .merci-icon { color: #E63946; }
+    .merci-card h2 { color: #1B2A4A; }
+    .merci-card p { color: #555; }
+
+    @media (prefers-color-scheme: dark) {
+        .merci-card { background: #1e1e2e; color: #e0e0e0; }
+        .merci-card h2 { color: #8ab4f8; }
+        .merci-card p { color: #bbb; }
+    }
+    .dark .merci-card, [data-theme="dark"] .merci-card { background: #1e1e2e; color: #e0e0e0; }
+    .dark .merci-card h2, [data-theme="dark"] .merci-card h2 { color: #8ab4f8; }
+    .dark .merci-card p, [data-theme="dark"] .merci-card p { color: #bbb; }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm border-0 merci-card">
+                <div class="card-body p-5 text-center">
+                    <i class="fas fa-heart fa-3x merci-icon mb-3"></i>
+                    <h2 class="mb-3">Merci pour votre générosité !</h2>
+
+                    {% if donateur %}
+                    <p class="mb-1">
+                        <strong>{{ donateur.nom }}</strong>
+                        {% if donateur.montant %} — {{ donateur.montant|floatformat:0 }} FC{% endif %}
+                    </p>
+                    {% if donateur.message %}
+                    <p class="fst-italic">« {{ donateur.message }} »</p>
+                    {% endif %}
+                    {% endif %}
+
+                    <p class="mt-3">Votre don contribue à promouvoir la lecture et la culture en RDC.</p>
+
+                    <a href="{% url 'home' %}" class="btn mt-3 text-white" style="background: #1B2A4A;">
+                        <i class="fas fa-home me-1"></i> Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -77,6 +77,9 @@ urlpatterns += i18n_patterns(
     
     # Moneroo Payment
     path("", include("catalogue.urls_moneroo")),
+
+    # Donations (anonymous, no login required)
+    path("", include("catalogue.donation_urls")),
     
     # Dashboards personnalisés (admin)
     path("admin-dashboard/", admin_dashboard, name='admin_dashboard'),

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Faire un don — Calures Éditions{% endblock %}
+
+{% block content %}
+<style>
+    .don-card { background: #ffffff; color: #1a1a1a; }
+    .don-header i, .don-header h2 { color: #1B2A4A; }
+    .don-header p { color: #666; }
+    .don-accounts { background: #f0f3f8; }
+    .don-accounts h6 { color: #1a1a1a; }
+    .don-account-item { color: #333; }
+    .don-account-number { color: #1B2A4A; font-weight: 600; }
+    .don-form label { color: #333; }
+    .don-cancel { color: #666; border-color: #ccc; }
+    .don-cancel:hover { background: #f5f5f5; color: #333; }
+    .don-security { color: #888; }
+    .don-suggested-btn { border-color: #1B2A4A; color: #1B2A4A; }
+    .don-suggested-btn:hover, .don-suggested-btn.active { background: #1B2A4A; color: #fff; }
+
+    @media (prefers-color-scheme: dark) {
+        .don-card { background: #1e1e2e; color: #e0e0e0; }
+        .don-header i, .don-header h2 { color: #8ab4f8; }
+        .don-header p { color: #bbb; }
+        .don-accounts { background: #2a2a3e; }
+        .don-accounts h6 { color: #f0f0f0; }
+        .don-account-item { color: #ccc; }
+        .don-account-number { color: #8ab4f8; }
+        .don-form label { color: #ddd; }
+        .don-cancel { color: #bbb; border-color: #555; background: transparent; }
+        .don-cancel:hover { background: #2a2a3e; color: #fff; }
+        .don-security { color: #999; }
+        .don-suggested-btn { border-color: #8ab4f8; color: #8ab4f8; }
+        .don-suggested-btn:hover, .don-suggested-btn.active { background: #8ab4f8; color: #1e1e2e; }
+    }
+    .dark .don-card, [data-theme="dark"] .don-card { background: #1e1e2e; color: #e0e0e0; }
+    .dark .don-header i, [data-theme="dark"] .don-header i,
+    .dark .don-header h2, [data-theme="dark"] .don-header h2 { color: #8ab4f8; }
+    .dark .don-header p, [data-theme="dark"] .don-header p { color: #bbb; }
+    .dark .don-accounts, [data-theme="dark"] .don-accounts { background: #2a2a3e; }
+    .dark .don-accounts h6, [data-theme="dark"] .don-accounts h6 { color: #f0f0f0; }
+    .dark .don-account-item, [data-theme="dark"] .don-account-item { color: #ccc; }
+    .dark .don-account-number, [data-theme="dark"] .don-account-number { color: #8ab4f8; }
+    .dark .don-form label, [data-theme="dark"] .don-form label { color: #ddd; }
+    .dark .don-cancel, [data-theme="dark"] .don-cancel { color: #bbb; border-color: #555; background: transparent; }
+    .dark .don-security, [data-theme="dark"] .don-security { color: #999; }
+    .dark .don-suggested-btn, [data-theme="dark"] .don-suggested-btn { border-color: #8ab4f8; color: #8ab4f8; }
+    .dark .don-suggested-btn:hover, [data-theme="dark"] .don-suggested-btn:hover,
+    .dark .don-suggested-btn.active, [data-theme="dark"] .don-suggested-btn.active { background: #8ab4f8; color: #1e1e2e; }
+</style>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm border-0 don-card">
+                <div class="card-body p-4 p-md-5">
+
+                    <!-- Header -->
+                    <div class="text-center mb-4 don-header">
+                        <i class="fas fa-heart fa-2x"></i>
+                        <h2 class="mt-3 mb-1">Soutenir BNC</h2>
+                        <p>Votre don aide à promouvoir la lecture en RDC</p>
+                    </div>
+
+                    {% if error %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-1"></i> {{ error }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Informational: Mobile Money accounts -->
+                    {% if merchant_accounts %}
+                    <div class="p-3 mb-4 rounded don-accounts">
+                        <h6 class="mb-2"><i class="fas fa-mobile-alt me-1"></i> Vous pouvez aussi envoyer directement à :</h6>
+                        {% for account in merchant_accounts %}
+                        <div class="don-account-item mb-1">
+                            <small>
+                                <strong>{{ account.get_payment_method_display }}</strong>:
+                                <span class="don-account-number">{{ account.account_number }}</span>
+                                {% if account.account_holder_name %}
+                                    ({{ account.account_holder_name }})
+                                {% endif %}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Donation Form -->
+                    <form method="POST" id="donationForm" class="don-form">
+                        {% csrf_token %}
+
+                        <!-- Nom -->
+                        <div class="mb-3">
+                            <label for="nom" class="form-label">Votre nom <small class="text-muted">(ou « Anonyme »)</small></label>
+                            <input type="text" class="form-control" id="nom" name="nom"
+                                   placeholder="Anonyme"
+                                   value="{{ form_data.nom|default:'' }}" maxlength="200">
+                        </div>
+
+                        <!-- Contact -->
+                        <div class="mb-3">
+                            <label for="contact" class="form-label">Téléphone ou email <small class="text-muted">(optionnel)</small></label>
+                            <input type="text" class="form-control" id="contact" name="contact"
+                                   placeholder="+243 ... ou email@example.com"
+                                   value="{{ form_data.contact|default:'' }}" maxlength="200">
+                        </div>
+
+                        <!-- Montant -->
+                        <div class="mb-3">
+                            <label for="montant" class="form-label fw-bold">Montant (FC) *</label>
+                            <input type="number" class="form-control form-control-lg text-center" id="montant" name="montant"
+                                   placeholder="5000" min="100" step="100" required
+                                   value="{{ form_data.montant|default:'' }}">
+                        </div>
+
+                        <!-- Suggested amounts -->
+                        <div class="d-flex justify-content-center gap-2 mb-4">
+                            <button type="button" class="btn btn-sm btn-outline-secondary don-suggested-btn" onclick="setAmount(1000)">1 000 FC</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary don-suggested-btn" onclick="setAmount(5000)">5 000 FC</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary don-suggested-btn" onclick="setAmount(10000)">10 000 FC</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary don-suggested-btn" onclick="setAmount(50000)">50 000 FC</button>
+                        </div>
+
+                        <!-- Message -->
+                        <div class="mb-4">
+                            <label for="message" class="form-label">Message <small class="text-muted">(optionnel)</small></label>
+                            <textarea class="form-control" id="message" name="message" rows="2"
+                                      placeholder="Un mot d'encouragement..." maxlength="300">{{ form_data.message|default:'' }}</textarea>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-lg w-100 text-white fw-bold" id="donBtn"
+                                style="background: #E63946; border: none; padding: 14px;">
+                            <i class="fas fa-heart me-2"></i> Faire un don
+                        </button>
+                    </form>
+
+                    <!-- Cancel -->
+                    <a href="{% url 'home' %}" class="btn w-100 mt-2 don-cancel">
+                        Retour à l'accueil
+                    </a>
+
+                    <!-- Security -->
+                    <div class="text-center mt-4 don-security">
+                        <small>
+                            <i class="fas fa-shield-alt me-1"></i> Paiement sécurisé via Moneroo
+                        </small>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setAmount(val) {
+    document.getElementById('montant').value = val;
+    document.querySelectorAll('.don-suggested-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+document.getElementById('donationForm').addEventListener('submit', function() {
+    var btn = document.getElementById('donBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Redirection vers le paiement...';
+});
+</script>
+{% endblock %}

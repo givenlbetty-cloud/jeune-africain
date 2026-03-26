@@ -720,6 +720,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'about' %}">À propos</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'donation:donate' %}" style="color: #E63946;"><i class="fas fa-heart"></i> Don</a>
+                    </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'users:favorite_list' %}"><i class="fas fa-heart"></i> Favoris</a>

@@ -19,12 +19,16 @@ from catalogue.payment_webhooks import (
     mpesa_webhook,
 )
 from catalogue.views_moneroo import moneroo_callback
+from catalogue.views_donation import donation_webhook
 
 app_name = 'payment_webhooks'
 
 urlpatterns = [
     # Moneroo webhook
     path('moneroo-callback/', moneroo_callback, name='moneroo_webhook'),
+
+    # Donation webhook (Moneroo)
+    path('donation-webhook/', donation_webhook, name='donation_webhook'),
 
     # Stripe webhook
     path('stripe/webhook/', stripe_webhook, name='stripe_webhook'),
