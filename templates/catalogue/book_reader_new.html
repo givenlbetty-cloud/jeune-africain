@@ -214,14 +214,73 @@
 
     /* MOBILE OPTIMIZATION */
     @media (max-width: 768px) {
-        .reader-toolbar {
-            justify-content: space-between;
+        :root {
+            --header-height: 40px;
+            --toolbar-height: 36px;
+            --page-gap: 10px;
+        }
+
+        .reader-header {
             padding: 0 10px;
         }
-        .textLayer {
-            opacity: 0.05; /* Hide completely on mobile but keep selectable */
+
+        .book-title {
+            font-size: 0.75rem;
+            max-width: 40vw;
         }
-        .header-controls span { display: none; } /* Hide text labels */
+
+        .reader-toolbar {
+            justify-content: space-between;
+            padding: 0 8px;
+            gap: 8px;
+        }
+
+        .zoom-controls, .page-controls {
+            gap: 6px;
+            padding: 2px 8px;
+        }
+
+        .btn-icon {
+            font-size: 0.9rem;
+            padding: 4px 6px;
+        }
+
+        .reader-content {
+            padding: 8px 0;
+        }
+
+        /* Force pages to fit screen width */
+        .pdf-page {
+            max-width: 100vw !important;
+            width: 100% !important;
+            box-shadow: none;
+            margin-bottom: 6px;
+        }
+
+        .pdf-page canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .textLayer {
+            opacity: 0.05;
+        }
+
+        .header-controls span { display: none; }
+
+        #zoomLevelDisplay { font-size: 0.75rem; }
+        .page-input { width: 32px; font-size: 0.8rem; }
+    }
+
+    /* Very small phones */
+    @media (max-width: 400px) {
+        .zoom-controls {
+            display: none; /* Hide zoom on very small phones, use pinch */
+        }
+
+        .reader-toolbar {
+            justify-content: center;
+        }
     }
 
     /* APERÇU LIMITÉ */
@@ -305,11 +364,12 @@
     // State
     const state = {
         pdf: null,
-        scale: 1.2, // Base scale
+        scale: 1.2, // Base scale — will be overridden for mobile
         currentPage: 1,
         totalPages: 0,
         rendering: false,
-        pagesRendered: []
+        pagesRendered: [],
+        isMobile: window.innerWidth <= 768
     };
 
     // DOM Elements
@@ -427,11 +487,23 @@
             // 2. Viewport & Scaling (HD Support)
             // Use device pixel ratio for sharp rendering on mobiles/retina
             const dpr = window.devicePixelRatio || 1;
-            const viewport = page.getViewport({ scale: state.scale });
+
+            // On mobile: fit page width to screen
+            let effectiveScale = state.scale;
+            if (state.isMobile) {
+                const containerWidth = scrollContainer.clientWidth - 16; // 8px padding each side
+                const defaultViewport = page.getViewport({ scale: 1.0 });
+                effectiveScale = containerWidth / defaultViewport.width;
+            }
+
+            const viewport = page.getViewport({ scale: effectiveScale });
             
             // Update pageDiv dimensions
             pageDiv.style.width = `${viewport.width}px`;
             pageDiv.style.height = `${viewport.height}px`;
+            if (state.isMobile) {
+                pageDiv.style.maxWidth = '100%';
+            }
 
             // 3. Canvas for Graphics/Images
             const canvas = document.createElement('canvas');
@@ -554,6 +626,21 @@
     document.getElementById('btnFullscreen').onclick = () => {
         document.documentElement.requestFullscreen();
     };
+
+    // Handle orientation change / resize on mobile
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const wasMobile = state.isMobile;
+            state.isMobile = window.innerWidth <= 768;
+            if (state.isMobile || wasMobile !== state.isMobile) {
+                const currentPage = state.currentPage;
+                reloadAll();
+                setTimeout(() => scrollToPage(currentPage), 500);
+            }
+        }, 300);
+    });
 
     function reloadAll() {
         container.innerHTML = '';
