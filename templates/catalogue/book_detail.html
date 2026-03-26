@@ -492,7 +492,29 @@
 
 /* ===== MOBILE-ONLY OVERRIDES (iPhone 7 + all mobiles) ===== */
 @media only screen and (max-width: 767px) {
-    /* Description mise en valeur */
+    /* Grille en une seule colonne, couverture centrée */
+    .bd-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        margin-top: -1.5rem !important;
+    }
+    .bd-cover {
+        position: relative !important;
+        top: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        max-width: 200px !important;
+        margin: 0 auto !important;
+    }
+    .bd-cover img {
+        max-width: 180px !important;
+    }
+    .bd-cover-actions {
+        width: 100% !important;
+    }
+
+    /* Description mise en valeur et centrée */
     .bd-description {
         font-size: 15px !important;
         line-height: 1.85 !important;
@@ -501,7 +523,19 @@
         padding: 14px 16px !important;
         border-radius: 10px !important;
         border-left: 3px solid #E63946 !important;
+        text-align: left !important;
         -webkit-text-size-adjust: 100%;
+    }
+    .bd-section-title {
+        -webkit-box-pack: center !important;
+        justify-content: center !important;
+    }
+    .bd-tags {
+        -webkit-box-pack: center !important;
+        justify-content: center !important;
+    }
+    .bd-desc-toggle {
+        text-align: center !important;
     }
     [data-bs-theme="dark"] .bd-description {
         background: rgba(255,255,255,0.06) !important;
