@@ -76,21 +76,23 @@
     gap: 0.2rem;
     font-size: 0.65rem;
     font-weight: 600;
-    padding: 0.18rem 0.5rem;
-    border-radius: 4px;
-    background: rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.9);
-    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.06));
+    color: rgba(255,255,255,0.95);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
 }
 .bd-hero-rating {
     display: flex;
     align-items: center;
     gap: 0.3rem;
 }
-.bd-hero-rating .stars { color: #FFB800; font-size: 0.8rem; }
-.bd-hero-rating .stars .dim { color: rgba(255,255,255,0.25); }
-.bd-hero-rating .score { font-size: 0.78rem; font-weight: 700; color: white; }
-.bd-hero-rating .count { font-size: 0.68rem; color: rgba(255,255,255,0.6); }
+.bd-hero-rating .stars { color: #FFB800; font-size: 1.05rem; text-shadow: 0 1px 6px rgba(255,184,0,0.4); }
+.bd-hero-rating .stars .dim { color: rgba(255,255,255,0.2); text-shadow: none; }
+.bd-hero-rating .score { font-size: 0.85rem; font-weight: 800; color: white; }
+.bd-hero-rating .count { font-size: 0.7rem; color: rgba(255,255,255,0.65); }
 
 /* Mobile actions (print + share) */
 .bd-mobile-actions {
@@ -132,9 +134,14 @@
 }
 .bd-cover img {
     width: 100%;
-    border-radius: 8px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35), 0 4px 20px rgba(230,57,70,0.2), 0 2px 8px rgba(0,0,0,0.15);
     display: block;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.bd-cover img:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 50px rgba(0,0,0,0.4), 0 6px 25px rgba(230,57,70,0.3), 0 2px 8px rgba(0,0,0,0.15);
 }
 .bd-cover-placeholder {
     width: 100%;
@@ -173,6 +180,11 @@
     transition: background 0.2s, transform 0.1s;
 }
 .bd-btn-read:hover { background: #d32f3d; color: white; transform: translateY(-1px); }
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(230,57,70,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(230,57,70,0); }
+}
+.bd-btn-read { animation: pulse-glow 2.5s ease-in-out infinite; }
 .bd-btn-add {
     display: flex;
     align-items: center;
@@ -282,12 +294,20 @@
     color: var(--text);
     margin-bottom: 0.45rem;
 }
-.bd-section-title i { color: var(--text-light); font-size: 0.82rem; }
+.bd-section-title i { color: #E63946; font-size: 0.85rem; }
 .bd-description {
     font-size: 0.84rem;
     line-height: 1.8;
     color: var(--text-light);
     margin: 0 0 0.6rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--bg-soft);
+    border-radius: 8px;
+    border-left: 3px solid #E63946;
+}
+[data-bs-theme="dark"] .bd-description {
+    background: rgba(255,255,255,0.03);
+    border-left-color: #5B8DD8;
 }.bd-desc-wrapper {
     position: relative;
     cursor: pointer;
@@ -365,12 +385,28 @@
 /* Reviews */
 .bd-review {
     padding: 0.55rem 0.65rem;
+    padding-left: 2.8rem;
     background: var(--bg-soft);
     border-radius: 8px;
     border-left: 3px solid #1B2A4A;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
+    position: relative;
 }
 [data-bs-theme="dark"] .bd-review { border-left-color: #5B8DD8; }
+.bd-review-avatar {
+    position: absolute;
+    left: 0.5rem;
+    top: 0.5rem;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: white;
+    text-transform: uppercase;
+}
 .bd-review-head {
     display: flex;
     justify-content: space-between;
@@ -652,7 +688,7 @@
                         <i class="fas fa-eye"></i> Lire un extrait
                     </a>
                     {% endif %}
-                    <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="bd-btn-read" style="background: #1B2A4A;">
+                    <a href="{% url 'catalogue:initiate_payment' book_id=book.pk %}" class="bd-btn-read" style="background: linear-gradient(135deg, #1B2A4A, #2d4470);">
                         <i class="fas fa-shopping-cart"></i> {{ book.get_final_price|floatformat:0 }} FC
                     </a>
                 {% endif %}
@@ -749,6 +785,7 @@
                 <div>
                     {% for review in reviews %}
                     <div class="bd-review">
+                        <div class="bd-review-avatar" style="background: linear-gradient(135deg, hsl({{ forloop.counter0 }}40, 60%, 45%), hsl({{ forloop.counter0 }}80, 65%, 55%));">{{ review.user.get_full_name|default:review.user.username|first }}</div>
                         <div class="bd-review-head">
                             <div style="display:flex; align-items:center;">
                                 <span class="bd-review-user">{{ review.user.get_full_name|default:review.user.username }}</span>
