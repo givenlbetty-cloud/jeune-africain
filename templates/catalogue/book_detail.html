@@ -458,6 +458,52 @@
 [data-bs-theme="dark"] .bd-hero::after {
     background: linear-gradient(135deg, rgba(15,15,30,0.9) 0%, rgba(26,26,46,0.93) 60%, rgba(230,57,70,0.12) 100%);
 }
+
+/* ===== MOBILE-ONLY OVERRIDES ===== */
+@media (max-width: 767px) {
+    /* Description mise en valeur */
+    .bd-description {
+        font-size: 0.92rem;
+        line-height: 1.9;
+        color: var(--text);
+        background: var(--bg-soft);
+        padding: 0.85rem 1rem;
+        border-radius: 10px;
+        border-left: 3px solid #E63946;
+    }
+    [data-bs-theme="dark"] .bd-description {
+        background: rgba(255,255,255,0.04);
+        border-left-color: #5B8DD8;
+    }
+
+    /* Carte auteur réduite */
+    .bd-author-card {
+        padding: 0.45rem 0.55rem;
+        gap: 0.45rem;
+        margin-bottom: 0.65rem;
+    }
+    .bd-author-avatar {
+        width: 32px; height: 32px;
+        font-size: 0.8rem;
+    }
+    .bd-author-card .name { font-size: 0.74rem; }
+    .bd-author-card .bio { font-size: 0.65rem; }
+
+    /* Section avis centrée */
+    .bd-review {
+        text-align: center;
+        border-left: none;
+        border-top: 3px solid #1B2A4A;
+    }
+    [data-bs-theme="dark"] .bd-review { border-top-color: #5B8DD8; }
+    .bd-review-head {
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+    .bd-review-text { text-align: center; }
+    .bd-review-form { text-align: center; }
+}
 </style>
 {% endblock %}
 
