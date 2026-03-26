@@ -12,6 +12,7 @@ from .models import CustomUser, StaffMember, Citation
 from datetime import datetime
 import random
 
+from django.db.models import Avg
 from users.forms import LoginForm, RegisterForm, UserProfileForm
 from users.otp_service import generate_otp, send_otp_via_whatsapp
 from catalogue.models import Book, ReadingSession, Payment, Favorite, Highlight, Note
@@ -33,13 +34,23 @@ def home(request):
     """Page d'accueil avec sections thématiques style YouScribe."""
     published = Book.objects.filter(is_published=True).prefetch_related('authors')
     
+    newest_books = list(published.order_by('-created_at')[:12])
+    newest_ids = [b.pk for b in newest_books]
+    popular_books = list(published.order_by('-reads_count').exclude(pk__in=newest_ids)[:12])
+    popular_ids = newest_ids + [b.pk for b in popular_books]
+    featured_books = list(published.order_by('-rating').exclude(pk__in=popular_ids)[:12])
+
+    avg_rating = published.aggregate(avg=Avg('rating'))['avg']
+    avg_rating_display = f"{avg_rating:.1f}/5" if avg_rating else "—"
+
     context = {
-        'newest_books': published.order_by('-created_at')[:12],
-        'popular_books': published.order_by('-reads_count')[:12],
+        'newest_books': newest_books,
+        'popular_books': popular_books,
         'free_books': published.filter(is_paid=False).order_by('-created_at')[:12],
-        'featured_books': published.order_by('-rating')[:12],
+        'featured_books': featured_books,
         'total_books': published.count(),
         'total_users': CustomUser.objects.count(),
+        'average_rating': avg_rating_display,
         'citation': get_citation_semaine(),
     }
     return render(request, 'home.html', context)

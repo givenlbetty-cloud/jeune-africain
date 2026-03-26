@@ -31,8 +31,8 @@
     {% if citation %}
     <div id="citation-banner" class="citation-banner" style="display:none; margin: 0.75rem 1rem;">
         <div class="citation-collapsed" id="citation-collapsed">
-            <i class="fas fa-quote-left" style="color: var(--primary); font-size: 0.8rem;"></i>
-            <span class="citation-teaser">{{ citation.texte|truncatechars:50 }}</span>
+            <i class="fas fa-quote-left" style="color: white; font-size: 0.8rem;"></i>
+            <span class="citation-teaser">Citation de la semaine</span>
             <i class="fas fa-chevron-down citation-chevron"></i>
         </div>
         <div class="citation-expanded" id="citation-expanded">
@@ -43,20 +43,34 @@
         </div>
     </div>
     <style>
-    .citation-banner { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--bg-soft); cursor: pointer; transition: box-shadow 0.25s; position: relative; }
-    .citation-banner:hover { box-shadow: 0 2px 12px rgba(27,42,74,0.12); }
-    .citation-collapsed { display: flex; align-items: center; gap: 0.5rem; padding: 0.55rem 0.85rem; font-size: 0.82rem; color: var(--text-secondary); }
-    .citation-teaser { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-    .citation-chevron { font-size: 0.7rem; transition: transform 0.25s; }
+    .citation-banner {
+        border-radius: 12px; overflow: hidden;
+        background: linear-gradient(135deg, #1B2A4A 0%, #0F1D36 70%, rgba(230,57,70,0.3) 100%);
+        color: white; cursor: pointer; transition: box-shadow 0.25s; position: relative;
+        box-shadow: 0 4px 20px rgba(27,42,74,0.25);
+    }
+    .citation-banner:hover { box-shadow: 0 6px 28px rgba(27,42,74,0.35); }
+    .citation-collapsed {
+        display: flex; align-items: center; gap: 0.5rem;
+        padding: 0.65rem 0.85rem; font-size: 0.85rem; font-weight: 600; color: white;
+    }
+    .citation-teaser { flex: 1; }
+    .citation-chevron { font-size: 0.7rem; transition: transform 0.25s; color: rgba(255,255,255,0.6); }
     .citation-banner.open .citation-chevron { transform: rotate(180deg); }
-    .citation-expanded { display: none; padding: 1rem 1.1rem 0.9rem; }
-    .citation-banner.open .citation-collapsed { border-bottom: 1px solid rgba(27,42,74,0.12); }
+    .citation-expanded { display: none; padding: 0.75rem 1.1rem 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
     .citation-banner.open .citation-expanded { display: block; }
-    .citation-icon-big { color: var(--primary); font-size: 1.4rem; opacity: 0.35; display: block; margin-bottom: 0.4rem; }
-    .citation-texte { font-style: italic; font-size: 0.92rem; line-height: 1.6; margin: 0 0 0.35rem; }
-    .citation-auteur { font-size: 0.78rem; font-weight: 600; color: var(--primary); margin: 0; }
-    .citation-close { position: absolute; top: 0.55rem; right: 0.65rem; background: none; border: none; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; padding: 0.25rem; }
-    .citation-close:hover { color: #dc3545; }
+    .citation-icon-big { color: #E63946; font-size: 1.5rem; opacity: 0.7; display: block; margin-bottom: 0.5rem; }
+    .citation-texte { font-style: italic; font-size: 0.95rem; line-height: 1.7; margin: 0 0 0.4rem; color: rgba(255,255,255,0.95); }
+    .citation-auteur { font-size: 0.8rem; font-weight: 700; color: #E63946; margin: 0; }
+    .citation-close {
+        position: absolute; top: 0.55rem; right: 0.65rem;
+        background: rgba(255,255,255,0.1); border: none; color: rgba(255,255,255,0.6);
+        font-size: 0.7rem; cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 4px;
+    }
+    .citation-close:hover { color: white; background: rgba(255,255,255,0.2); }
+    [data-bs-theme="dark"] .citation-banner {
+        background: linear-gradient(135deg, #1A1A2E 0%, #16213E 70%, rgba(230,57,70,0.2) 100%);
+    }
     </style>
     <script>
     (function(){
@@ -67,6 +81,7 @@
         var collapsed = document.getElementById('citation-collapsed');
         var closeBtn = document.getElementById('citation-close');
         banner.style.display = '';
+        banner.classList.add('open');
         collapsed.addEventListener('click', function(){ banner.classList.toggle('open'); });
         closeBtn.addEventListener('click', function(e){ e.stopPropagation(); banner.style.display = 'none'; localStorage.setItem(STORAGE_KEY, WEEK_KEY); });
     })();
@@ -205,7 +220,7 @@
             <div style="font-size: 0.7rem; color: var(--text);">Lecteurs</div>
         </div>
         <div style="text-align: center; padding: 0.75rem 1.5rem; background: var(--bg-soft-alt); border-radius: 8px;">
-            <div style="font-size: 1.3rem; font-weight: 800; color: #10B981;">4.8/5</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: #10B981;">{{ average_rating|default:"—" }}</div>
             <div style="font-size: 0.7rem; color: var(--text);">Note</div>
         </div>
     </div>
