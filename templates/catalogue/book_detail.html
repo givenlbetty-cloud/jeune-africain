@@ -92,9 +92,10 @@
 .bd-hero-rating .score { font-size: 0.78rem; font-weight: 700; color: white; }
 .bd-hero-rating .count { font-size: 0.68rem; color: rgba(255,255,255,0.6); }
 
-/* Mobile actions (share only) */
+/* Mobile actions (print + share) */
 .bd-mobile-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.4rem;
     margin-bottom: 0.75rem;
 }
@@ -251,23 +252,24 @@
     align-items: center;
     gap: 0.6rem;
     padding: 0.65rem 0.85rem;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
+    background: #1B2A4A;
+    border: 1px solid rgba(230,57,70,0.3);
     border-radius: 10px;
     margin-bottom: 1rem;
 }
-.bd-inline-cta .cta-icon { font-size: 1.3rem; color: var(--text-light); flex-shrink: 0; }
-.bd-inline-cta .cta-msg { flex: 1; font-size: 0.78rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+.bd-inline-cta .cta-icon { font-size: 1.3rem; color: rgba(255,255,255,0.7); flex-shrink: 0; }
+.bd-inline-cta .cta-msg { flex: 1; font-size: 0.78rem; font-weight: 600; color: white; line-height: 1.35; }
 .bd-inline-cta .cta-link {
     flex-shrink: 0;
     font-size: 0.72rem;
     font-weight: 700;
     padding: 0.35rem 0.7rem;
     border-radius: 6px;
-    background: #1B2A4A;
+    background: #E63946;
     color: white;
     text-decoration: none;
 }
+[data-bs-theme="dark"] .bd-inline-cta { background: #1A1A2E; border-color: rgba(91,141,216,0.3); }
 [data-bs-theme="dark"] .bd-inline-cta .cta-link { background: #E63946; }
 
 /* Description */
@@ -381,10 +383,10 @@
 .bd-meta-item:last-child { border: none; }
 .bd-meta-label {
     font-size: 0.62rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    color: var(--text-light);
+    color: var(--text-secondary, #555);
     margin-bottom: 0.1rem;
 }
 .bd-meta-val {
@@ -549,8 +551,11 @@
                 <span class="bd-meta-badge"><i class="fas fa-eye" style="font-size:0.6rem; margin-right:0.2rem;"></i> {{ book.reads_count|default:0 }}</span>
             </div>
 
-            <!-- Mobile actions: share only (hidden on desktop) -->
+            <!-- Mobile actions: print + share (hidden on desktop) -->
             <div class="bd-mobile-actions">
+                <button type="button" class="bd-side-btn" data-bs-toggle="modal" data-bs-target="#printOrderModal">
+                    <i class="fas fa-print"></i> Commander l'imprimé
+                </button>
                 <button type="button" class="bd-side-btn" onclick="navigator.share ? navigator.share({title:'{{ book.title|escapejs }}',url:window.location.href}) : navigator.clipboard.writeText(window.location.href).then(()=>alert('Lien copié !'))">
                     <i class="fas fa-share-alt"></i> Partager
                 </button>

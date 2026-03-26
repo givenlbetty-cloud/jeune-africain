@@ -1,6 +1,6 @@
 from django.db.models import F
 from django.db.models.functions import Coalesce
-from .models import SiteConfiguration, Book, Category
+from .models import SiteConfiguration, Book, Category, LienSocial
 
 
 def site_configuration(request):
@@ -36,3 +36,12 @@ def site_categories(request):
     except Exception:
         categories = []
     return {'site_categories': categories}
+
+
+def social_links(request):
+    """Liens sociaux actifs pour toutes les pages."""
+    try:
+        links = LienSocial.objects.filter(is_active=True)
+    except Exception:
+        links = []
+    return {'liens_sociaux': links}

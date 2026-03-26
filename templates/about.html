@@ -301,69 +301,19 @@
             <p style="font-size: 0.85rem; max-width: 500px; margin: 0 auto;">Une question, une suggestion, un partenariat ? Contactez-nous via vos canaux préférés.</p>
         </div>
         <div class="row g-2 mt-2">
+            {% for lien in liens_sociaux %}
             <div class="col-6 col-md-3">
-                <a href="mailto:contact@calures.org" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fas fa-envelope" style="color: #E63946; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">Email</strong>
-                    <span style="font-size: 0.6rem;">contact@calures.org</span>
+                <a href="{{ lien.url }}" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
+                    <i class="{{ lien.icon_class }}" style="color: {{ lien.color }}; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
+                    <strong style="font-size: 0.75rem;">{{ lien.get_platform_display }}</strong>
+                    <span style="font-size: 0.6rem;">{{ lien.label }}</span>
                 </a>
             </div>
-            <div class="col-6 col-md-3">
-                <a href="https://www.calures.org" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fas fa-globe" style="color: var(--primary); font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">Site Web</strong>
-                    <span style="font-size: 0.6rem;">www.calures.org</span>
-                </a>
+            {% empty %}
+            <div class="col-12">
+                <p style="font-size: 0.75rem; color: var(--text-light); text-align: center;">Aucun lien de contact configuré.</p>
             </div>
-            <div class="col-6 col-md-3">
-                <a href="https://wa.me/243000000000" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">WhatsApp</strong>
-                    <span style="font-size: 0.6rem;">+243 000 000 000</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://facebook.com/calureseditions" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fab fa-facebook" style="color: #1877F2; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">Facebook</strong>
-                    <span style="font-size: 0.6rem;">Calures Éditions</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://x.com/Calures_" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fab fa-x-twitter" style="color: #000000; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">X (Twitter)</strong>
-                    <span style="font-size: 0.6rem;">@Calures_</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://instagram.com/calureseditions01" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fab fa-instagram" style="color: #E4405F; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">Instagram</strong>
-                    <span style="font-size: 0.6rem;">@calureseditions01</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://youtube.com/@calureseditions" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fab fa-youtube" style="color: #FF0000; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">YouTube</strong>
-                    <span style="font-size: 0.6rem;">Calures Éditions</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://linkedin.com/company/calures-editions" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fab fa-linkedin" style="color: #0A66C2; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">LinkedIn</strong>
-                    <span style="font-size: 0.6rem;">Calures Éditions</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="https://www.calures.org" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
-                    <i class="fas fa-globe" style="color: var(--primary); font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
-                    <strong style="font-size: 0.75rem;">Site Web</strong>
-                    <span style="font-size: 0.6rem;">www.calures.org</span>
-                </a>
-            </div>
+            {% endfor %}
         </div>
     </div>
 

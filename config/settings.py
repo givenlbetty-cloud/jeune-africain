@@ -142,6 +142,7 @@ TEMPLATES = [
                 "catalogue.context_processors.site_configuration",
                 "catalogue.context_processors.featured_books",  # CORRECTION #4
                 "catalogue.context_processors.site_categories",  # Navigation
+                "catalogue.context_processors.social_links",  # Liens sociaux
             ],
         },
     },
