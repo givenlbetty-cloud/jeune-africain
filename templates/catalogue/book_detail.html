@@ -288,8 +288,39 @@
     line-height: 1.8;
     color: var(--text-light);
     margin: 0 0 0.6rem;
+}.bd-desc-wrapper {
+    position: relative;
+    cursor: pointer;
 }
-.bd-tags {
+.bd-desc-wrapper.collapsed .bd-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-height: 6.5em;
+}
+.bd-desc-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2.5em;
+    background: linear-gradient(transparent, #fff);
+    pointer-events: none;
+}
+[data-bs-theme="dark"] .bd-desc-fade {
+    background: linear-gradient(transparent, var(--bg-card, #1a1a2e));
+}
+.bd-desc-wrapper.expanded .bd-desc-fade { display: none; }
+.bd-desc-toggle {
+    display: block;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #E63946;
+    padding: 0.35rem 0 0;
+    cursor: pointer;
+}.bd-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.3rem;
@@ -627,7 +658,11 @@
             {% if book.description %}
             <div style="margin-bottom: 1rem;">
                 <h6 class="bd-section-title"><i class="fas fa-align-left"></i> Description</h6>
-                <p class="bd-description">{{ book.description }}</p>
+                <div class="bd-desc-wrapper collapsed" id="descWrapper" onclick="toggleDesc()">
+                    <p class="bd-description">{{ book.description }}</p>
+                    <div class="bd-desc-fade" id="descFade"></div>
+                </div>
+                <span class="bd-desc-toggle" id="descToggle" onclick="toggleDesc()"><i class="fas fa-chevron-down"></i> Lire la suite</span>
                 <div class="bd-tags">
                     {% if book.get_genre_display and book.genre != 'other' %}<span class="bd-tag">{{ book.get_genre_display }}</span>{% endif %}
                 </div>
@@ -806,6 +841,19 @@ function scrollCarousel(btn, dir) {
 function setRating(r) {
     document.querySelector('input[name="rating"][value="'+r+'"]').checked = true;
     document.querySelectorAll('#ratingStars label i').forEach(function(s,i){ s.style.color = i < r ? '#FFB800' : '#DDD'; });
+}
+function toggleDesc() {
+    var w = document.getElementById('descWrapper');
+    var t = document.getElementById('descToggle');
+    if (w.classList.contains('collapsed')) {
+        w.classList.remove('collapsed');
+        w.classList.add('expanded');
+        t.innerHTML = '<i class="fas fa-chevron-up"></i> Réduire';
+    } else {
+        w.classList.remove('expanded');
+        w.classList.add('collapsed');
+        t.innerHTML = '<i class="fas fa-chevron-down"></i> Lire la suite';
+    }
 }
 function toggleFavorite(e, id) {
     e.preventDefault();
