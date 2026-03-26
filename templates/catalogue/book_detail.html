@@ -497,7 +497,7 @@
     .bd-grid {
         grid-template-columns: 1fr !important;
         gap: 0 !important;
-        margin-top: -1.5rem !important;
+        margin-top: -3.5rem !important;
     }
 
     /* Couverture centrée et agrandie */
@@ -516,6 +516,22 @@
     .bd-cover-actions {
         max-width: 280px !important;
         margin: 0.5rem auto 0 !important;
+        -webkit-box-orient: horizontal !important;
+        -webkit-box-direction: normal !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    .bd-btn-read {
+        width: auto !important;
+        flex: 1 1 45% !important;
+        font-size: 0.72rem !important;
+        padding: 0.45rem 0.6rem !important;
+    }
+    .bd-btn-add {
+        width: 100% !important;
+        font-size: 0.68rem !important;
+        padding: 0.35rem 0.5rem !important;
     }
 
     /* Supprime le CTA encombrant */
