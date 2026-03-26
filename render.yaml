@@ -6,7 +6,7 @@ services:
     startCommand: "gunicorn config.wsgi:application"
     disk:
       name: bnc-data
-      mountPath: /var/data
+      mountPath: /var/data/media
       sizeGB: 10
     envVars:
       - key: PYTHON_VERSION
