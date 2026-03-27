@@ -165,7 +165,15 @@ DATABASES = {
 
 # Render PostgreSQL Database (Production)
 db_from_env = dj_database_url.config(conn_max_age=600)
-DATABASES['default'].update(db_from_env)
+if db_from_env:
+    DATABASES['default'].update(db_from_env)
+elif not DEBUG:
+    import warnings
+    warnings.warn(
+        "⚠️ DATABASE_URL non défini en production ! "
+        "L'app utilise SQLite — les données seront perdues à chaque déploiement.",
+        RuntimeWarning
+    )
 
 # Auth & Custom User Model
 AUTH_USER_MODEL = "users.CustomUser"

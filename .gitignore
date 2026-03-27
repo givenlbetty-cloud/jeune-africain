@@ -40,3 +40,6 @@ htmlcov/
 # OS
 .DS_Store
 Thumbs.db
+
+# Backups — garder uniquement le dernier backup dans Git
+# Les backups JSON sont VERSIONNÉS pour ne pas perdre de données
