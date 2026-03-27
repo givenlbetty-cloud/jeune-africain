@@ -302,6 +302,25 @@
         .book-action button:hover, .book-action a:hover { box-shadow: var(--shadow-sm); }
         
         /* ============================================
+           FOOTER DESKTOP
+           ============================================ */
+        .footer-desktop {
+            background: var(--dark, #1b2a4a); color: rgba(255,255,255,0.8);
+            padding: 2.5rem 0 1rem; margin-top: 3rem;
+        }
+        .footer-desktop h6 { color: #fff; font-weight: 700; margin-bottom: 0.75rem; font-size: 0.95rem; }
+        .footer-desc { font-size: 0.85rem; line-height: 1.6; opacity: 0.8; }
+        .footer-links li { margin-bottom: 0.35rem; }
+        .footer-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+        .footer-links a:hover { color: #fff; }
+        .footer-desktop hr { border-color: rgba(255,255,255,0.15); margin: 1.5rem 0 1rem; }
+        .footer-copy { font-size: 0.8rem; opacity: 0.6; margin: 0; }
+        [data-bs-theme="dark"] .footer-desktop { background: #0d1117; }
+        @media (max-width: 767.98px) {
+            .footer-desktop { display: none; }
+        }
+
+        /* ============================================
            FOOTER TAB BAR — Mobile uniquement
            ============================================ */
         .footer-app {
@@ -537,6 +556,36 @@
         {% block content %}{% endblock %}
     </main>
     
+    <!-- Footer Desktop — masqué sur mobile -->
+    <footer class="footer-desktop">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h6><i class="fas fa-book me-2"></i>Calures Éditions</h6>
+                    <p class="footer-desc">Votre bibliothèque numérique africaine. Découvrez, lisez et partagez des livres d'auteurs africains.</p>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h6><i class="fas fa-link me-2"></i>Liens</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{% url 'home' %}">Accueil</a></li>
+                        <li><a href="{% url 'catalogue:catalogue' %}">Catalogue</a></li>
+                        <li><a href="{% url 'about' %}">À propos</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-lock me-2"></i>Légal</h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{% url 'cgu' %}">Conditions d'utilisation</a></li>
+                        <li><a href="{% url 'confidentialite' %}">Politique de confidentialité</a></li>
+                        <li><a href="{% url 'mentions_legales' %}">Mentions légales</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <p class="text-center footer-copy">&copy; 2025 Calures Éditions. Tous droits réservés.</p>
+        </div>
+    </footer>
+
     <!-- Footer Tab Bar — Mobile uniquement (masqué sur desktop via CSS) -->
     <div class="footer-app">
         <div class="footer-nav">
