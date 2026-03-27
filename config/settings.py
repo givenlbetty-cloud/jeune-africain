@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security & Environment
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-change-in-production")
 DEBUG = os.environ.get("DEBUG", "True") == "True"
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
 
@@ -58,6 +58,10 @@ CSRF_COOKIE_HTTPONLY = False  # Keep False for Jazzmin admin
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if not DEBUG else None
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
 
 # CORS Configuration for mobile apps
 CORS_ALLOWED_ORIGINS = [
@@ -253,6 +257,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+    },
 }
 
 # Jazzmin Configuration - SIMPLIFIÉ POUR NON-TECHNICIENS

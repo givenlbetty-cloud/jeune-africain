@@ -54,6 +54,11 @@ urlpatterns += i18n_patterns(
     # Page À propos
     path("apropos/", TemplateView.as_view(template_name="about.html"), name='about'),
 
+    # Pages légales
+    path("cgu/", TemplateView.as_view(template_name="legal/cgu.html"), name='cgu'),
+    path("confidentialite/", TemplateView.as_view(template_name="legal/confidentialite.html"), name='confidentialite'),
+    path("mentions-legales/", TemplateView.as_view(template_name="legal/mentions_legales.html"), name='mentions_legales'),
+
     # Page Staff technique
     path("staff/", staff_view, name='staff'),
 

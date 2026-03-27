@@ -1,0 +1,90 @@
+{% extends 'base-premium.html' %}
+{% load static %}
+
+{% block title %}Politique de Confidentialité — Calures Éditions{% endblock %}
+
+{% block extra_css %}
+<style>
+    .legal-hero {
+        background: linear-gradient(135deg, #1b2a4a 0%, #e63946 100%);
+        color: white;
+        padding: 3rem 0 2rem;
+        text-align: center;
+    }
+    .legal-hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .legal-hero p { opacity: 0.85; }
+    .legal-content { max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.8; color: #333; }
+    .legal-content h2 { color: #1b2a4a; margin-top: 2rem; font-size: 1.3rem; border-bottom: 2px solid #e63946; padding-bottom: 0.3rem; }
+    .legal-content p, .legal-content li { font-size: 0.95rem; }
+    .legal-content ul { padding-left: 1.5rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="legal-hero">
+    <div class="container">
+        <h1>Politique de Confidentialité</h1>
+        <p>Dernière mise à jour : janvier 2025</p>
+    </div>
+</section>
+
+<div class="legal-content">
+    <h2>1. Introduction</h2>
+    <p>Calures Éditions s'engage à protéger la vie privée de ses utilisateurs. La présente politique décrit les données personnelles collectées, leur utilisation et les droits dont vous disposez.</p>
+
+    <h2>2. Données collectées</h2>
+    <p>Nous collectons les données suivantes :</p>
+    <ul>
+        <li><strong>Données d'inscription :</strong> nom, prénom, adresse e-mail, mot de passe (chiffré)</li>
+        <li><strong>Données de profil :</strong> photo de profil, préférences de lecture</li>
+        <li><strong>Données de transaction :</strong> historique d'achats, méthode de paiement (traitée par Moneroo)</li>
+        <li><strong>Données de navigation :</strong> pages visitées, livres consultés, durée de lecture</li>
+        <li><strong>Données techniques :</strong> adresse IP, type de navigateur, appareil utilisé</li>
+    </ul>
+
+    <h2>3. Finalités du traitement</h2>
+    <p>Vos données sont utilisées pour :</p>
+    <ul>
+        <li>Gérer votre compte et votre bibliothèque personnelle</li>
+        <li>Traiter vos achats et paiements</li>
+        <li>Personnaliser votre expérience (recommandations de lecture)</li>
+        <li>Améliorer nos services et la Plateforme</li>
+        <li>Vous envoyer des communications relatives à votre compte</li>
+        <li>Assurer la sécurité de la Plateforme</li>
+    </ul>
+
+    <h2>4. Partage des données</h2>
+    <p>Vos données personnelles ne sont jamais vendues. Elles peuvent être partagées avec :</p>
+    <ul>
+        <li><strong>Moneroo :</strong> pour le traitement sécurisé des paiements</li>
+        <li><strong>Render.com :</strong> hébergeur de la Plateforme</li>
+        <li><strong>Autorités compétentes :</strong> en cas d'obligation légale</li>
+    </ul>
+
+    <h2>5. Sécurité des données</h2>
+    <p>Nous mettons en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données : chiffrement SSL/TLS, mots de passe hashés, accès restreint aux données, sauvegardes régulières.</p>
+
+    <h2>6. Conservation des données</h2>
+    <p>Vos données sont conservées tant que votre compte est actif. En cas de suppression de compte, vos données personnelles sont effacées dans un délai de 30 jours, sauf obligation légale de conservation.</p>
+
+    <h2>7. Vos droits</h2>
+    <p>Conformément à la législation applicable, vous disposez des droits suivants :</p>
+    <ul>
+        <li><strong>Droit d'accès :</strong> obtenir une copie de vos données personnelles</li>
+        <li><strong>Droit de rectification :</strong> corriger des données inexactes</li>
+        <li><strong>Droit de suppression :</strong> demander l'effacement de vos données</li>
+        <li><strong>Droit de portabilité :</strong> recevoir vos données dans un format structuré</li>
+        <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
+    </ul>
+    <p>Pour exercer ces droits, contactez-nous à : <strong>contact@calures.com</strong></p>
+
+    <h2>8. Cookies</h2>
+    <p>La Plateforme utilise des cookies essentiels au fonctionnement (session, CSRF, préférences de langue). Aucun cookie publicitaire ou de tracking tiers n'est utilisé.</p>
+
+    <h2>9. Modifications</h2>
+    <p>Cette politique peut être mise à jour. Les modifications seront publiées sur cette page avec la date de mise à jour.</p>
+
+    <h2>10. Contact</h2>
+    <p>Pour toute question concernant cette politique de confidentialité : <strong>contact@calures.com</strong></p>
+</div>
+{% endblock %}
