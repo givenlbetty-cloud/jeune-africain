@@ -125,10 +125,10 @@ class BookDetailSerializer(serializers.ModelSerializer):
         return obj.price
     
     def get_rating_avg(self, obj):
-        """Retourne la note moyenne (future implémentation)"""
-        # Pour l'instant, retournez une valeur fictive
-        # Cette logique sera améliorée lors de l'ajout du système de notations
-        return 4.5
+        """Retourne la note moyenne calculée depuis les reviews"""
+        from django.db.models import Avg
+        avg = obj.reviews.aggregate(avg=Avg('rating'))['avg']
+        return round(avg, 2) if avg else None
 
 
 class PaymentSerializer(serializers.ModelSerializer):
