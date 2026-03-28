@@ -9,7 +9,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from catalogue.dashboard_views import (
     admin_dashboard, 
     reader_statistics, 
@@ -67,6 +67,7 @@ urlpatterns += i18n_patterns(
     
     # Authentication (allauth for social login)
     path("auth/", include("allauth.urls")),
+    path("auth/google/", RedirectView.as_view(url="/auth/google/login/", permanent=False), name="google_login"),
     
     # Account Linking (lier plusieurs comptes OAuth)
     path("accounts/social/", include("users.account_linking_urls")),
