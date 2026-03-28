@@ -120,6 +120,8 @@
     z-index: 2;
 }
 .bd-desc-fullwidth { display: none; }
+.bd-reviews-fullwidth { display: none; }
+.bd-reviews-toggle-btn { display: none; }
 @media (min-width: 768px) {
     .bd-grid {
         grid-template-columns: 240px 1fr 220px;
@@ -606,12 +608,44 @@
     .bd-desc-ingrid {
         display: none !important;
     }
+    .bd-content > div:has(.bd-review),
+    .bd-reviews-ingrid {
+        display: none !important;
+    }
     .bd-desc-fullwidth {
         display: block !important;
         width: 100% !important;
         margin-top: 0.75rem !important;
         padding: 0 !important;
     }
+    .bd-reviews-fullwidth {
+        display: block !important;
+        width: 100% !important;
+        margin-top: 0.5rem !important;
+    }
+    .bd-reviews-toggle-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #1B2A4A;
+        background: #f0f0f5;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .bd-reviews-toggle-btn i { font-size: 0.7rem; }
+    [data-bs-theme="dark"] .bd-reviews-toggle-btn {
+        background: rgba(255,255,255,0.06);
+        color: #e0e0e0;
+        border-color: rgba(255,255,255,0.1);
+    }
+    .bd-reviews-content { display: none; margin-top: 0.5rem; }
+    .bd-reviews-content.open { display: block; }
     .bd-description {
         font-size: 14px !important;
         line-height: 1.75 !important;
@@ -782,7 +816,7 @@
             {% endif %}
 
             <!-- ===== REVIEWS ===== -->
-            <div style="margin-bottom: 1rem;">
+            <div class="bd-reviews-ingrid" style="margin-bottom: 1rem;">
                 <h6 class="bd-section-title"><i class="fas fa-comments"></i> Avis ({{ book.rating_count|default:0 }})</h6>
 
                 {% if user.is_authenticated and can_review %}
@@ -913,6 +947,56 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Avis pleine largeur mobile (bouton dépliable) -->
+    <div class="bd-reviews-fullwidth">
+        <button class="bd-reviews-toggle-btn" onclick="toggleReviewsMobile()">
+            <i class="fas fa-comments"></i>
+            <span>Avis ({{ book.rating_count|default:0 }})</span>
+            <i class="fas fa-chevron-down" id="reviewsChevron"></i>
+        </button>
+        <div class="bd-reviews-content" id="reviewsContentMobile">
+            {% if user.is_authenticated and can_review %}
+            <div class="bd-review-form">
+                <form method="POST" action="{% url 'catalogue:add_review' book.pk %}" style="display:flex; flex-direction:column; gap:0.3rem;">
+                    {% csrf_token %}
+                    <div style="display:flex; align-items:center; gap:0.35rem;">
+                        <span style="font-size:0.68rem; font-weight:600; color:var(--text);">Note :</span>
+                        <span style="display:flex; gap:0.1rem; font-size:0.88rem;">
+                            {% for i in "12345" %}
+                            <label style="cursor:pointer; color:#DDD;"><input type="radio" name="rating" value="{{ forloop.counter }}" style="display:none;"><i class="fas fa-star" onclick="this.parentNode.querySelector('input').checked=true; var s=this.closest('span').querySelectorAll('i'); for(var x=0;x<s.length;x++){s[x].style.color=x<{{ forloop.counter }}?'#FFB800':'#DDD';}"></i></label>
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <textarea name="comment" class="form-control form-control-sm" rows="2" placeholder="Partagez votre avis..." style="font-size:0.75rem; border-radius:8px;"></textarea>
+                    <button type="submit" class="btn btn-premium btn-sm" style="font-size:0.68rem; padding:0.28rem 0.6rem; align-self:flex-end;">
+                        <i class="fas fa-paper-plane"></i> Publier
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+            {% if reviews %}
+            {% for review in reviews %}
+            <div class="bd-review">
+                <div class="bd-review-avatar" style="background: linear-gradient(135deg, hsl({{ forloop.counter0 }}40, 60%, 45%), hsl({{ forloop.counter0 }}80, 65%, 55%));">{{ review.user.get_full_name|default:review.user.username|first }}</div>
+                <div class="bd-review-head">
+                    <div style="display:flex; align-items:center;">
+                        <span class="bd-review-user">{{ review.user.get_full_name|default:review.user.username }}</span>
+                        <span class="bd-review-stars">{% for i in "12345" %}{% if review.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}</span>
+                    </div>
+                    <span class="bd-review-date">{{ review.created_at|date:"d/m/Y" }}</span>
+                </div>
+                <p class="bd-review-text">{{ review.comment }}</p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="text-align:center; color:var(--text-light); font-size:0.75rem; padding:1rem 0;">
+                <i class="fas fa-comment-slash" style="font-size:1.1rem; display:block; margin-bottom:0.25rem; opacity:0.35;"></i>
+                Aucun avis. Soyez le premier !
+            </p>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 <!-- ===== LIVRES SIMILAIRES (carousel) ===== -->
@@ -979,6 +1063,19 @@ function toggleDescMobile() {
         w.classList.remove('expanded');
         w.classList.add('collapsed');
         t.innerHTML = '<i class="fas fa-chevron-down"></i> Lire la suite';
+    }
+}
+function toggleReviewsMobile() {
+    var c = document.getElementById('reviewsContentMobile');
+    var ch = document.getElementById('reviewsChevron');
+    if (c.classList.contains('open')) {
+        c.classList.remove('open');
+        ch.classList.remove('fa-chevron-up');
+        ch.classList.add('fa-chevron-down');
+    } else {
+        c.classList.add('open');
+        ch.classList.remove('fa-chevron-down');
+        ch.classList.add('fa-chevron-up');
     }
 }
 function toggleFavorite(e, id) {
