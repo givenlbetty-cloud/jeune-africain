@@ -15,8 +15,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security & Environment
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-change-in-production")
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
+
+# Custom domain support
+CUSTOM_DOMAIN = os.environ.get("CUSTOM_DOMAIN")
+if CUSTOM_DOMAIN:
+    ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
+    ALLOWED_HOSTS.append(f"www.{CUSTOM_DOMAIN}")
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     ALLOWED_HOSTS.append(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
 
@@ -51,6 +57,10 @@ CSRF_TRUSTED_ORIGINS = [
 
 if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
     CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}")
+
+if CUSTOM_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{CUSTOM_DOMAIN}")
+    CSRF_TRUSTED_ORIGINS.append(f"https://www.{CUSTOM_DOMAIN}")
 
 
 CSRF_COOKIE_SECURE = not DEBUG
@@ -451,13 +461,12 @@ AUTHENTICATION_BACKENDS = [
     # No need to specify explicit backends - providers are auto-discovered
 ]
 
-# Allauth settings (updated to new API)
-# Deprecated: ACCOUNT_AUTHENTICATION_METHOD replaced by ACCOUNT_LOGIN_METHODS
-ACCOUNT_LOGIN_METHODS = {'email'}
-# Deprecated: ACCOUNT_EMAIL_REQUIRED replaced by ACCOUNT_SIGNUP_FIELDS
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+# Allauth settings (v0.63.x compatible)
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Can be 'mandatory', 'optional', or 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Require email verification before login
 
 # Login URLs
 LOGIN_URL = 'users:login'
@@ -516,7 +525,7 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_EMAIL_VERIFICATION = 'optional'
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # OAuth providers already verify emails
 
 # Social account custom adapter for profile population
 # SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
