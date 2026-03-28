@@ -539,7 +539,7 @@
 
     /* Grille 2 colonnes : couverture gauche + infos droite */
     .bd-grid {
-        grid-template-columns: 42% 1fr !important;
+        grid-template-columns: 48% 1fr !important;
         gap: 0.75rem !important;
         margin-top: -1rem !important;
         align-items: start !important;
@@ -557,7 +557,8 @@
         max-width: 100% !important;
         margin: 0 !important;
         display: block !important;
-        border-radius: 6px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
     }
     .bd-cover-actions {
         margin: 0.5rem 0 0 !important;
@@ -602,13 +603,18 @@
     /* Description mise en valeur */
     .bd-description {
         font-size: 14px !important;
-        line-height: 1.7 !important;
+        line-height: 1.75 !important;
         color: #222 !important;
         background: #f5f5f7 !important;
-        padding: 10px 12px !important;
-        border-radius: 8px !important;
+        padding: 14px 16px !important;
+        border-radius: 10px !important;
         border-left: 3px solid #E63946 !important;
         -webkit-text-size-adjust: 100%;
+        text-align: center !important;
+    }
+    .bd-section-title {
+        text-align: center !important;
+        font-size: 0.85rem !important;
     }
     [data-bs-theme="dark"] .bd-description {
         background: rgba(255,255,255,0.06) !important;
