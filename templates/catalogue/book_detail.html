@@ -119,6 +119,7 @@
     position: relative;
     z-index: 2;
 }
+.bd-desc-fullwidth { display: none; }
 @media (min-width: 768px) {
     .bd-grid {
         grid-template-columns: 240px 1fr 220px;
@@ -601,6 +602,16 @@
     }
 
     /* Description mise en valeur */
+    .bd-content > div:has(.bd-description),
+    .bd-desc-ingrid {
+        display: none !important;
+    }
+    .bd-desc-fullwidth {
+        display: block !important;
+        width: 100% !important;
+        margin-top: 0.75rem !important;
+        padding: 0 !important;
+    }
     .bd-description {
         font-size: 14px !important;
         line-height: 1.75 !important;
@@ -742,7 +753,7 @@
 
             <!-- ===== DESCRIPTION ===== -->
             {% if book.description %}
-            <div style="margin-bottom: 1rem;">
+            <div class="bd-desc-ingrid" style="margin-bottom: 1rem;">
                 <h6 class="bd-section-title"><i class="fas fa-align-left"></i> Description</h6>
                 <div class="bd-desc-wrapper collapsed" id="descWrapper" onclick="toggleDesc()">
                     <p class="bd-description">{{ book.description }}</p>
@@ -887,6 +898,21 @@
             </div>
         </div>
     </div>
+
+    <!-- Description pleine largeur mobile (sous la grille) -->
+    {% if book.description %}
+    <div class="bd-desc-fullwidth">
+        <h6 class="bd-section-title"><i class="fas fa-align-left"></i> Description</h6>
+        <div class="bd-desc-wrapper collapsed" id="descWrapperMobile" onclick="toggleDescMobile()">
+            <p class="bd-description">{{ book.description }}</p>
+            <div class="bd-desc-fade" id="descFadeMobile"></div>
+        </div>
+        <span class="bd-desc-toggle" id="descToggleMobile" onclick="toggleDescMobile()"><i class="fas fa-chevron-down"></i> Lire la suite</span>
+        <div class="bd-tags">
+            {% if book.get_genre_display and book.genre != 'other' %}<span class="bd-tag">{{ book.get_genre_display }}</span>{% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- ===== LIVRES SIMILAIRES (carousel) ===== -->
@@ -932,6 +958,19 @@ function setRating(r) {
 function toggleDesc() {
     var w = document.getElementById('descWrapper');
     var t = document.getElementById('descToggle');
+    if (w.classList.contains('collapsed')) {
+        w.classList.remove('collapsed');
+        w.classList.add('expanded');
+        t.innerHTML = '<i class="fas fa-chevron-up"></i> Réduire';
+    } else {
+        w.classList.remove('expanded');
+        w.classList.add('collapsed');
+        t.innerHTML = '<i class="fas fa-chevron-down"></i> Lire la suite';
+    }
+}
+function toggleDescMobile() {
+    var w = document.getElementById('descWrapperMobile');
+    var t = document.getElementById('descToggleMobile');
     if (w.classList.contains('collapsed')) {
         w.classList.remove('collapsed');
         w.classList.add('expanded');
