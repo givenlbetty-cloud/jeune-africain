@@ -38,6 +38,7 @@ class Command(BaseCommand):
                 updated = True
             user.set_password(password)
             user.save()
+            self._verify_email(email)
             if updated:
                 self.stdout.write(self.style.SUCCESS(
                     f"Superuser '{email}' mis à jour (is_superuser + mot de passe)."
@@ -53,6 +54,24 @@ class Command(BaseCommand):
             email=email,
             password=password,
         )
+        
+        # Marquer l'email comme vérifié pour allauth
+        self._verify_email(email)
+        
         self.stdout.write(self.style.SUCCESS(
-            f"Superuser '{email}' créé avec succès."
+            f"Superuser '{email}' créé avec succès (email vérifié)."
         ))
+    
+    def _verify_email(self, email):
+        """Marque l'email du superuser comme vérifié dans allauth."""
+        try:
+            from allauth.account.models import EmailAddress
+            User = get_user_model()
+            user = User.objects.get(email=email)
+            EmailAddress.objects.update_or_create(
+                user=user,
+                email=email,
+                defaults={'verified': True, 'primary': True},
+            )
+        except Exception:
+            pass  # allauth pas installé ou table pas encore créée
