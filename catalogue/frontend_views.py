@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.cache import cache_page  # CORRECTION #9: Performance
-from django.db.models import Avg, Q, Prefetch
+from django.db.models import Avg, Q, Prefetch, F, Count
 from django.db.models.functions import Coalesce  # Import correct pour Coalesce
 from django.contrib import messages
 from django.utils import timezone
@@ -182,6 +182,10 @@ def catalogue_view(request):
 def book_detail_view(request, book_id):
     """Vue détail d'un livre."""
     book = get_object_or_404(Book, id=book_id, is_published=True)
+    
+    # Incrémenter le compteur de vues
+    Book.objects.filter(pk=book.pk).update(reads_count=F('reads_count') + 1)
+    book.refresh_from_db(fields=['reads_count'])
     
     # CORRECTION #1: Logique d'accès corrigée
     # Les livres GRATUITS sont accessibles à tous (avec ou sans authentification)
@@ -580,6 +584,12 @@ def add_review_view(request, book_id):
                 'comment': form.cleaned_data['comment'],
             }
         )
+        # Mettre à jour rating et rating_count du livre
+        agg = book.reviews.aggregate(avg=Avg('rating'), cnt=Count('id'))
+        book.rating = round(agg['avg'] or 0, 2)
+        book.rating_count = agg['cnt']
+        book.save(update_fields=['rating', 'rating_count'])
+        
         if created:
             messages.success(request, "Votre avis a été ajouté avec succès.")
         else:

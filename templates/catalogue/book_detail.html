@@ -3,6 +3,15 @@
 
 {% block title %}{{ book.title }} - Calures Éditions{% endblock %}
 
+{% block extra_meta %}
+<meta property="og:title" content="{{ book.title }}">
+<meta property="og:description" content="{{ book.description|truncatewords:30 }}">
+{% if book.cover %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ book.cover.url }}">{% endif %}
+<meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+<meta property="og:type" content="book">
+<meta property="og:site_name" content="Calures Éditions">
+{% endblock %}
+
 {% block extra_css %}
 <style>
 /* ========== PAGE DETAIL – DESIGN PRO ========== */
@@ -715,10 +724,10 @@
         </div>
         <div class="bd-hero-rating">
             <span class="stars">
-                {% for i in "12345" %}{% if book.rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}
+                {% for i in "12345" %}{% if average_rating >= forloop.counter %}<i class="fas fa-star"></i>{% else %}<i class="fas fa-star dim"></i>{% endif %}{% endfor %}
             </span>
-            <span class="score">{{ book.rating|default:"0" }}/5</span>
-            <span class="count">({{ book.rating_count|default:0 }} avis)</span>
+            <span class="score">{{ average_rating|floatformat:1 }}/5</span>
+            <span class="count">({{ reviews|length }} avis)</span>
         </div>
     </div>
     <div style="height: 3.5rem;"></div>
@@ -817,7 +826,7 @@
 
             <!-- ===== REVIEWS ===== -->
             <div class="bd-reviews-ingrid" style="margin-bottom: 1rem;">
-                <h6 class="bd-section-title"><i class="fas fa-comments"></i> Avis ({{ book.rating_count|default:0 }})</h6>
+                <h6 class="bd-section-title"><i class="fas fa-comments"></i> Avis ({{ reviews|length }})</h6>
 
                 {% if user.is_authenticated and can_review %}
                 <div class="bd-review-form">
@@ -952,7 +961,7 @@
     <div class="bd-reviews-fullwidth">
         <button class="bd-reviews-toggle-btn" onclick="toggleReviewsMobile()">
             <i class="fas fa-comments"></i>
-            <span>Avis ({{ book.rating_count|default:0 }})</span>
+            <span>Avis ({{ reviews|length }})</span>
             <i class="fas fa-chevron-down" id="reviewsChevron"></i>
         </button>
         <div class="bd-reviews-content" id="reviewsContentMobile">
