@@ -17,9 +17,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         User = get_user_model()
 
-        email = os.environ.get("DJANGO_SUPERUSER_EMAIL")
-        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
-        username = os.environ.get("DJANGO_SUPERUSER_USERNAME", "admin")
+        email = os.environ.get("DJANGO_SUPERUSER_EMAIL", "").strip()
+        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD", "").strip()
+        username = os.environ.get("DJANGO_SUPERUSER_USERNAME", "admin").strip()
 
         if not email or not password:
             self.stdout.write(self.style.WARNING(
@@ -27,26 +27,21 @@ class Command(BaseCommand):
             ))
             return
 
-        if User.objects.filter(email=email).exists():
-            user = User.objects.get(email=email)
-            updated = False
-            if not user.is_superuser:
-                user.is_superuser = True
-                updated = True
-            if not user.is_staff:
-                user.is_staff = True
-                updated = True
+        # Chercher par email OU par username
+        user = User.objects.filter(email__iexact=email).first() or \
+               User.objects.filter(username__iexact=username).first()
+
+        if user:
+            user.email = email
+            user.username = username
+            user.is_superuser = True
+            user.is_staff = True
             user.set_password(password)
             user.save()
             self._verify_email(email)
-            if updated:
-                self.stdout.write(self.style.SUCCESS(
-                    f"Superuser '{email}' mis à jour (is_superuser + mot de passe)."
-                ))
-            else:
-                self.stdout.write(self.style.SUCCESS(
-                    f"Superuser '{email}' — mot de passe synchronisé."
-                ))
+            self.stdout.write(self.style.SUCCESS(
+                f"Superuser '{email}' mis à jour (mot de passe + permissions + email vérifié)."
+            ))
             return
 
         User.objects.create_superuser(
