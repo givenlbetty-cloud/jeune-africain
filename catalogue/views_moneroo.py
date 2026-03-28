@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 from django.conf import settings as django_settings
 
 MONEROO_API_KEY = getattr(django_settings, 'MONEROO_API_KEY', '') or os.getenv('MONEROO_API_KEY', '')
-    MONEROO_SECRET_KEY = getattr(django_settings, 'MONEROO_SECRET_KEY', '') or os.getenv('MONEROO_SECRET_KEY', '')
+MONEROO_SECRET_KEY = getattr(django_settings, 'MONEROO_SECRET_KEY', '') or os.getenv('MONEROO_SECRET_KEY', '')
 MONEROO_API_URL = 'https://api.moneroo.io/v1'
 
 # Validate configuration
