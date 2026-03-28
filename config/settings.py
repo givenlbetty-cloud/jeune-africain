@@ -462,7 +462,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth settings (v0.63.x compatible)
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'  # Connexion par email OU username
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True

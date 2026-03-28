@@ -82,9 +82,9 @@
                 <div class="auth-error"><i class="fas fa-exclamation-circle"></i> {{ form.non_field_errors.0 }}</div>
                 {% endif %}
                 <div class="auth-field">
-                    <label for="id_email" class="auth-label"><i class="fas fa-envelope" style="margin-right:0.3rem; opacity:0.6;"></i>Email</label>
-                    <input type="email" class="auth-input {% if form.email.errors %}is-invalid{% endif %}"
-                           id="id_email" name="email" placeholder="votre@email.com" required autocomplete="email">
+                    <label for="id_email" class="auth-label"><i class="fas fa-user" style="margin-right:0.3rem; opacity:0.6;"></i>Email ou nom d'utilisateur</label>
+                    <input type="text" class="auth-input {% if form.email.errors %}is-invalid{% endif %}"
+                           id="id_email" name="email" placeholder="votre@email.com ou admin" required autocomplete="username">
                     {% if form.email.errors %}<div class="auth-error" style="margin-top:0.4rem; margin-bottom:0;">{{ form.email.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="auth-field">
