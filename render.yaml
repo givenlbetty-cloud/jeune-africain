@@ -2,8 +2,8 @@ services:
   - type: web
     name: bnc-web
     env: python
-    buildCommand: "./build.sh"
-    startCommand: "./start.sh"
+    buildCommand: "bash build.sh"
+    startCommand: "bash start.sh"
     disk:
       name: bnc-data
       mountPath: /var/data/media
