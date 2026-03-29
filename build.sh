@@ -20,5 +20,8 @@ if [ -n "$RENDER_MEDIA_ROOT" ]; then
     echo "✅ Backup saved to persistent disk"
 fi
 
-echo "🔑 Creating superuser (DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-(not set)})..."
-python manage.py create_superuser_env || true
+echo "🔑 Creating superuser..."
+echo "   DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-(⚠️ NOT SET)}"
+echo "   DJANGO_SUPERUSER_PASSWORD=$(if [ -n \"$DJANGO_SUPERUSER_PASSWORD\" ]; then echo '✅ SET'; else echo '⚠️ NOT SET'; fi)"
+echo "   DJANGO_SUPERUSER_USERNAME=${DJANGO_SUPERUSER_USERNAME:-admin}"
+python manage.py create_superuser_env 2>&1 || echo "⚠️ Superuser creation failed (will retry at startup)"
