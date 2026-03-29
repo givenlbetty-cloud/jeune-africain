@@ -41,6 +41,10 @@ urlpatterns = [
     
     # Legacy URLs redirection (old catalog path)
     path("catalogue/books/<uuid:book_id>/", redirect_old_book_url, name='redirect_old_book_url'),
+    
+    # Authentication (allauth for social login) - HORS i18n pour que les callbacks OAuth marchent
+    path("auth/", include("allauth.urls")),
+    path("auth/google/", RedirectView.as_view(url="/auth/google/login/", permanent=False), name="google_login"),
 ]
 
 # URLs with i18n prefix (translated)
@@ -64,10 +68,6 @@ urlpatterns += i18n_patterns(
 
     # Offline page (fallback for service worker)
     path("offline/", lambda request: __import__('django.shortcuts', fromlist=['render']).render(request, 'offline.html'), name='offline'),
-    
-    # Authentication (allauth for social login)
-    path("auth/", include("allauth.urls")),
-    path("auth/google/", RedirectView.as_view(url="/auth/google/login/", permanent=False), name="google_login"),
     
     # Account Linking (lier plusieurs comptes OAuth)
     path("accounts/social/", include("users.account_linking_urls")),

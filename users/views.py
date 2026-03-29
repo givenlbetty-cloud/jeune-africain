@@ -101,9 +101,9 @@ def login_view(request):
                         # Redirection par défaut vers la page d'accueil
                         return redirect('home')
                 else:
-                    messages.error(request, "Identifiant ou mot de passe incorrect.")
+                    form.add_error(None, "Identifiant ou mot de passe incorrect.")
             except CustomUser.DoesNotExist:
-                messages.error(request, "Compte introuvable.")
+                form.add_error(None, "Compte introuvable. Vérifiez votre email ou nom d'utilisateur.")
     else:
         form = LoginForm()
     
