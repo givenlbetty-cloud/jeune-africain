@@ -14,7 +14,7 @@ wheel==0.45.1
 # OAuth and security dependencies
 PyJWT==2.10.1
 cryptography==41.0.7
-requests==2.31.0
+requests>=2.32.0
 oauthlib==3.2.2
 google-auth-oauthlib==1.1.0
 cloudinary
