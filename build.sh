@@ -20,4 +20,5 @@ if [ -n "$RENDER_MEDIA_ROOT" ]; then
     echo "✅ Backup saved to persistent disk"
 fi
 
-python manage.py create_superuser_env
+echo "🔑 Creating superuser (DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL:-(not set)})..."
+python manage.py create_superuser_env || true
