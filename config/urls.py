@@ -5,7 +5,7 @@ Documentation: https://docs.djangoproject.com/en/6.0/topics/http/urls/
 
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.decorators.http import require_http_methods
@@ -96,9 +96,14 @@ urlpatterns += i18n_patterns(
     prefix_default_language=True,
 )
 # Servir les fichiers MEDIA
-# En production (Render), les fichiers media sont sur le disque persistant
-# WhiteNoise ne gère que les static, il faut servir les media via Django
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+# IMPORTANT : static() ne sert rien quand DEBUG=False.
+# Sur Render, on utilise le disque persistant → il faut servir les media via Django directement.
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # En production : servir les media via Django (Render n'a pas de serveur de fichiers séparé)
+    from django.views.static import serve as static_serve
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
