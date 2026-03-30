@@ -90,279 +90,140 @@
 
     <div style="padding: 0 1rem; max-width: 1200px; margin: 0 auto;">
 
-    <!-- Section: Actualités (carrousel coverflow) -->
+    <!-- Section: Actualités (carrousel) -->
     {% if latest_articles %}
     <div style="margin-top: 1.25rem; margin-bottom: 1.5rem;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
             <h2 class="ys-section-title" style="margin-bottom: 0;"><i class="fas fa-newspaper" style="color: #E63946; margin-right: 0.3rem;"></i>Actualités</h2>
             <a href="{% url 'catalogue:articles_list' %}" style="font-size: 0.78rem; color: var(--primary); font-weight: 600; text-decoration: none;">Tout voir <i class="fas fa-arrow-right" style="font-size: 0.65rem;"></i></a>
         </div>
-        <div class="coverflow-container" id="coverflowContainer">
-            <button class="coverflow-arrow coverflow-arrow-left" id="cfPrev"><i class="fas fa-chevron-left"></i></button>
-            <div class="coverflow-track" id="coverflowTrack">
-                {% for article in latest_articles %}
-                <div class="coverflow-slide" data-index="{{ forloop.counter0 }}">
-                    <a href="{% url 'catalogue:article_detail' slug=article.slug %}" style="text-decoration: none; color: inherit;">
-                        <div class="coverflow-card">
-                            <div class="coverflow-image">
-                                {% if article.image %}
-                                <img src="{{ article.image.url }}" alt="{{ article.title }}">
-                                {% else %}
-                                <div class="coverflow-placeholder">
-                                    <i class="fas fa-newspaper"></i>
+        <div class="cf-wrapper" id="cfWrapper">
+            <button class="cf-btn cf-btn-left" id="cfPrev"><i class="fas fa-chevron-left"></i></button>
+            <div class="cf-viewport">
+                <div class="cf-track" id="cfTrack">
+                    {% for article in latest_articles %}
+                    <div class="cf-slide" data-index="{{ forloop.counter0 }}">
+                        <a href="{% url 'catalogue:article_detail' slug=article.slug %}" class="cf-link">
+                            <div class="cf-card">
+                                <div class="cf-img">
+                                    {% if article.image %}
+                                    <img src="{{ article.image.url }}" alt="{{ article.title }}">
+                                    {% else %}
+                                    <div class="cf-img-empty"><i class="fas fa-newspaper"></i></div>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
-                            </div>
-                            <div class="coverflow-info">
-                                <span class="coverflow-badge">{{ article.get_category_display }}</span>
-                                <h6 class="coverflow-title">{{ article.title }}</h6>
-                                <p class="coverflow-excerpt">{{ article.excerpt }}</p>
-                                <div class="coverflow-meta">
-                                    <span><i class="far fa-clock"></i> {{ article.created_at|timesince }}</span>
-                                    <span class="coverflow-read">Lire <i class="fas fa-arrow-right"></i></span>
+                                <div class="cf-body">
+                                    <span class="cf-tag">{{ article.get_category_display }}</span>
+                                    <h6 class="cf-title">{{ article.title }}</h6>
+                                    <p class="cf-desc">{{ article.excerpt }}</p>
+                                    <div class="cf-foot">
+                                        <span><i class="far fa-clock"></i> {{ article.created_at|timesince }}</span>
+                                        <span class="cf-cta">Lire <i class="fas fa-arrow-right"></i></span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
-            <button class="coverflow-arrow coverflow-arrow-right" id="cfNext"><i class="fas fa-chevron-right"></i></button>
-            <div class="coverflow-dots" id="coverflowDots"></div>
+            <button class="cf-btn cf-btn-right" id="cfNext"><i class="fas fa-chevron-right"></i></button>
+            <div class="cf-dots" id="cfDots"></div>
         </div>
     </div>
     <style>
-    .coverflow-container {
-        position: relative;
-        overflow: hidden;
-        padding: 1rem 0 2rem;
+    .cf-wrapper{position:relative;padding:0.5rem 0 1.5rem}
+    .cf-viewport{overflow:hidden;margin:0 auto;width:100%}
+    .cf-track{display:flex;transition:transform 0.45s ease;will-change:transform}
+    .cf-slide{flex:0 0 72%;max-width:72%;padding:0 8px;box-sizing:border-box;transition:transform 0.4s ease,opacity 0.4s ease;opacity:0.45;transform:scale(0.88)}
+    .cf-slide.active{opacity:1;transform:scale(1);z-index:2}
+    .cf-slide.near{opacity:0.7;transform:scale(0.93)}
+    .cf-link{text-decoration:none;color:inherit;display:block}
+    .cf-card{background:var(--bg-card,#fff);border-radius:14px;overflow:hidden;box-shadow:0 2px 14px rgba(0,0,0,0.08);border:1px solid var(--border,#e5e7eb);transition:box-shadow 0.3s}
+    .cf-slide.active .cf-card{box-shadow:0 8px 32px rgba(0,0,0,0.16)}
+    .cf-img{width:100%;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,#1B2A4A,#E63946)}
+    .cf-img img{width:100%;height:100%;object-fit:cover;display:block}
+    .cf-img-empty{display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:2rem;opacity:0.4}
+    .cf-body{padding:0.7rem 0.85rem}
+    .cf-tag{display:inline-block;background:var(--secondary,#E63946);color:#fff;font-size:0.58rem;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;margin-bottom:0.35rem}
+    .cf-title{font-weight:700;font-size:0.85rem;margin:0 0 0.25rem;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .cf-desc{font-size:0.7rem;color:var(--text-light,#6b7280);margin:0 0 0.35rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
+    .cf-foot{display:flex;align-items:center;justify-content:space-between;font-size:0.63rem;color:var(--text-light,#6b7280)}
+    .cf-cta{color:var(--primary,#1B2A4A);font-weight:600}
+    .cf-btn{position:absolute;top:42%;transform:translateY(-50%);z-index:20;background:rgba(255,255,255,0.95);border:1px solid var(--border,#e5e7eb);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.8rem;color:var(--primary,#1B2A4A);box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all 0.2s}
+    .cf-btn:hover{background:var(--primary,#1B2A4A);color:#fff}
+    .cf-btn-left{left:2px}
+    .cf-btn-right{right:2px}
+    .cf-dots{display:flex;justify-content:center;gap:6px;margin-top:0.7rem}
+    .cf-dot{width:7px;height:7px;border-radius:50%;background:var(--border,#d1d5db);cursor:pointer;transition:all 0.3s}
+    .cf-dot.active{background:var(--secondary,#E63946);transform:scale(1.35)}
+    @media(min-width:768px){
+        .cf-slide{flex:0 0 38%;max-width:38%}
     }
-    .coverflow-track {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0;
-        transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        perspective: 1000px;
-        min-height: 340px;
-    }
-    .coverflow-slide {
-        flex: 0 0 280px;
-        max-width: 280px;
-        transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        transform: scale(0.78) rotateY(0deg);
-        opacity: 0.5;
-        filter: brightness(0.7);
-        z-index: 1;
-        pointer-events: none;
-    }
-    .coverflow-slide.active {
-        transform: scale(1) rotateY(0deg);
-        opacity: 1;
-        filter: brightness(1);
-        z-index: 10;
-        pointer-events: auto;
-    }
-    .coverflow-slide.prev {
-        transform: scale(0.85) rotateY(15deg) translateX(30px);
-        opacity: 0.7;
-        filter: brightness(0.85);
-        z-index: 5;
-        pointer-events: auto;
-    }
-    .coverflow-slide.next {
-        transform: scale(0.85) rotateY(-15deg) translateX(-30px);
-        opacity: 0.7;
-        filter: brightness(0.85);
-        z-index: 5;
-        pointer-events: auto;
-    }
-    .coverflow-card {
-        background: var(--bg-card);
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.10);
-        border: 1px solid var(--border);
-        transition: box-shadow 0.3s;
-    }
-    .coverflow-slide.active .coverflow-card {
-        box-shadow: 0 12px 40px rgba(0,0,0,0.18);
-    }
-    .coverflow-image {
-        height: 180px;
-        overflow: hidden;
-        background: linear-gradient(135deg, #1B2A4A, #E63946);
-    }
-    .coverflow-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-    .coverflow-placeholder {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        color: white;
-        font-size: 2.5rem;
-        opacity: 0.4;
-    }
-    .coverflow-info {
-        padding: 0.8rem;
-    }
-    .coverflow-badge {
-        display: inline-block;
-        background: var(--secondary);
-        color: white;
-        font-size: 0.6rem;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 4px;
-        text-transform: uppercase;
-        margin-bottom: 0.4rem;
-    }
-    .coverflow-title {
-        font-weight: 700;
-        font-size: 0.88rem;
-        margin: 0 0 0.3rem;
-        line-height: 1.3;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    .coverflow-excerpt {
-        font-size: 0.72rem;
-        color: var(--text-light);
-        margin: 0 0 0.4rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        line-height: 1.5;
-    }
-    .coverflow-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 0.65rem;
-        color: var(--text-light);
-    }
-    .coverflow-read {
-        color: var(--primary);
-        font-weight: 600;
-    }
-    .coverflow-arrow {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 20;
-        background: rgba(255,255,255,0.92);
-        border: 1px solid var(--border);
-        border-radius: 50%;
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        font-size: 0.85rem;
-        color: var(--primary);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: all 0.2s;
-    }
-    .coverflow-arrow:hover {
-        background: var(--primary);
-        color: white;
-    }
-    .coverflow-arrow-left { left: 4px; }
-    .coverflow-arrow-right { right: 4px; }
-    .coverflow-dots {
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        margin-top: 0.8rem;
-    }
-    .coverflow-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--border);
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    .coverflow-dot.active {
-        background: var(--secondary);
-        transform: scale(1.3);
-    }
-    @media (max-width: 600px) {
-        .coverflow-slide { flex: 0 0 240px; max-width: 240px; }
-        .coverflow-image { height: 150px; }
-        .coverflow-track { min-height: 300px; }
+    @media(min-width:1024px){
+        .cf-slide{flex:0 0 30%;max-width:30%}
     }
     </style>
     <script>
-    (function() {
-        const track = document.getElementById('coverflowTrack');
-        const slides = track.querySelectorAll('.coverflow-slide');
-        const dotsContainer = document.getElementById('coverflowDots');
-        const prevBtn = document.getElementById('cfPrev');
-        const nextBtn = document.getElementById('cfNext');
-        const total = slides.length;
-        let current = Math.min(1, total - 1); // Start at second if possible
+    (function(){
+        var track=document.getElementById('cfTrack');
+        var slides=track.querySelectorAll('.cf-slide');
+        var dots=document.getElementById('cfDots');
+        var n=slides.length;
+        if(!n)return;
+        var cur=0;
 
-        // Create dots
-        slides.forEach((_, i) => {
-            const dot = document.createElement('span');
-            dot.className = 'coverflow-dot' + (i === current ? ' active' : '');
-            dot.addEventListener('click', () => goTo(i));
-            dotsContainer.appendChild(dot);
-        });
+        // Build dots
+        for(var i=0;i<n;i++){
+            var d=document.createElement('span');
+            d.className='cf-dot';
+            d.dataset.i=i;
+            d.addEventListener('click',function(){goTo(+this.dataset.i)});
+            dots.appendChild(d);
+        }
 
-        function updateSlides() {
-            slides.forEach((slide, i) => {
-                slide.classList.remove('active', 'prev', 'next');
-                if (i === current) slide.classList.add('active');
-                else if (i === current - 1) slide.classList.add('prev');
-                else if (i === current + 1) slide.classList.add('next');
+        function update(){
+            // Classes
+            slides.forEach(function(s,i){
+                s.classList.remove('active','near');
+                if(i===cur)s.classList.add('active');
+                else if(Math.abs(i-cur)===1)s.classList.add('near');
             });
+            // Slide width in %
+            var sw=slides[0].getBoundingClientRect().width;
+            var vw=track.parentElement.getBoundingClientRect().width;
             // Center the active slide
-            const container = track.parentElement;
-            const slideWidth = slides[0].offsetWidth;
-            const containerWidth = container.offsetWidth;
-            const offset = (containerWidth / 2) - (slideWidth / 2) - (current * slideWidth);
-            track.style.transform = 'translateX(' + offset + 'px)';
-            // Update dots
-            dotsContainer.querySelectorAll('.coverflow-dot').forEach((d, i) => {
-                d.classList.toggle('active', i === current);
+            var offset=(vw/2)-(sw/2)-(cur*sw);
+            track.style.transform='translateX('+offset+'px)';
+            // Dots
+            dots.querySelectorAll('.cf-dot').forEach(function(d,i){
+                d.classList.toggle('active',i===cur);
             });
         }
 
-        function goTo(index) {
-            current = Math.max(0, Math.min(index, total - 1));
-            updateSlides();
-        }
+        function goTo(i){cur=Math.max(0,Math.min(i,n-1));update()}
 
-        prevBtn.addEventListener('click', () => goTo(current - 1));
-        nextBtn.addEventListener('click', () => goTo(current + 1));
+        document.getElementById('cfPrev').addEventListener('click',function(){goTo(cur-1)});
+        document.getElementById('cfNext').addEventListener('click',function(){goTo(cur+1)});
 
-        // Touch/swipe support
-        let startX = 0;
-        track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
-        track.addEventListener('touchend', e => {
-            const diff = startX - e.changedTouches[0].clientX;
-            if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
-        }, {passive: true});
+        // Swipe
+        var sx=0;
+        track.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
+        track.addEventListener('touchend',function(e){
+            var dx=sx-e.changedTouches[0].clientX;
+            if(Math.abs(dx)>35)goTo(cur+(dx>0?1:-1));
+        },{passive:true});
 
-        // Auto-play
-        let autoplay = setInterval(() => goTo((current + 1) % total), 5000);
-        track.addEventListener('mouseenter', () => clearInterval(autoplay));
-        track.addEventListener('mouseleave', () => {
-            autoplay = setInterval(() => goTo((current + 1) % total), 5000);
+        // Autoplay
+        var ap=setInterval(function(){goTo((cur+1)%n)},5000);
+        track.parentElement.parentElement.addEventListener('mouseenter',function(){clearInterval(ap)});
+        track.parentElement.parentElement.addEventListener('mouseleave',function(){
+            ap=setInterval(function(){goTo((cur+1)%n)},5000);
         });
 
-        updateSlides();
+        // Recalc on resize
+        window.addEventListener('resize',update);
+        update();
     })();
     </script>
     {% endif %}
