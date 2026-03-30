@@ -1057,10 +1057,14 @@ def article_detail_view(request, slug):
     # Incrémenter le compteur de vues
     Article.objects.filter(pk=article.pk).update(views_count=F('views_count') + 1)
     
-    # Articles similaires (même catégorie)
+    # Articles similaires (même catégorie, sinon récents)
     related_articles = Article.objects.filter(
         is_published=True, category=article.category
     ).exclude(pk=article.pk)[:4]
+    if not related_articles.exists():
+        related_articles = Article.objects.filter(
+            is_published=True
+        ).exclude(pk=article.pk).order_by('-created_at')[:4]
     
     context = {
         'article': article,
