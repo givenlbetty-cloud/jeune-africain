@@ -4,190 +4,342 @@
 {% block title %}Actualités — Calures Éditions{% endblock %}
 
 {% block content %}
-<div style="background: var(--bg-page); min-height: 100vh;">
+<div class="actu-page">
 
-    <!-- Hero Header -->
-    <div style="background: linear-gradient(135deg, #1B2A4A 0%, #2d4a7a 50%, #E63946 100%); padding: 2.5rem 1rem 2rem; text-align: center; color: white;">
-        <h1 style="font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: 900; margin: 0 0 0.5rem;">
-            <i class="fas fa-newspaper" style="margin-right: 0.4rem;"></i> Actualités
-        </h1>
-        <p style="font-size: 0.9rem; opacity: 0.85; max-width: 500px; margin: 0 auto;">
-            Restez informé des dernières nouvelles littéraires, culturelles et des événements
-        </p>
+    <!-- ═══════════════ HERO CARROUSEL ═══════════════ -->
+    {% if hero_articles or hero_events %}
+    <div class="hero-slider" id="heroSlider">
+        <div class="hero-slides" id="heroSlides">
+            {% for article in hero_articles %}
+            <div class="hero-slide">
+                <div class="hero-bg" style="background-image: url('{% if article.image %}{{ article.image.url }}{% endif %}');"></div>
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <span class="hero-tag"><i class="fas fa-newspaper"></i> {{ article.get_category_display }}</span>
+                    <h2 class="hero-title">{{ article.title }}</h2>
+                    <p class="hero-excerpt">{{ article.excerpt|truncatewords:20 }}</p>
+                    <div class="hero-meta">
+                        <span><i class="far fa-user"></i> {{ article.author_name }}</span>
+                        <span><i class="far fa-clock"></i> {{ article.created_at|timesince }}</span>
+                    </div>
+                    <a href="{% url 'catalogue:article_detail' slug=article.slug %}" class="hero-btn">
+                        Lire l'article <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            {% for event in hero_events %}
+            <div class="hero-slide">
+                <div class="hero-bg" style="background-image: url('{% if event.image %}{{ event.image.url }}{% endif %}');"></div>
+                <div class="hero-overlay hero-overlay--event"></div>
+                <div class="hero-content">
+                    <span class="hero-tag hero-tag--event"><i class="fas fa-calendar-alt"></i> {{ event.get_event_type_display }}</span>
+                    <h2 class="hero-title">{{ event.title }}</h2>
+                    <p class="hero-excerpt">{{ event.description|truncatewords:20 }}</p>
+                    <div class="hero-meta">
+                        <span><i class="far fa-calendar"></i> {{ event.date_start|date:"d M Y" }}</span>
+                        {% if event.location %}<span><i class="fas fa-map-marker-alt"></i> {{ event.location }}</span>{% endif %}
+                    </div>
+                    <a href="{% url 'catalogue:event_detail' event_id=event.pk %}" class="hero-btn hero-btn--event">
+                        Voir l'événement <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <!-- Contrôles -->
+        <button class="hero-arrow hero-arrow--left" id="heroPrev"><i class="fas fa-chevron-left"></i></button>
+        <button class="hero-arrow hero-arrow--right" id="heroNext"><i class="fas fa-chevron-right"></i></button>
+        <div class="hero-indicators" id="heroIndicators"></div>
+        <!-- Progress bar -->
+        <div class="hero-progress"><div class="hero-progress-bar" id="heroProgressBar"></div></div>
     </div>
+    {% endif %}
 
-    <!-- Filtres par type de contenu -->
-    <div style="max-width: 900px; margin: 0 auto; padding: 1rem 1rem 0;">
-        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; margin-bottom: 0.6rem;">
-            <a href="{% url 'catalogue:articles_list' %}"
-               style="display: inline-block; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;
-               {% if not current_type %}background: var(--primary); color: white;{% else %}background: var(--bg-soft); color: var(--text); border: 1px solid var(--border);{% endif %}">
+    <!-- ═══════════════ FILTRES ═══════════════ -->
+    <div class="actu-filters">
+        <div class="actu-filters-row">
+            <a href="{% url 'catalogue:articles_list' %}" class="actu-filter-pill {% if not current_type %}active{% endif %}">
                 <i class="fas fa-layer-group"></i> Tout
             </a>
-            <a href="{% url 'catalogue:articles_list' %}?type=articles"
-               style="display: inline-block; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;
-               {% if current_type == 'articles' %}background: var(--primary); color: white;{% else %}background: var(--bg-soft); color: var(--text); border: 1px solid var(--border);{% endif %}">
+            <a href="{% url 'catalogue:articles_list' %}?type=articles" class="actu-filter-pill {% if current_type == 'articles' %}active{% endif %}">
                 <i class="fas fa-newspaper"></i> Articles
             </a>
-            <a href="{% url 'catalogue:articles_list' %}?type=events"
-               style="display: inline-block; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-decoration: none; transition: all 0.2s;
-               {% if current_type == 'events' %}background: var(--primary); color: white;{% else %}background: var(--bg-soft); color: var(--text); border: 1px solid var(--border);{% endif %}">
+            <a href="{% url 'catalogue:articles_list' %}?type=events" class="actu-filter-pill {% if current_type == 'events' %}active{% endif %}">
                 <i class="fas fa-calendar-alt"></i> Événements
             </a>
         </div>
-
-        <!-- Filtres catégorie articles (visible sauf si type=events) -->
         {% if current_type != 'events' %}
-        <div style="display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: center;">
-            <a href="{% url 'catalogue:articles_list' %}{% if current_type %}?type={{ current_type }}{% endif %}"
-               style="display: inline-block; padding: 0.3rem 0.7rem; border-radius: 16px; font-size: 0.7rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
-               {% if not current_category %}background: var(--secondary); color: white;{% else %}background: var(--bg-soft); color: var(--text-light); border: 1px solid var(--border);{% endif %}">
-                Toutes catégories
-            </a>
+        <div class="actu-cats-row">
+            <a href="{% url 'catalogue:articles_list' %}{% if current_type %}?type={{ current_type }}{% endif %}" class="actu-cat-chip {% if not current_category %}active{% endif %}">Tout</a>
             {% for code, label in categories %}
-            <a href="{% url 'catalogue:articles_list' %}?category={{ code }}{% if current_type %}&type={{ current_type }}{% endif %}"
-               style="display: inline-block; padding: 0.3rem 0.7rem; border-radius: 16px; font-size: 0.7rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
-               {% if current_category == code %}background: var(--secondary); color: white;{% else %}background: var(--bg-soft); color: var(--text-light); border: 1px solid var(--border);{% endif %}">
-                {{ label }}
-            </a>
+            <a href="{% url 'catalogue:articles_list' %}?category={{ code }}{% if current_type %}&type={{ current_type }}{% endif %}" class="actu-cat-chip {% if current_category == code %}active{% endif %}">{{ label }}</a>
             {% endfor %}
         </div>
         {% endif %}
     </div>
 
-    <div style="max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 2rem;">
+    <!-- ═══════════════ GRILLE CONTENU ═══════════════ -->
+    <div class="actu-grid-section">
 
-        <!-- Section Événements -->
-        {% if events %}
-        {% if current_type != 'articles' %}
-        <div style="margin-bottom: 2rem;">
-            {% if not current_type %}<h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; color: var(--text);"><i class="fas fa-calendar-alt" style="color: var(--secondary); margin-right: 0.3rem;"></i> Événements</h2>{% endif %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.25rem;">
-                {% for event in events %}
-                <a href="{% url 'catalogue:event_detail' event_id=event.pk %}" style="text-decoration: none; color: inherit;">
-                    <div style="background: var(--bg-card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.25s, box-shadow 0.25s; height: 100%;"
-                         onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)';"
-                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)';">
-                        
-                        <!-- Image événement -->
-                        <div style="height: 170px; overflow: hidden; position: relative; background: linear-gradient(135deg, #1B2A4A, #E63946);">
-                            {% if event.image %}
-                            <img src="{{ event.image.url }}" alt="{{ event.title }}" 
-                                 style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
-                                 onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
-                            {% else %}
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white;">
-                                <i class="fas fa-calendar-alt" style="font-size: 2.5rem; opacity: 0.4;"></i>
+        {% if events and current_type != 'articles' %}
+        {% if not current_type %}<h2 class="actu-section-heading"><i class="fas fa-calendar-alt"></i> Événements</h2>{% endif %}
+        <div class="actu-grid">
+            {% for event in events %}
+            <a href="{% url 'catalogue:event_detail' event_id=event.pk %}" class="actu-card-link actu-reveal">
+                <div class="actu-card">
+                    <div class="actu-card-img">
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                        {% else %}
+                        <div class="actu-card-empty"><i class="fas fa-calendar-alt"></i></div>
+                        {% endif %}
+                        <span class="actu-card-badge actu-card-badge--event">{{ event.get_event_type_display }}</span>
+                        {% if event.is_happening_now %}
+                        <span class="actu-card-status actu-card-status--live"><i class="fas fa-circle"></i> En cours</span>
+                        {% elif event.is_upcoming %}
+                        <span class="actu-card-status actu-card-status--soon"><i class="far fa-clock"></i> À venir</span>
+                        {% endif %}
+                    </div>
+                    <div class="actu-card-body">
+                        <h3 class="actu-card-title">{{ event.title }}</h3>
+                        <p class="actu-card-desc">{{ event.description|truncatewords:25 }}</p>
+                        <div class="actu-card-foot">
+                            <div class="actu-card-meta">
+                                <span><i class="far fa-calendar"></i> {{ event.date_start|date:"d M Y" }}</span>
+                                {% if event.location %}<span><i class="fas fa-map-marker-alt"></i> {{ event.location|truncatewords:3 }}</span>{% endif %}
                             </div>
-                            {% endif %}
-                            <span style="position: absolute; top: 10px; left: 10px; background: #6366F1; color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; text-transform: uppercase;">
-                                {{ event.get_event_type_display }}
-                            </span>
-                            {% if event.is_happening_now %}
-                            <span style="position: absolute; top: 10px; right: 10px; background: #10B981; color: white; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;">
-                                <i class="fas fa-circle" style="font-size: 0.4rem; vertical-align: middle;"></i> En cours
-                            </span>
-                            {% elif event.is_upcoming %}
-                            <span style="position: absolute; top: 10px; right: 10px; background: #F59E0B; color: white; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;">
-                                <i class="far fa-clock"></i> À venir
-                            </span>
-                            {% endif %}
-                        </div>
-
-                        <!-- Contenu événement -->
-                        <div style="padding: 1rem;">
-                            <h3 style="font-weight: 700; font-size: 0.95rem; margin: 0 0 0.4rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ event.title }}
-                            </h3>
-                            <p style="font-size: 0.8rem; color: var(--text-light); margin: 0 0 0.75rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ event.description|truncatewords:25 }}
-                            </p>
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid var(--border);">
-                                <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: var(--text-light);">
-                                    <span><i class="far fa-calendar"></i> {{ event.date_start|date:"d M Y" }}</span>
-                                    {% if event.location %}<span><i class="fas fa-map-marker-alt"></i> {{ event.location|truncatewords:3 }}</span>{% endif %}
-                                </div>
-                                <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">
-                                    Voir <i class="fas fa-arrow-right" style="font-size: 0.6rem;"></i>
-                                </span>
-                            </div>
+                            <span class="actu-card-cta">Voir <i class="fas fa-arrow-right"></i></span>
                         </div>
                     </div>
-                </a>
-                {% endfor %}
-            </div>
+                </div>
+            </a>
+            {% endfor %}
         </div>
         {% endif %}
-        {% endif %}
 
-        <!-- Section Articles -->
-        {% if articles %}
-        {% if current_type != 'events' %}
-        <div>
-            {% if not current_type and events %}<h2 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1rem; color: var(--text);"><i class="fas fa-newspaper" style="color: var(--secondary); margin-right: 0.3rem;"></i> Articles</h2>{% endif %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.25rem;">
-                {% for article in articles %}
-                <a href="{% url 'catalogue:article_detail' slug=article.slug %}" style="text-decoration: none; color: inherit;">
-                    <div style="background: var(--bg-card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.25s, box-shadow 0.25s; height: 100%;"
-                         onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)';"
-                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)';">
-                        
-                        <!-- Image -->
-                        <div style="height: 170px; overflow: hidden; position: relative; background: linear-gradient(135deg, #1B2A4A, #E63946);">
-                            {% if article.image %}
-                            <img src="{{ article.image.url }}" alt="{{ article.title }}" 
-                                 style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
-                                 onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
-                            {% else %}
-                            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white;">
-                                <i class="fas fa-newspaper" style="font-size: 2.5rem; opacity: 0.4;"></i>
+        {% if articles and current_type != 'events' %}
+        {% if not current_type and events %}<h2 class="actu-section-heading"><i class="fas fa-newspaper"></i> Articles</h2>{% endif %}
+        <div class="actu-grid">
+            {% for article in articles %}
+            <a href="{% url 'catalogue:article_detail' slug=article.slug %}" class="actu-card-link actu-reveal">
+                <div class="actu-card">
+                    <div class="actu-card-img">
+                        {% if article.image %}
+                        <img src="{{ article.image.url }}" alt="{{ article.title }}">
+                        {% else %}
+                        <div class="actu-card-empty"><i class="fas fa-newspaper"></i></div>
+                        {% endif %}
+                        <span class="actu-card-badge">{{ article.get_category_display }}</span>
+                        {% if article.is_featured %}
+                        <span class="actu-card-status actu-card-status--featured"><i class="fas fa-star"></i> À la une</span>
+                        {% endif %}
+                    </div>
+                    <div class="actu-card-body">
+                        <h3 class="actu-card-title">{{ article.title }}</h3>
+                        <p class="actu-card-desc">{{ article.excerpt }}</p>
+                        <div class="actu-card-foot">
+                            <div class="actu-card-meta">
+                                <span><i class="far fa-user"></i> {{ article.author_name }}</span>
+                                <span><i class="far fa-clock"></i> {{ article.created_at|timesince }}</span>
                             </div>
-                            {% endif %}
-                            <span style="position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; text-transform: uppercase;">
-                                {{ article.get_category_display }}
-                            </span>
-                            {% if article.is_featured %}
-                            <span style="position: absolute; top: 10px; right: 10px; background: #F59E0B; color: white; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;">
-                                <i class="fas fa-star"></i> À la une
-                            </span>
-                            {% endif %}
-                        </div>
-
-                        <!-- Contenu -->
-                        <div style="padding: 1rem;">
-                            <h3 style="font-weight: 700; font-size: 0.95rem; margin: 0 0 0.4rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ article.title }}
-                            </h3>
-                            <p style="font-size: 0.8rem; color: var(--text-light); margin: 0 0 0.75rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                                {{ article.excerpt }}
-                            </p>
-                            <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid var(--border);">
-                                <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: var(--text-light);">
-                                    <span><i class="far fa-user"></i> {{ article.author_name }}</span>
-                                    <span><i class="far fa-clock"></i> {{ article.created_at|timesince }}</span>
-                                </div>
-                                <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">
-                                    Lire <i class="fas fa-arrow-right" style="font-size: 0.6rem;"></i>
-                                </span>
-                            </div>
+                            <span class="actu-card-cta">Lire <i class="fas fa-arrow-right"></i></span>
                         </div>
                     </div>
-                </a>
-                {% endfor %}
-            </div>
+                </div>
+            </a>
+            {% endfor %}
         </div>
         {% endif %}
-        {% endif %}
 
-        <!-- Message vide -->
         {% if not articles and not events %}
-        <div style="text-align: center; padding: 3rem 1rem;">
-            <i class="fas fa-newspaper" style="font-size: 3rem; color: var(--border); margin-bottom: 1rem;"></i>
-            <h3 style="font-weight: 700; font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem;">Aucun contenu pour le moment</h3>
-            <p style="font-size: 0.85rem; color: var(--text-light);">Revenez bientôt pour découvrir nos actualités et événements !</p>
+        <div class="actu-empty">
+            <i class="fas fa-newspaper"></i>
+            <h3>Aucun contenu pour le moment</h3>
+            <p>Revenez bientôt pour découvrir nos actualités et événements !</p>
         </div>
         {% endif %}
     </div>
 
 </div>
+
+<!-- ═══════════════ STYLES ═══════════════ -->
+<style>
+/* Page */
+.actu-page{background:var(--bg-page,#fff);min-height:100vh}
+
+/* ── Hero Carrousel ── */
+.hero-slider{position:relative;width:100%;height:420px;overflow:hidden;background:#0a1628}
+@media(min-width:768px){.hero-slider{height:480px}}
+.hero-slides{display:flex;width:100%;height:100%;transition:transform 0.7s cubic-bezier(.4,0,.2,1)}
+.hero-slide{position:relative;flex:0 0 100%;width:100%;height:100%}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 8s linear}
+.hero-slide.active .hero-bg{transform:scale(1.06)}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,22,40,0.92) 0%,rgba(10,22,40,0.4) 50%,rgba(10,22,40,0.15) 100%)}
+.hero-overlay--event{background:linear-gradient(to top,rgba(40,10,20,0.92) 0%,rgba(40,10,20,0.4) 50%,rgba(40,10,20,0.15) 100%)}
+.hero-content{position:absolute;bottom:0;left:0;right:0;padding:1.5rem 1.25rem 2.5rem;color:#fff;max-width:700px;z-index:2;
+    opacity:0;transform:translateY(30px);transition:opacity 0.6s ease 0.15s,transform 0.6s ease 0.15s}
+.hero-slide.active .hero-content{opacity:1;transform:translateY(0)}
+.hero-tag{display:inline-block;background:var(--secondary,#E63946);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;margin-bottom:0.6rem;letter-spacing:0.5px}
+.hero-tag--event{background:#6366F1}
+.hero-title{font-size:clamp(1.25rem,4.5vw,2.2rem);font-weight:800;margin:0 0 0.5rem;line-height:1.2;text-shadow:0 2px 15px rgba(0,0,0,0.3)}
+.hero-excerpt{font-size:0.85rem;opacity:0.88;margin:0 0 0.7rem;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hero-meta{display:flex;gap:1rem;font-size:0.72rem;opacity:0.75;margin-bottom:0.9rem;flex-wrap:wrap}
+.hero-btn{display:inline-flex;align-items:center;gap:0.4rem;background:var(--secondary,#E63946);color:#fff;padding:0.55rem 1.3rem;border-radius:8px;font-size:0.78rem;font-weight:700;text-decoration:none;transition:all 0.25s;box-shadow:0 4px 15px rgba(230,57,70,0.3)}
+.hero-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(230,57,70,0.45)}
+.hero-btn--event{background:#6366F1;box-shadow:0 4px 15px rgba(99,102,241,0.3)}
+.hero-btn--event:hover{box-shadow:0 6px 20px rgba(99,102,241,0.45)}
+
+/* Arrows */
+.hero-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:0.9rem;transition:all 0.25s}
+.hero-arrow:hover{background:rgba(255,255,255,0.3)}
+.hero-arrow--left{left:10px}
+.hero-arrow--right{right:10px}
+
+/* Indicators */
+.hero-indicators{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
+.hero-ind{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.35);cursor:pointer;transition:all 0.3s;border:2px solid transparent}
+.hero-ind.active{background:#fff;border-color:var(--secondary,#E63946);transform:scale(1.2)}
+
+/* Progress bar */
+.hero-progress{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.15);z-index:10}
+.hero-progress-bar{height:100%;background:var(--secondary,#E63946);width:0;transition:width 0.1s linear}
+
+/* ── Filtres ── */
+.actu-filters{max-width:960px;margin:0 auto;padding:1.25rem 1rem 0}
+.actu-filters-row{display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:0.65rem}
+.actu-filter-pill{display:inline-flex;align-items:center;gap:0.3rem;padding:0.45rem 1.1rem;border-radius:25px;font-size:0.8rem;font-weight:700;text-decoration:none;transition:all 0.25s;background:var(--bg-soft,#f3f4f6);color:var(--text,#333);border:1px solid var(--border,#e5e7eb)}
+.actu-filter-pill.active{background:var(--primary,#1B2A4A);color:#fff;border-color:var(--primary,#1B2A4A);box-shadow:0 3px 10px rgba(27,42,74,0.25)}
+.actu-filter-pill:hover:not(.active){background:var(--bg-card,#fff);box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.actu-cats-row{display:flex;gap:0.35rem;justify-content:center;flex-wrap:wrap}
+.actu-cat-chip{padding:0.28rem 0.7rem;border-radius:16px;font-size:0.68rem;font-weight:600;text-decoration:none;transition:all 0.2s;background:var(--bg-soft,#f3f4f6);color:var(--text-light,#6b7280);border:1px solid var(--border,#e5e7eb)}
+.actu-cat-chip.active{background:var(--secondary,#E63946);color:#fff;border-color:var(--secondary,#E63946)}
+
+/* ── Grille ── */
+.actu-grid-section{max-width:960px;margin:0 auto;padding:1.25rem 1rem 3rem}
+.actu-section-heading{font-size:1.05rem;font-weight:800;margin:1.5rem 0 0.9rem;color:var(--text,#333);display:flex;align-items:center;gap:0.4rem}
+.actu-section-heading i{color:var(--secondary,#E63946);font-size:0.95rem}
+.actu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.35rem;margin-bottom:1.5rem}
+.actu-card-link{text-decoration:none;color:inherit;display:block}
+.actu-card{background:var(--bg-card,#fff);border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid var(--border,#e5e7eb);transition:transform 0.35s cubic-bezier(.25,.46,.45,.94),box-shadow 0.35s;height:100%}
+.actu-card:hover{transform:translateY(-6px);box-shadow:0 12px 35px rgba(0,0,0,0.13)}
+.actu-card-img{position:relative;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,#1B2A4A,#E63946)}
+.actu-card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.5s}
+.actu-card:hover .actu-card-img img{transform:scale(1.07)}
+.actu-card-empty{display:flex;align-items:center;justify-content:center;height:100%;color:#fff;font-size:2rem;opacity:0.35}
+.actu-card-badge{position:absolute;top:10px;left:10px;background:var(--secondary,#E63946);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 10px;border-radius:5px;text-transform:uppercase;letter-spacing:0.3px}
+.actu-card-badge--event{background:#6366F1}
+.actu-card-status{position:absolute;top:10px;right:10px;color:#fff;font-size:0.58rem;font-weight:700;padding:3px 8px;border-radius:5px}
+.actu-card-status--live{background:#10B981}
+.actu-card-status--live i{font-size:0.35rem;vertical-align:middle}
+.actu-card-status--soon{background:#F59E0B}
+.actu-card-status--featured{background:#F59E0B}
+.actu-card-body{padding:0.9rem 1rem}
+.actu-card-title{font-weight:700;font-size:0.95rem;margin:0 0 0.35rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.actu-card-desc{font-size:0.78rem;color:var(--text-light,#6b7280);margin:0 0 0.7rem;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.actu-card-foot{display:flex;align-items:center;justify-content:space-between;padding-top:0.5rem;border-top:1px solid var(--border,#e5e7eb)}
+.actu-card-meta{display:flex;align-items:center;gap:0.7rem;font-size:0.68rem;color:var(--text-light,#6b7280)}
+.actu-card-cta{font-size:0.7rem;color:var(--primary,#1B2A4A);font-weight:700}
+
+/* Scroll reveal */
+.actu-reveal{opacity:0;transform:translateY(25px);transition:opacity 0.5s ease,transform 0.5s ease}
+.actu-reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Empty */
+.actu-empty{text-align:center;padding:4rem 1rem}
+.actu-empty i{font-size:3rem;color:var(--border,#d1d5db);margin-bottom:1rem;display:block}
+.actu-empty h3{font-weight:700;font-size:1.1rem;margin-bottom:0.5rem}
+.actu-empty p{font-size:0.85rem;color:var(--text-light,#6b7280)}
+
+@media(max-width:600px){
+    .hero-slider{height:380px}
+    .hero-content{padding:1.25rem 1rem 2.25rem}
+    .hero-arrow{width:34px;height:34px;font-size:0.8rem}
+    .hero-arrow--left{left:6px}
+    .hero-arrow--right{right:6px}
+    .actu-grid{grid-template-columns:1fr}
+}
+</style>
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+(function(){
+    /* ── Hero Slider ── */
+    var slides=document.querySelectorAll('#heroSlides .hero-slide');
+    var n=slides.length;
+    if(!n)return;
+    var cur=0;
+    var bar=document.getElementById('heroProgressBar');
+    var inds=document.getElementById('heroIndicators');
+    var duration=6000;
+    var start=Date.now();
+    var ap;
+
+    // Build indicators
+    for(var i=0;i<n;i++){
+        var d=document.createElement('span');
+        d.className='hero-ind';
+        d.dataset.i=i;
+        d.addEventListener('click',function(){goTo(+this.dataset.i)});
+        inds.appendChild(d);
+    }
+
+    function show(idx){
+        slides.forEach(function(s,i){s.classList.toggle('active',i===idx)});
+        document.getElementById('heroSlides').style.transform='translateX(-'+(idx*100)+'%)';
+        inds.querySelectorAll('.hero-ind').forEach(function(d,i){d.classList.toggle('active',i===idx)});
+        start=Date.now();
+    }
+
+    function goTo(idx){cur=((idx%n)+n)%n;show(cur)}
+    document.getElementById('heroPrev').addEventListener('click',function(){goTo(cur-1)});
+    document.getElementById('heroNext').addEventListener('click',function(){goTo(cur+1)});
+
+    // Progress + autoplay
+    function tick(){
+        var elapsed=Date.now()-start;
+        var pct=Math.min(elapsed/duration*100,100);
+        bar.style.width=pct+'%';
+        if(elapsed>=duration){goTo(cur+1)}
+        ap=requestAnimationFrame(tick);
+    }
+    ap=requestAnimationFrame(tick);
+
+    // Pause on hover
+    var slider=document.getElementById('heroSlider');
+    slider.addEventListener('mouseenter',function(){cancelAnimationFrame(ap)});
+    slider.addEventListener('mouseleave',function(){start=Date.now();ap=requestAnimationFrame(tick)});
+
+    // Swipe
+    var sx=0;
+    slider.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;cancelAnimationFrame(ap)},{passive:true});
+    slider.addEventListener('touchend',function(e){
+        var dx=sx-e.changedTouches[0].clientX;
+        if(Math.abs(dx)>40)goTo(cur+(dx>0?1:-1));
+        start=Date.now();ap=requestAnimationFrame(tick);
+    },{passive:true});
+
+    show(0);
+
+    /* ── Scroll Reveal ── */
+    var cards=document.querySelectorAll('.actu-reveal');
+    if('IntersectionObserver' in window){
+        var obs=new IntersectionObserver(function(entries){
+            entries.forEach(function(e){
+                if(e.isIntersecting){
+                    e.target.classList.add('visible');
+                    obs.unobserve(e.target);
+                }
+            });
+        },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+        cards.forEach(function(c,i){
+            c.style.transitionDelay=(i%3)*0.1+'s';
+            obs.observe(c);
+        });
+    }else{
+        cards.forEach(function(c){c.classList.add('visible')});
+    }
+})();
+</script>
+
 {% endblock %}

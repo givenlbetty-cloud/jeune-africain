@@ -1033,9 +1033,15 @@ def articles_list_view(request):
     elif content_type == 'events':
         articles = Article.objects.none()
     
+    # Hero carousel: featured articles + recent events (max 6)
+    hero_articles = Article.objects.filter(is_published=True).order_by('-created_at')[:4]
+    hero_events = Event.objects.filter(is_published=True).order_by('-date_start')[:2]
+    
     context = {
         'articles': articles,
         'events': events,
+        'hero_articles': hero_articles,
+        'hero_events': hero_events,
         'categories': Article.CATEGORY_CHOICES,
         'event_types': Event.EVENT_TYPE_CHOICES,
         'current_category': category,
