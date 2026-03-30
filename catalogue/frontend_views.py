@@ -1017,18 +1017,29 @@ def order_print_view(request, book_id):
 # ============================================================================
 
 def articles_list_view(request):
-    """Liste des articles d'actualité."""
+    """Liste des articles d'actualité et événements fusionnés."""
     articles = Article.objects.filter(is_published=True)
+    events = Event.objects.filter(is_published=True).order_by('-date_start')
     
     # Filtre par catégorie
     category = request.GET.get('category')
+    content_type = request.GET.get('type', '')  # 'articles', 'events', or '' (all)
+    
     if category:
         articles = articles.filter(category=category)
     
+    if content_type == 'articles':
+        events = Event.objects.none()
+    elif content_type == 'events':
+        articles = Article.objects.none()
+    
     context = {
         'articles': articles,
+        'events': events,
         'categories': Article.CATEGORY_CHOICES,
+        'event_types': Event.EVENT_TYPE_CHOICES,
         'current_category': category,
+        'current_type': content_type,
     }
     return render(request, 'catalogue/articles_list.html', context)
 
