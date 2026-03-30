@@ -2583,3 +2583,70 @@ class LienSocial(models.Model):
     @property
     def color(self):
         return self.COLOR_MAP.get(self.platform, '#1B2A4A')
+
+
+class Article(models.Model):
+    """Modèle pour les articles d'actualité / blog."""
+    
+    CATEGORY_CHOICES = [
+        ('LITTERATURE', _('Littérature')),
+        ('CULTURE', _('Culture')),
+        ('EDITION', _('Édition')),
+        ('AUTEUR', _('Portrait d\'auteur')),
+        ('EVENEMENT', _('Événement')),
+        ('SOCIETE', _('Société')),
+        ('AUTRE', _('Autre')),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(_("Titre"), max_length=255)
+    slug = models.SlugField(_("Slug"), max_length=280, unique=True, blank=True)
+    excerpt = models.TextField(_("Extrait"), max_length=500, help_text="Court résumé affiché dans les listes")
+    content = models.TextField(_("Contenu"), help_text="Contenu complet de l'article")
+    image = models.ImageField(
+        _("Image de couverture"),
+        upload_to="articles/%Y/%m/",
+        null=True,
+        blank=True
+    )
+    category = models.CharField(
+        _("Catégorie"),
+        max_length=20,
+        choices=CATEGORY_CHOICES,
+        default='AUTRE'
+    )
+    author_name = models.CharField(_("Auteur de l'article"), max_length=150, blank=True, default="Calures Éditions")
+    is_published = models.BooleanField(_("Publié"), default=True)
+    is_featured = models.BooleanField(_("À la une"), default=False, help_text="Affiché en priorité sur la page d'accueil")
+    views_count = models.PositiveIntegerField(_("Nombre de vues"), default=0)
+    created_at = models.DateTimeField(_("Date de publication"), auto_now_add=True)
+    updated_at = models.DateTimeField(_("Dernière modification"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("Article")
+        verbose_name_plural = _("Articles")
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['is_published', '-created_at']),
+            models.Index(fields=['category']),
+            models.Index(fields=['slug']),
+        ]
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while Article.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('catalogue:article_detail', kwargs={'slug': self.slug})

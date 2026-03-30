@@ -1,0 +1,21 @@
+{% extends "allauth/layouts/entrance.html" %}
+{% load i18n %}
+
+{% block head_title %}Erreur d'authentification{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-bottom: 1rem;">
+    <div style="width: 56px; height: 56px; border-radius: 50%; background: #FEE2E2; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;">
+        <i class="fas fa-times-circle" style="font-size: 1.3rem; color: #DC2626;"></i>
+    </div>
+</div>
+
+<h1>Erreur de connexion</h1>
+<p>Une erreur s'est produite lors de la connexion avec votre compte tiers. Veuillez réessayer ou utiliser une autre méthode de connexion.</p>
+
+<a href="{% url 'users:login' %}">
+    <button type="button" style="width: 100%; padding: 0.7rem; background: linear-gradient(135deg, var(--primary), #2d4a7a); color: white; border: none; border-radius: 10px; font-size: 0.92rem; font-weight: 700; cursor: pointer; margin-top: 0.5rem;">
+        <i class="fas fa-arrow-left"></i> Retour à la connexion
+    </button>
+</a>
+{% endblock %}

@@ -15,7 +15,7 @@ import random
 from django.db.models import Avg
 from users.forms import LoginForm, RegisterForm, UserProfileForm
 from users.otp_service import generate_otp, send_otp_via_whatsapp
-from catalogue.models import Book, ReadingSession, Payment, Favorite, Highlight, Note
+from catalogue.models import Book, ReadingSession, Payment, Favorite, Highlight, Note, Article
 
 
 def get_citation_semaine():
@@ -43,11 +43,15 @@ def home(request):
     avg_rating = published.aggregate(avg=Avg('rating'))['avg']
     avg_rating_display = f"{avg_rating:.1f}/5" if avg_rating else "—"
 
+    # Articles d'actualité
+    latest_articles = Article.objects.filter(is_published=True)[:6]
+
     context = {
         'newest_books': newest_books,
         'popular_books': popular_books,
         'free_books': published.filter(is_paid=False).order_by('-created_at')[:12],
         'featured_books': featured_books,
+        'latest_articles': latest_articles,
         'total_books': published.count(),
         'total_users': CustomUser.objects.count(),
         'average_rating': avg_rating_display,

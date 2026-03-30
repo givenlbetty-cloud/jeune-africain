@@ -1,0 +1,100 @@
+{% extends 'base-premium.html' %}
+{% load static %}
+
+{% block title %}Actualités — Calures Éditions{% endblock %}
+
+{% block content %}
+<div style="background: var(--bg-page); min-height: 100vh;">
+
+    <!-- Hero Header -->
+    <div style="background: linear-gradient(135deg, #1B2A4A 0%, #2d4a7a 50%, #E63946 100%); padding: 2.5rem 1rem 2rem; text-align: center; color: white;">
+        <h1 style="font-size: clamp(1.5rem, 5vw, 2.2rem); font-weight: 900; margin: 0 0 0.5rem;">
+            <i class="fas fa-newspaper" style="margin-right: 0.4rem;"></i> Actualités
+        </h1>
+        <p style="font-size: 0.9rem; opacity: 0.85; max-width: 500px; margin: 0 auto;">
+            Restez informé des dernières nouvelles littéraires et culturelles
+        </p>
+    </div>
+
+    <!-- Filtres par catégorie -->
+    <div style="max-width: 900px; margin: 0 auto; padding: 1rem 1rem 0;">
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center;">
+            <a href="{% url 'catalogue:articles_list' %}"
+               style="display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
+               {% if not current_category %}background: var(--primary); color: white;{% else %}background: var(--bg-soft); color: var(--text); border: 1px solid var(--border);{% endif %}">
+                Tout
+            </a>
+            {% for code, label in categories %}
+            <a href="{% url 'catalogue:articles_list' %}?category={{ code }}"
+               style="display: inline-block; padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
+               {% if current_category == code %}background: var(--primary); color: white;{% else %}background: var(--bg-soft); color: var(--text); border: 1px solid var(--border);{% endif %}">
+                {{ label }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Grille d'articles -->
+    <div style="max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 2rem;">
+        {% if articles %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1.25rem;">
+            {% for article in articles %}
+            <a href="{% url 'catalogue:article_detail' slug=article.slug %}" style="text-decoration: none; color: inherit;">
+                <div style="background: var(--bg-card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border: 1px solid var(--border); transition: transform 0.25s, box-shadow 0.25s; height: 100%;"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)';"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)';">
+                    
+                    <!-- Image -->
+                    <div style="height: 170px; overflow: hidden; position: relative; background: linear-gradient(135deg, #1B2A4A, #E63946);">
+                        {% if article.image %}
+                        <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                             style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
+                             onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                        {% else %}
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white;">
+                            <i class="fas fa-newspaper" style="font-size: 2.5rem; opacity: 0.4;"></i>
+                        </div>
+                        {% endif %}
+                        <span style="position: absolute; top: 10px; left: 10px; background: var(--secondary); color: white; font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 4px; text-transform: uppercase;">
+                            {{ article.get_category_display }}
+                        </span>
+                        {% if article.is_featured %}
+                        <span style="position: absolute; top: 10px; right: 10px; background: #F59E0B; color: white; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 4px;">
+                            <i class="fas fa-star"></i> À la une
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Contenu -->
+                    <div style="padding: 1rem;">
+                        <h3 style="font-weight: 700; font-size: 0.95rem; margin: 0 0 0.4rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ article.title }}
+                        </h3>
+                        <p style="font-size: 0.8rem; color: var(--text-light); margin: 0 0 0.75rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ article.excerpt }}
+                        </p>
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid var(--border);">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.7rem; color: var(--text-light);">
+                                <span><i class="far fa-user"></i> {{ article.author_name }}</span>
+                                <span><i class="far fa-clock"></i> {{ article.created_at|timesince }}</span>
+                            </div>
+                            <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">
+                                Lire <i class="fas fa-arrow-right" style="font-size: 0.6rem;"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem 1rem;">
+            <i class="fas fa-newspaper" style="font-size: 3rem; color: var(--border); margin-bottom: 1rem;"></i>
+            <h3 style="font-weight: 700; font-size: 1.1rem; color: var(--text); margin-bottom: 0.5rem;">Aucun article pour le moment</h3>
+            <p style="font-size: 0.85rem; color: var(--text-light);">Revenez bientôt pour découvrir nos actualités !</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -14,7 +14,7 @@ import uuid
 
 from catalogue.models import (
     Book, ReadingSession, Payment, Author, Favorite, Review,
-    Highlight, Note, Event, PrintOrder
+    Highlight, Note, Event, PrintOrder, Article
 )
 from .forms import ReviewForm
 
@@ -1010,3 +1010,43 @@ def order_print_view(request, book_id):
         'success': True,
         'message': f'Votre commande pour "{book.title}" a été enregistrée. Nous vous contacterons bientôt.'
     })
+
+
+# ============================================================================
+# ARTICLES / ACTUALITÉS
+# ============================================================================
+
+def articles_list_view(request):
+    """Liste des articles d'actualité."""
+    articles = Article.objects.filter(is_published=True)
+    
+    # Filtre par catégorie
+    category = request.GET.get('category')
+    if category:
+        articles = articles.filter(category=category)
+    
+    context = {
+        'articles': articles,
+        'categories': Article.CATEGORY_CHOICES,
+        'current_category': category,
+    }
+    return render(request, 'catalogue/articles_list.html', context)
+
+
+def article_detail_view(request, slug):
+    """Détail d'un article."""
+    article = get_object_or_404(Article, slug=slug, is_published=True)
+    
+    # Incrémenter le compteur de vues
+    Article.objects.filter(pk=article.pk).update(views_count=F('views_count') + 1)
+    
+    # Articles similaires (même catégorie)
+    related_articles = Article.objects.filter(
+        is_published=True, category=article.category
+    ).exclude(pk=article.pk)[:4]
+    
+    context = {
+        'article': article,
+        'related_articles': related_articles,
+    }
+    return render(request, 'catalogue/article_detail.html', context)

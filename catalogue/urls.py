@@ -36,6 +36,10 @@ urlpatterns = [
     path('events/', frontend_views.events_view, name='events_list'),
     path('event/<uuid:event_id>/', frontend_views.event_detail_view, name='event_detail'),
     
+    # Articles / Actualités
+    path('actualites/', frontend_views.articles_list_view, name='articles_list'),
+    path('actualites/<slug:slug>/', frontend_views.article_detail_view, name='article_detail'),
+    
     # Recommandations
     path('recommendations/', recommendations_views.recommendations_view, name='recommendations'),
     path('recommendations/dashboard/', frontend_views.recommendations_dashboard, name='recommendations_dashboard'),

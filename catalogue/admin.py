@@ -15,7 +15,7 @@ from .models import (
     BookSimilarity, UserPreference, UserRecommendation, RecommendationStatistic,
     SyncQueue, UserRecommendationFeedback,
     AudiobookMetadata, VideoMaterial, Podcast,
-    SiteConfiguration, Donateur, LienSocial
+    SiteConfiguration, Donateur, LienSocial, Article
 )
 from .proxy_models import (
     AudiobookProxy, VideoProxy, PodcastProxy, 
@@ -580,3 +580,26 @@ class LienSocialAdmin(admin.ModelAdmin):
     list_filter = ('platform', 'is_active')
     search_fields = ('label', 'url')
     ordering = ('order',)
+
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+    """Admin pour les articles d'actualité."""
+    list_display = ('title', 'category', 'author_name', 'is_published', 'is_featured', 'views_count', 'created_at')
+    list_filter = ('is_published', 'is_featured', 'category')
+    list_editable = ('is_published', 'is_featured')
+    search_fields = ('title', 'excerpt', 'content')
+    prepopulated_fields = {'slug': ('title',)}
+    ordering = ('-created_at',)
+    
+    fieldsets = (
+        ('📰 ARTICLE', {
+            'fields': ('title', 'slug', 'category', 'author_name', 'image'),
+        }),
+        ('CONTENU', {
+            'fields': ('excerpt', 'content'),
+        }),
+        ('PUBLICATION', {
+            'fields': ('is_published', 'is_featured'),
+        }),
+    )
