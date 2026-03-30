@@ -31,6 +31,26 @@
             <span><i class="far fa-calendar"></i> {{ article.created_at|date:"d M Y" }}</span>
             <span><i class="far fa-eye"></i> {{ article.views_count }} vue{{ article.views_count|pluralize }}</span>
         </div>
+
+        {% if article.event_date or article.event_location %}
+        <div style="margin-top: 0.8rem; background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(230,57,70,0.06)); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; padding: 0.75rem 1rem; display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center;">
+            {% if article.event_date %}
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fas fa-calendar-check" style="color: #6366F1; font-size: 0.9rem;"></i>
+                <div>
+                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text);">{{ article.event_date|date:"l d F Y" }}</div>
+                    <div style="font-size: 0.68rem; color: var(--text-light);">{{ article.event_date|date:"H:i" }}{% if article.event_end_date %} — {{ article.event_end_date|date:"H:i" }}{% endif %}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if article.event_location %}
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fas fa-map-marker-alt" style="color: var(--secondary); font-size: 0.9rem;"></i>
+                <span style="font-size: 0.75rem; font-weight: 600; color: var(--text);">{{ article.event_location }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
     <!-- Contenu de l'article -->
@@ -48,17 +68,28 @@
 
         <!-- Partager -->
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
-            <p style="font-weight: 700; font-size: 0.85rem; margin-bottom: 0.6rem;"><i class="fas fa-share-alt" style="color: var(--primary);"></i> Partager cet article</p>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <a href="https://wa.me/?text={{ article.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.3rem; background: #25D366; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-decoration: none;">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
+            <p style="font-weight: 700; font-size: 0.9rem; margin-bottom: 0.8rem; color: var(--text);"><i class="fas fa-share-alt" style="color: var(--secondary);"></i> Partager cet article</p>
+            <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                <a href="https://wa.me/?text={{ article.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener"
+                   style="display: inline-flex; align-items: center; gap: 0.4rem; background: #25D366; color: white; padding: 0.55rem 1.1rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.25s; box-shadow: 0 3px 10px rgba(37,211,102,0.25);"
+                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(37,211,102,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 10px rgba(37,211,102,0.25)'">
+                    <i class="fab fa-whatsapp" style="font-size: 1.05rem;"></i> WhatsApp
                 </a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.3rem; background: #1877F2; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-decoration: none;">
-                    <i class="fab fa-facebook-f"></i> Facebook
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener"
+                   style="display: inline-flex; align-items: center; gap: 0.4rem; background: #1877F2; color: white; padding: 0.55rem 1.1rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.25s; box-shadow: 0 3px 10px rgba(24,119,242,0.25);"
+                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(24,119,242,0.35)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 10px rgba(24,119,242,0.25)'">
+                    <i class="fab fa-facebook-f" style="font-size: 0.95rem;"></i> Facebook
                 </a>
-                <a href="https://twitter.com/intent/tweet?text={{ article.title|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.3rem; background: #1DA1F2; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-decoration: none;">
-                    <i class="fab fa-twitter"></i> Twitter
+                <a href="https://x.com/intent/tweet?text={{ article.title|urlencode }}&url={{ request.build_absolute_uri|urlencode }}" target="_blank" rel="noopener"
+                   style="display: inline-flex; align-items: center; gap: 0.4rem; background: #000000; color: white; padding: 0.55rem 1.1rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; text-decoration: none; transition: all 0.25s; box-shadow: 0 3px 10px rgba(0,0,0,0.2);"
+                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 10px rgba(0,0,0,0.2)'">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X
                 </a>
+                <button type="button" onclick="navigator.share?navigator.share({title:'{{ article.title|escapejs }}',text:'{{ article.excerpt|escapejs|truncatewords:15 }}',url:window.location.href}):navigator.clipboard.writeText(window.location.href).then(function(){alert('Lien copié !')})"
+                   style="display: inline-flex; align-items: center; gap: 0.4rem; background: var(--primary); color: white; padding: 0.55rem 1.1rem; border-radius: 10px; font-size: 0.8rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.25s; box-shadow: 0 3px 10px rgba(27,42,74,0.2);"
+                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(27,42,74,0.3)'" onmouseout="this.style.transform='';this.style.boxShadow='0 3px 10px rgba(27,42,74,0.2)'">
+                    <i class="fas fa-share-alt" style="font-size: 0.9rem;"></i> Partager
+                </button>
             </div>
         </div>
     </article>

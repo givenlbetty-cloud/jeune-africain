@@ -599,6 +599,10 @@ class ArticleAdmin(admin.ModelAdmin):
         ('CONTENU', {
             'fields': ('excerpt', 'content'),
         }),
+        ('📅 DATE & LIEU (optionnel)', {
+            'fields': ('event_date', 'event_end_date', 'event_location'),
+            'description': "Renseignez ces champs si l'article est lié à un événement avec une date et un lieu précis.",
+        }),
         ('PUBLICATION', {
             'fields': ('is_published', 'is_featured'),
         }),

@@ -2616,6 +2616,9 @@ class Article(models.Model):
         default='AUTRE'
     )
     author_name = models.CharField(_("Auteur de l'article"), max_length=150, blank=True, default="Calures Éditions")
+    event_date = models.DateTimeField(_("Date de l'événement"), null=True, blank=True, help_text="Date et heure si l'article est lié à un événement")
+    event_end_date = models.DateTimeField(_("Date de fin"), null=True, blank=True, help_text="Date et heure de fin (optionnel)")
+    event_location = models.CharField(_("Lieu"), max_length=255, blank=True, default="", help_text="Lieu de l'événement (optionnel)")
     is_published = models.BooleanField(_("Publié"), default=True)
     is_featured = models.BooleanField(_("À la une"), default=False, help_text="Affiché en priorité sur la page d'accueil")
     views_count = models.PositiveIntegerField(_("Nombre de vues"), default=0)
