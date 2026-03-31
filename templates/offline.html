@@ -1,94 +1,99 @@
-{% extends 'base-premium.html' %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mode Hors Ligne — Calures Éditions</title>
+    <meta name="theme-color" content="#1B2A4A">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; }
+        .card { background: white; border-radius: 16px; padding: 2rem; max-width: 440px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.08); text-align: center; }
+        .icon { font-size: 3rem; margin-bottom: 1rem; }
+        h1 { font-size: 1.3rem; font-weight: 700; color: #1B2A4A; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 0.88rem; color: #666; margin-bottom: 1.5rem; line-height: 1.5; }
+        .books-section { text-align: left; margin-top: 1rem; }
+        .books-section h3 { font-size: 0.85rem; font-weight: 700; color: #1B2A4A; margin-bottom: 0.75rem; }
+        .book-item { display: flex; align-items: center; gap: 0.75rem; background: #f8f9fa; border-radius: 10px; padding: 0.75rem; margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s; text-decoration: none; color: inherit; }
+        .book-item:hover { background: #e9ecef; }
+        .book-icon { width: 36px; height: 36px; background: #1B2A4A; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .book-info .title { font-size: 0.82rem; font-weight: 600; }
+        .book-info .date { font-size: 0.7rem; color: #999; }
+        .empty-state { font-size: 0.82rem; color: #999; padding: 1rem; background: #f8f9fa; border-radius: 10px; }
+        .status-bar { display: flex; align-items: center; gap: 6px; justify-content: center; margin-top: 1.5rem; font-size: 0.75rem; color: #999; }
+        .status-dot { width: 8px; height: 8px; background: #E63946; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .online-redirect { display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">📴</div>
+        <h1>Mode Hors Ligne</h1>
+        <p class="subtitle">Vous n'êtes pas connecté à Internet. Vous pouvez lire les livres que vous avez sauvegardés.</p>
 
-{% block title %}Mode Hors Ligne — Calures Éditions{% endblock %}
+        <div class="books-section">
+            <h3>📚 Mes livres sauvegardés</h3>
+            <div id="booksList">
+                <div class="empty-state">Chargement...</div>
+            </div>
+        </div>
 
-{% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <!-- Icône hors ligne -->
-            <div class="mb-4">
-                <i class="fas fa-wifi-off" style="font-size: 4rem; color: #ffc107;"></i>
-            </div>
-            
-            <!-- Message -->
-            <h1 class="mb-3">Mode Hors Ligne Activé</h1>
-            <p class="lead text-muted mb-4">
-                Vous êtes actuellement hors ligne. Vous pouvez continuer à lire les livres téléchargés.
-            </p>
-            
-            <!-- Actions disponibles -->
-            <div class="alert alert-info mb-4">
-                <h5>✅ Disponible hors ligne:</h5>
-                <ul class="mb-0 text-start">
-                    <li>Lecture des livres téléchargés</li>
-                    <li>Navigation entre les pages</li>
-                    <li>Affichage des recommandations en cache</li>
-                </ul>
-            </div>
-            
-            <!-- Actions non disponibles -->
-            <div class="alert alert-warning mb-4">
-                <h5>⚠️ Non disponible hors ligne:</h5>
-                <ul class="mb-0 text-start">
-                    <li>Synchronisation des évaluations</li>
-                    <li>Mise à jour des préférences</li>
-                    <li>Téléchargement de nouveaux livres</li>
-                    <li>Actions nécessitant internet</li>
-                </ul>
-            </div>
-            
-            <!-- Info de sync -->
-            <div class="card bg-light mb-4">
-                <div class="card-body">
-                    <p class="mb-0">
-                        <i class="fas fa-sync-alt"></i>
-                        <strong>Synchronisation automatique:</strong>
-                        Les actions en attente seront synchronisées automatiquement une fois que vous serez de nouveau en ligne.
-                    </p>
-                </div>
-            </div>
-            
-            <!-- Actions disponibles -->
-            <div class="btn-group mb-4" role="group">
-                <a href="/" class="btn btn-primary">
-                    <i class="fas fa-home"></i> Accueil
-                </a>
-                <a href="/books/recommendations/dashboard/" class="btn btn-primary">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
-            </div>
-            
-            <!-- Status de connexion -->
-            <p class="text-muted small">
-                <i class="fas fa-info-circle"></i>
-                L'application repassera automatiquement en mode en ligne dès que votre connexion sera rétablie.
-            </p>
+        <div class="status-bar">
+            <span class="status-dot"></span>
+            <span>En attente de connexion...</span>
         </div>
     </div>
-</div>
 
-<script>
-    // Détecter quand la connexion revient
-    window.addEventListener('online', function() {
-        // Afficher notification
-        showToast('Connexion rétablie!', 'Synchronisation en cours...', 'success');
-        
-        // Sync data
-        navigator.serviceWorker.controller?.postMessage({
-            type: 'SYNC_DATA'
-        });
-        
-        // Rediriger vers accueil après 2 secondes
-        setTimeout(() => {
+    <script>
+    // List saved books from IndexedDB
+    (function() {
+        var req = indexedDB.open('Calures_Offline', 1);
+        req.onupgradeneeded = function(e) {
+            var db = e.target.result;
+            if (!db.objectStoreNames.contains('books')) db.createObjectStore('books', { keyPath: 'id' });
+        };
+        req.onsuccess = function() {
+            var db = req.result;
+            if (!db.objectStoreNames.contains('books')) {
+                document.getElementById('booksList').innerHTML = '<div class="empty-state">Aucun livre sauvegardé. Connectez-vous et sauvegardez un livre pour le lire hors ligne.</div>';
+                return;
+            }
+            var tx = db.transaction(['books'], 'readonly');
+            var store = tx.objectStore('books');
+            var all = store.getAll();
+            all.onsuccess = function() {
+                var books = all.result;
+                var container = document.getElementById('booksList');
+                if (!books.length) {
+                    container.innerHTML = '<div class="empty-state">Aucun livre sauvegardé. Connectez-vous et sauvegardez un livre pour le lire hors ligne.</div>';
+                    return;
+                }
+                var html = '';
+                books.forEach(function(b) {
+                    var date = b.ts ? new Date(b.ts).toLocaleDateString('fr-FR') : '';
+                    var title = b.title || 'Livre';
+                    html += '<a href="/offline-reader/' + b.id + '/" class="book-item">';
+                    html += '<div class="book-icon">📖</div>';
+                    html += '<div class="book-info"><div class="title">' + title + '</div>';
+                    html += '<div class="date">Sauvegardé le ' + date + '</div></div>';
+                    html += '</a>';
+                });
+                container.innerHTML = html;
+            };
+        };
+        req.onerror = function() {
+            document.getElementById('booksList').innerHTML = '<div class="empty-state">Impossible d\'accéder aux livres sauvegardés.</div>';
+        };
+
+        // Auto-redirect when back online
+        window.addEventListener('online', function() {
             window.location.href = '/';
-        }, 2000);
-    });
-    
-    // Check si online
-    if (navigator.onLine) {
-        window.location.href = '/';
-    }
-</script>
-
-{% endblock %}
+        });
+        if (navigator.onLine) {
+            window.location.href = '/';
+        }
+    })();
+    </script>
+</body>
+</html>

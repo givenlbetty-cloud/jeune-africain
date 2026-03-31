@@ -1133,11 +1133,11 @@ async function saveForOffline(id, url) {
 
         // 3. Pre-cache the offline reader page + PDF.js lib via Cache API
         if('caches' in window){
-            var cache = await caches.open('bnc-v3-2026');
+            var cache = await caches.open('calures-v4');
             var pagesToCache = [
                 '/offline-reader/' + id + '/',
-                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
-                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+                '/static/js/pdf.min.js',
+                '/static/js/pdf.worker.min.js'
             ];
             await Promise.allSettled(pagesToCache.map(function(u){ return cache.add(u); }));
         }

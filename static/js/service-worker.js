@@ -5,10 +5,10 @@ Stratégies: cache-first (assets), network-first (API), PDF pour offline
 IndexedDB pour sync background et données locales
 */
 
-const CACHE_NAME = 'bnc-v3-2026';
-const API_CACHE = 'bnc-api-v3-2026';
-const PDF_CACHE = 'bnc-pdf-v3-2026';
-const RUNTIME_CACHE = 'bnc-runtime-v3-2026';
+const CACHE_NAME = 'calures-v4';
+const API_CACHE = 'calures-api-v4';
+const PDF_CACHE = 'calures-pdf-v4';
+const RUNTIME_CACHE = 'calures-runtime-v4';
 
 // Assets statiques à pré-cacher
 const STATIC_ASSETS = [
@@ -16,6 +16,8 @@ const STATIC_ASSETS = [
     '/offline/',
     '/pwa/manifest.json',
     '/static/css/global.css',
+    '/static/js/pdf.min.js',
+    '/static/js/pdf.worker.min.js',
     '/static/images/icon-192x192.png',
     '/static/images/icon-512x512.png'
 ];
@@ -118,7 +120,6 @@ async function handleBookReader(request, url) {
     try {
         const response = await fetch(request);
         if (response.ok) {
-            // Cache it for later
             const cache = await caches.open(RUNTIME_CACHE);
             cache.put(request, response.clone());
             return response;
@@ -130,10 +131,15 @@ async function handleBookReader(request, url) {
         if (match) {
             const bookId = match[1];
             const offlineUrl = '/offline-reader/' + bookId + '/';
+            
+            // Try to serve cached offline reader page
             const cached = await caches.match(offlineUrl);
             if (cached) return cached;
+            
+            // Redirect to offline reader (browser will handle it)
+            return Response.redirect(offlineUrl, 302);
         }
-        // Last resort: try cached version of original page
+        // Last resort: serve cached page or offline page
         const cached = await caches.match(request);
         if (cached) return cached;
         

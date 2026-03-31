@@ -127,8 +127,8 @@
         <div class="reader-content" id="readerContent"></div>
     </div>
 
-    <!-- PDF.js from CDN (will be cached by SW) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <!-- PDF.js local (pas de dépendance CDN en offline) -->
+    <script src="/static/js/pdf.min.js"></script>
     <script>
     (async function() {
         const loadingScreen = document.getElementById('loadingScreen');
@@ -160,11 +160,10 @@
             // Book found! Load it
             const blobUrl = URL.createObjectURL(bookData.blob);
 
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = '/static/js/pdf.worker.min.js';
 
             const pdf = await pdfjsLib.getDocument({
                 url: blobUrl,
-                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
                 cMapPacked: true,
             }).promise;
 

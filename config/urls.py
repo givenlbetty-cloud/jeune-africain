@@ -36,8 +36,21 @@ urlpatterns = [
     # PWA Support (manifest, config, offline sync)
     path("pwa/", include("config.pwa_urls")),
     
+    # Service Worker served from root scope (critical for PWA)
+    path("sw.js", lambda request: __import__('django.http', fromlist=['FileResponse']).FileResponse(
+        open(__import__('os').path.join(__import__('django.conf', fromlist=['settings']).settings.BASE_DIR, 'static', 'js', 'service-worker.js'), 'rb'),
+        content_type='application/javascript',
+        headers={'Service-Worker-Allowed': '/', 'Cache-Control': 'no-cache'}
+    ), name='service_worker'),
+    
     # Offline reader (no auth required - reads from IndexedDB)
     path("offline-reader/<str:book_id>/", lambda request, book_id: __import__('django.shortcuts', fromlist=['render']).render(request, 'catalogue/offline_reader.html'), name='offline_reader'),
+    
+    # Offline page (fallback for service worker - must be outside i18n)
+    path("offline/", lambda request: __import__('django.http', fromlist=['FileResponse']).HttpResponse(
+        open(__import__('os').path.join(__import__('django.conf', fromlist=['settings']).settings.BASE_DIR, 'templates', 'offline.html'), 'r').read(),
+        content_type='text/html'
+    ), name='offline'),
     
     # Analytics Dashboard (not translated)
     path("analytics/", include("catalogue.analytics_urls")),
@@ -68,9 +81,6 @@ urlpatterns += i18n_patterns(
 
     # Page Staff technique
     path("staff/", staff_view, name='staff'),
-
-    # Offline page (fallback for service worker)
-    path("offline/", lambda request: __import__('django.shortcuts', fromlist=['render']).render(request, 'offline.html'), name='offline'),
     
     # Account Linking (lier plusieurs comptes OAuth)
     path("accounts/social/", include("users.account_linking_urls")),

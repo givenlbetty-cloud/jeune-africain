@@ -674,7 +674,7 @@
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/static/js/service-worker.js', { scope: '/' })
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
                 .then(function(reg) { console.log('[PWA] SW enregistré:', reg.scope); })
                 .catch(function(err) { console.log('[PWA] SW erreur:', err); });
         });
