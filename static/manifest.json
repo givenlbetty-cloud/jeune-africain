@@ -1,0 +1,99 @@
+{
+    "name": "Calures Éditions — Littérature Congolaise",
+    "short_name": "Calures",
+    "description": "Bibliothèque numérique congolaise — Lisez et téléchargez des livres africains en ligne et hors-ligne",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1B2A4A",
+    "scope": "/",
+    "lang": "fr-FR",
+    "icons": [
+        {
+            "src": "/static/images/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/images/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/static/images/icon-maskable.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/static/images/screenshot-1.png",
+            "sizes": "540x720",
+            "type": "image/png",
+            "form_factor": "narrow"
+        },
+        {
+            "src": "/static/images/screenshot-2.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        }
+    ],
+    "categories": ["books", "education"],
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "shortcuts": [
+        {
+            "name": "Catalogue",
+            "short_name": "Catalogue",
+            "description": "Parcourir le catalogue",
+            "url": "/catalogue/",
+            "icons": [
+                {
+                    "src": "/static/images/icon-96x96.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Lecteur PDF",
+            "short_name": "Lecteur",
+            "description": "Ouvrir le lecteur PDF",
+            "url": "/lecteur/",
+            "icons": [
+                {
+                    "src": "/static/images/icon-96x96.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Ma Bibliothèque",
+            "short_name": "Bibliothèque",
+            "description": "Accéder à ma bibliothèque",
+            "url": "/library/",
+            "icons": [
+                {
+                    "src": "/static/images/icon-96x96.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ],
+    "share_target": {
+        "action": "/share",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "title": "title",
+            "text": "text",
+            "url": "url"
+        }
+    }
+}

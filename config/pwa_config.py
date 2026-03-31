@@ -105,15 +105,15 @@ class PWAOfflineDataManager:
 def manifest_view(request):
     """Serve manifest.json"""
     manifest = {
-        'name': 'BNC - Bibliothèque Numérique Cameroun',
-        'short_name': 'BNC',
-        'description': 'Accédez à des milliers de livres numériques avec synchronisation hors ligne',
+        'name': 'Calures Éditions — Littérature Congolaise',
+        'short_name': 'Calures',
+        'description': 'Bibliothèque numérique congolaise — Lisez et téléchargez des livres africains en ligne et hors-ligne',
         'start_url': '/',
         'scope': '/',
         'display': 'standalone',
         'orientation': 'portrait-primary',
         'background_color': '#ffffff',
-        'theme_color': '#667eea',
+        'theme_color': '#1B2A4A',
         'prefer_related_applications': False,
         'categories': ['books', 'education'],
         'icons': [

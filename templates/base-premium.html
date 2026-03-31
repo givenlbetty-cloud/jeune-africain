@@ -9,6 +9,9 @@
     <meta name="theme-color" content="#1B2A4A">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+    <link rel="apple-touch-icon" href="{% static 'images/icon-192x192.png' %}">
     
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -453,6 +456,9 @@
     </style>
     
     {% block extra_css %}{% endblock %}
+
+    <!-- PWA Install Prompt -->
+    <script src="{% static 'js/pwa-install.js' %}" defer></script>
 </head>
 <body>
     <!-- Navbar — Desktop: liens horizontaux / Mobile: burger -->
@@ -663,5 +669,16 @@
     </script>
     
     {% block extra_js %}{% endblock %}
+
+    <!-- Service Worker Registration -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/static/js/service-worker.js', { scope: '/' })
+                .then(function(reg) { console.log('[PWA] SW enregistré:', reg.scope); })
+                .catch(function(err) { console.log('[PWA] SW erreur:', err); });
+        });
+    }
+    </script>
 </body>
 </html>

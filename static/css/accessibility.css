@@ -1,0 +1,757 @@
+/**
+ * Accessibility CSS - WCAG 2.1 AA Compliance
+ * Styles pour améliorer l'accessibilité et l'expérience utilisateur
+ */
+
+/* ============================================================================
+   ROOT VARIABLES & COLOR SCHEMES
+   ============================================================================ */
+
+:root {
+  /* Base colors with good contrast */
+  --color-text: #1a1a1a;
+  --color-text-light: #666666;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f5f5f5;
+  --color-border: #cccccc;
+  
+  /* Semantic colors (WCAG AA compliant) */
+  --color-primary: #1a73e8;
+  --color-success: #188038;
+  --color-warning: #9c6c00;
+  --color-error: #d32f2f;
+  --color-info: #1a73e8;
+  
+  /* Focus indicator */
+  --focus-color: #4285f4;
+  --focus-outline: 3px solid var(--focus-color);
+  --focus-outline-offset: 2px;
+  
+  /* Reduced motion */
+  --transition: 0.3s ease;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #e1e1e1;
+    --color-text-light: #b0b0b0;
+    --color-bg: #121212;
+    --color-bg-alt: #1e1e1e;
+    --color-border: #424242;
+    --color-primary: #8ab4f8;
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition: 0s;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  :root {
+    --color-text: #000000;
+    --color-text-light: #333333;
+    --color-border: #000000;
+  }
+  
+  body {
+    border: 2px solid var(--color-border);
+  }
+}
+
+
+/* ============================================================================
+   SCREEN READER ONLY
+   ============================================================================ */
+
+.sr-only,
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Allow screen reader text to display when focused */
+.sr-only:focus,
+.sr-only:active,
+.visually-hidden:focus,
+.visually-hidden:active {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+
+/* ============================================================================
+   FOCUS INDICATORS
+   ============================================================================ */
+
+/* Visible focus indicator for keyboard navigation */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
+/* Remove default focus for mouse users only */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Enhanced focus for interactive elements */
+:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+  box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.1);
+}
+
+
+/* ============================================================================
+   SKIP TO MAIN CONTENT LINK
+   ============================================================================ */
+
+.skip-to-main {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  z-index: 9999;
+  padding: 12px 20px;
+  background: var(--color-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.skip-to-main:focus {
+  top: 10px;
+  left: 10px;
+  outline: var(--focus-outline);
+}
+
+
+/* ============================================================================
+   SEMANTIC HTML ELEMENTS
+   ============================================================================ */
+
+article {
+  margin: 2rem 0;
+  padding: 1rem;
+}
+
+section {
+  margin: 1rem 0;
+}
+
+nav[aria-label] {
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+main {
+  display: block;
+}
+
+main:focus {
+  outline: none;
+}
+
+
+/* ============================================================================
+   HEADINGS & TYPOGRAPHY
+   ============================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.75rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.25rem;
+}
+
+h5, h6 {
+  font-size: 1rem;
+}
+
+/* Ensure sufficient text spacing */
+p {
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  margin-bottom: 1rem;
+}
+
+/* Readable line length */
+article,
+main,
+.content {
+  max-width: 80ch;
+  margin: 0 auto;
+}
+
+
+/* ============================================================================
+   LINKS
+   ============================================================================ */
+
+a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  transition: color var(--transition);
+}
+
+a:visited {
+  color: #6200ea;
+}
+
+a:hover {
+  color: #1765cc;
+  text-decoration: underline wavy;
+}
+
+a:active {
+  color: #1550b8;
+}
+
+/* Indicate external links */
+a[target="_blank"]::after {
+  content: " (opens in new window)";
+  font-size: 0.85em;
+  vertical-align: super;
+}
+
+a[target="_blank"].sr-only::after {
+  position: static;
+  width: auto;
+}
+
+/* Icon-only links need text alternative */
+a.icon-only {
+  display: inline-block;
+  position: relative;
+}
+
+a.icon-only span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+
+/* ============================================================================
+   FORMS & INPUTS
+   ============================================================================ */
+
+form {
+  margin: 2rem 0;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+  display: block;
+}
+
+label abbr[title="required"] {
+  text-decoration: none;
+}
+
+.required-indicator {
+  color: var(--color-error);
+  font-weight: bold;
+  margin-left: 0.25rem;
+  aria-label: "required";
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="tel"],
+textarea,
+select {
+  padding: 0.75rem;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+}
+
+input[disabled],
+textarea[disabled],
+select[disabled] {
+  background-color: var(--color-bg-alt);
+  color: var(--color-text-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Checkboxes and radios */
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  vertical-align: middle;
+  accent-color: var(--color-primary);
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+
+.form-check-label {
+  margin: 0;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Error messages */
+.error-message,
+[role="alert"] {
+  color: var(--color-error);
+  font-weight: 600;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+input.is-invalid,
+textarea.is-invalid,
+select.is-invalid {
+  border-color: var(--color-error);
+}
+
+input.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+}
+
+/* Help text */
+.form-text,
+[role="note"] {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  margin-top: 0.25rem;
+  display: block;
+}
+
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--color-primary);
+  border-radius: 4px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  user-select: none;
+  transition: background-color var(--transition), border-color var(--transition);
+}
+
+button:hover,
+.btn:hover {
+  background-color: #1550b8;
+  border-color: #1550b8;
+}
+
+button:active,
+.btn:active {
+  background-color: #1540a8;
+  border-color: #1540a8;
+}
+
+button:disabled,
+button[disabled],
+.btn:disabled {
+  background-color: var(--color-bg-alt);
+  border-color: var(--color-border);
+  color: var(--color-text-light);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Secondary button */
+.btn-secondary {
+  background: var(--color-bg-alt);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg);
+  border-color: var(--color-text);
+}
+
+/* Min touch target (48px) for mobile */
+button, .btn {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+
+/* ============================================================================
+   NOTIFICATIONS & ALERTS
+   ============================================================================ */
+
+[role="alert"],
+[role="status"],
+.notification,
+.alert {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-left: 4px solid var(--color-info);
+  border-radius: 4px;
+  background-color: rgba(26, 115, 232, 0.1);
+  color: var(--color-text);
+}
+
+.notification-success,
+.alert-success {
+  border-left-color: var(--color-success);
+  background-color: rgba(24, 128, 56, 0.1);
+}
+
+.notification-error,
+.alert-danger {
+  border-left-color: var(--color-error);
+  background-color: rgba(211, 47, 47, 0.1);
+}
+
+.notification-warning,
+.alert-warning {
+  border-left-color: var(--color-warning);
+  background-color: rgba(156, 108, 0, 0.1);
+}
+
+.notification-info,
+.alert-info {
+  border-left-color: var(--color-info);
+  background-color: rgba(26, 115, 232, 0.1);
+}
+
+
+/* ============================================================================
+   LISTS
+   ============================================================================ */
+
+ul, ol {
+  margin: 1rem 0;
+  padding-left: 2rem;
+}
+
+li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+/* List without bullets (nav lists) */
+.nav-list {
+  list-style: none;
+  padding: 0;
+}
+
+.nav-list li {
+  margin: 0.5rem 0;
+}
+
+
+/* ============================================================================
+   TABLES
+   ============================================================================ */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+th {
+  background-color: var(--color-bg-alt);
+  font-weight: 600;
+  color: var(--color-text);
+  vertical-align: middle;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Ensure sufficient contrast for table */
+th, td {
+  color: var(--color-text);
+}
+
+
+/* ============================================================================
+   IMAGES & MEDIA
+   ============================================================================ */
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Decorative images should have empty alt */
+img[role="presentation"],
+img.decorative {
+  border: none;
+  background: transparent;
+}
+
+figure {
+  margin: 1.5rem 0;
+}
+
+figcaption {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+/* Video player accessibility */
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+
+/* ============================================================================
+   ARIA LIVE REGIONS
+   ============================================================================ */
+
+[aria-live],
+[role="status"],
+[role="alert"] {
+  position: relative;
+}
+
+.aria-live-region {
+  padding: 1rem;
+  margin: 1rem 0;
+  border-left: 4px solid var(--color-info);
+  background-color: rgba(26, 115, 232, 0.05);
+  border-radius: 4px;
+}
+
+
+/* ============================================================================
+   TOOLTIPS
+   ============================================================================ */
+
+.tooltip-trigger {
+  cursor: help;
+  border-bottom: 1px dotted var(--color-text);
+  position: relative;
+}
+
+.tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-text);
+  color: var(--color-bg);
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  z-index: 1000;
+}
+
+.tooltip-trigger:hover .tooltip-content,
+.tooltip-trigger:focus-visible .tooltip-content {
+  display: block;
+}
+
+
+/* ============================================================================
+   KEYBOARD HINTS
+   ============================================================================ */
+
+.keyboard-hint {
+  font-size: 0.85rem;
+  font-family: monospace;
+  background: var(--color-bg-alt);
+  padding: 0.25rem 0.5rem;
+  border-radius: 2px;
+  border: 1px solid var(--color-border);
+  display: inline-block;
+  margin: 0 0.25rem;
+}
+
+
+/* ============================================================================
+   LOADING INDICATORS
+   ============================================================================ */
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--color-bg-alt);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+[aria-busy="true"] .spinner {
+  display: inline-block;
+}
+
+[aria-busy="false"] .spinner {
+  display: none;
+}
+
+
+/* ============================================================================
+   RESPONSIVE ACCESSIBILITY
+   ============================================================================ */
+
+/* Larger text on mobile */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px; /* Prevents zoom on input focus in iOS */
+  }
+  
+  button, .btn, input, select, textarea {
+    font-size: 16px;
+  }
+  
+  /* Ensure touch targets are at least 44px */
+  button, .btn, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Increase text spacing on request */
+@media (prefers-color-scheme: light) and (prefers-contrast: more) {
+  body {
+    letter-spacing: 0.05em;
+    word-spacing: 0.1em;
+  }
+}
+
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+  
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+  
+  button, .btn {
+    display: none;
+  }
+  
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+}
+

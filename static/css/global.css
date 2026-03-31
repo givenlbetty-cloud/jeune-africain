@@ -1,0 +1,587 @@
+/* Global Styles for BNC */
+
+/* ============= SMOOTH TRANSITIONS ============= */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ============= FOCUS STATES ============= */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ============= LOADING ANIMATIONS ============= */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ============= MODAL IMPROVEMENTS ============= */
+.modal-content {
+    border: none;
+    border-radius: 8px; /* Slightly less round */
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px 8px 0 0;
+    padding: 1.5rem;
+}
+
+.modal-header .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+.modal-body {
+    padding: 2rem;
+    /* CORRECTION UI: Modales - Ajouter max-height et scroll */
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+/* ============= DROPDOWN IMPROVEMENTS ============= */
+.dropdown-menu {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+}
+
+.dropdown-item {
+    border-radius: 6px;
+    margin-bottom: 2px;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+}
+
+/* ============= TOOLTIP STYLING ============= */
+.tooltip-inner {
+    background: var(--primary-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.bs-tooltip-top .tooltip-arrow::before,
+.bs-tooltip-bottom .tooltip-arrow::before {
+    border-top-color: var(--primary-color);
+}
+
+/* ============= INPUT STYLING ============= */
+.input-group-text {
+    background: white;
+    border: 2px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.input-group-text i {
+    color: var(--primary-color);
+}
+
+/* ============= LINK STYLING ============= */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--primary-light);
+    text-decoration: underline;
+}
+
+/* ============= TABLE STYLING ============= */
+.table {
+    border: 1px solid var(--border-color);
+    border-radius: 4px; /* More square */
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: var(--bg-light);
+    background: var(--bg-light);
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.table thead th {
+    border: none;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(75, 44, 146, 0.05); /* Subtle purple tint */
+}
+
+.table tbody td {
+    vertical-align: middle;
+    color: var(--text-primary);
+}
+
+/* ============= LISTGROUP ============= */
+.list-group-item {
+    border: 1px solid var(--border-color);
+    background: white;
+    transition: background-color 0.2s ease;
+}
+
+[data-bs-theme="dark"] .list-group-item {
+    background: var(--bg-white);
+}
+
+.list-group-item:hover {
+    background: var(--bg-light);
+}
+
+.list-group-item.active {
+    background-color: var(--primary-color);
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* ============= BREADCRUMB ============= */
+.breadcrumb {
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 0;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* ============= NAV TABS ============= */
+.nav-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: transparent;
+    border-bottom-color: var(--primary-color);
+}
+
+/* ============= BREADCRUMB NAV ============= */
+.breadcrumb-item::before {
+    color: var(--text-secondary);
+}
+
+/* ============= LABEL STYLING ============= */
+label {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ============= LOADING SPINNER ============= */
+.spinner-border {
+    border-color: rgba(26, 77, 62, 0.1);
+    border-right-color: var(--primary-color);
+}
+
+.spinner-grow {
+    background: var(--primary-color);
+}
+
+/* ============= UI COMPONENTS ============= */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+/* ============= UTILITY CLASSES ============= */
+.bg-gradient-primary {
+    background-color: var(--primary-color) !important;
+    background: var(--primary-color) !important;
+}
+
+.text-gradient {
+    color: var(--primary-color);
+    background: none;
+    -webkit-text-fill-color: initial;
+}
+
+/* ============= PRINT STYLES ============= */
+@media print {
+    .navbar,
+    footer,
+    .sidebar,
+    .pagination {
+        display: none;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .container {
+        width: 100%;
+    }
+}
+
+/* ============= ACCESSIBILITY ============= */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============= HIGH CONTRAST MODE ============= */
+@media (prefers-contrast: more) {
+    .btn {
+        border-width: 2px;
+    }
+    
+    .card {
+        border-width: 2px;
+    }
+}
+
+/* ============= DARK MODE SPECIFIC ============= */
+[data-bs-theme="dark"] .card {
+    background: var(--bg-white);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .modal-content {
+    background: var(--bg-white);
+    color: var(--text-primary);
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background: var(--bg-white);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+    background: var(--bg-white);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .table {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-bs-theme="dark"] .table thead {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+}
+
+/* ============= RESPONSIVE IMPROVEMENTS ============= */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+    
+    .card {
+        margin-bottom: 16px;
+    }
+    
+    h1 {
+        font-size: 1.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* ============= MOBILE BOTTOM NAVIGATION (JW Style) ============= */
+.bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f8f8f8; /* Light grey background like native apps */
+    border-top: 1px solid #dcdcdc;
+    z-index: 1050;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+}
+
+.bottom-nav-inner {
+    display: flex;
+    justify-content: space-around;
+    height: 60px; /* Standard tab bar height */
+    align-items: center;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #757575; /* Inactive color */
+    flex: 1;
+    height: 100%;
+    padding: 5px 0;
+    transition: color 0.15s ease;
+}
+
+.bottom-nav-item i {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+}
+
+.bottom-nav-item span {
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.bottom-nav-item:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+    background-color: rgba(0,0,0,0.02);
+}
+
+.bottom-nav-item.active {
+    color: var(--primary-color);
+}
+
+/* Show only on mobile/tablet */
+@media (max-width: 768px) {
+    .bottom-nav {
+        display: block;
+    }
+    
+    /* Add padding to body so content isn't hidden */
+    body {
+        padding-bottom: 70px;
+    }
+    
+    /* Hide footer on mobile if it takes too much space, optional */
+    footer {
+        padding-bottom: 80px;
+    }
+    
+    /* Hide top navbar specific elements if needed, 
+```
+
+/* ============= CORRECTION UI: Cartes de Livres - Compacter et optimiser ============= */
+.card, .book-card {
+    max-height: 380px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-img-top, .book-image-container {
+    max-height: 200px;
+    object-fit: cover;
+}
+
+.card-body, .book-details {
+    max-height: 140px;
+    overflow: hidden;
+    padding: 1rem;
+}
+
+.card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* ============= CORRECTION UI: Modales - Scrollbar personnalisée ============= */
+.modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Firefox support */
+.modal-body {
+    scrollbar-color: var(--primary-color) rgba(0, 0, 0, 0.05);
+    scrollbar-width: thin;
+}
+
+/* ============= CORRECTION UI: Navigation Footer - Transitions fluides ============= */
+#scroll-top-btn {
+    transition: opacity 0.3s ease !important;
+    visibility: hidden !important;
+}
+
+#scroll-top-btn.show {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* ============= CORRECTION UI: Responsive Mobile Amélioration ============= */
+
+/* Téléphones très petits (< 480px) */
+@media (max-width: 480px) {
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .card-title {
+        font-size: 0.85rem;
+    }
+    
+    .pagination {
+        font-size: 0.75rem;
+    }
+    
+    .page-link {
+        padding: 0.25rem 0.4rem;
+        margin: 0 2px;
+    }
+    
+    .modal-header {
+        padding: 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+        max-height: 60vh;
+    }
+    
+    .modal-footer {
+        padding: 1rem;
+    }
+    
+    button.btn {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Tablettes petites (480px - 768px) */
+@media (max-width: 768px) and (min-width: 481px) {
+    .card {
+        max-height: 360px;
+    }
+    
+    .modal-body {
+        max-height: 65vh;
+    }
+}
+
+/* ============= CORRECTION UI: Grid responsive des cartes ============= */
+.book-grid, .books-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+    .book-grid, .books-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .book-grid, .books-container {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.6rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .book-grid, .books-container {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.5rem;
+    }
+}
+       but keeping it is usually good for branding/search */
+}

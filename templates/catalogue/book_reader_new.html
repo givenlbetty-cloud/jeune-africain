@@ -384,7 +384,7 @@
             // Check IndexedDB first
             let pdfData = CONFIG.pdfUrl;
             try {
-                const dbName = 'BNC_OfflineBooks';
+                const dbName = 'Calures_Offline';
                 const request = indexedDB.open(dbName, 1);
                 
                 const db = await new Promise((resolve, reject) => {
