@@ -1104,15 +1104,63 @@ function toggleFavorite(e, id) {
 }
 async function saveForOffline(id, url) {
     if(!url||url==='None'){alert("Fichier non disponible.");return;}
-    var b=document.getElementById('offlineBtn'),t=document.getElementById('offlineText'),ic=b.querySelector('i');
-    ic.className='fas fa-spinner fa-spin';t.textContent='...';b.disabled=true;
+    // Update both desktop and mobile buttons
+    var btns = [
+        {b: document.getElementById('offlineBtn'), t: document.getElementById('offlineText')},
+        {b: document.getElementById('offlineBtnMobile'), t: document.getElementById('offlineTextMobile')}
+    ];
+    btns.forEach(function(x){
+        if(x.b){x.b.querySelector('i').className='fas fa-spinner fa-spin'; if(x.t)x.t.textContent='Téléchargement...'; x.b.disabled=true;}
+    });
     try{
-        var r=await fetch(url);if(!r.ok)throw 0;var bl=await r.blob();
-        var rq=indexedDB.open('Calures_Offline',1);
-        rq.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('books'))db.createObjectStore('books',{keyPath:'id'});};
-        rq.onsuccess=function(e){var tx=e.target.result.transaction(['books'],'readwrite');tx.objectStore('books').put({id:id,blob:bl,ts:Date.now()});
-            tx.oncomplete=function(){ic.className='fas fa-check-circle';t.textContent='Sauvegardé';b.style.borderColor='#10B981';b.style.color='#10B981';};};
-    }catch(x){ic.className='fas fa-exclamation-triangle';t.textContent='Erreur';b.disabled=false;setTimeout(function(){ic.className='fas fa-cloud-download-alt';t.textContent='Hors-ligne';},3000);}
+        // 1. Download the PDF
+        var r=await fetch(url);if(!r.ok)throw new Error('Téléchargement échoué');
+        var bl=await r.blob();
+
+        // 2. Save PDF + book metadata to IndexedDB
+        var bookTitle = document.querySelector('h1')?.textContent || 'Livre';
+        await new Promise(function(resolve, reject){
+            var rq=indexedDB.open('Calures_Offline',1);
+            rq.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('books'))db.createObjectStore('books',{keyPath:'id'});};
+            rq.onsuccess=function(e){
+                var tx=e.target.result.transaction(['books'],'readwrite');
+                tx.objectStore('books').put({id:id, blob:bl, title:bookTitle, ts:Date.now()});
+                tx.oncomplete=function(){resolve();};
+                tx.onerror=function(){reject(tx.error);};
+            };
+            rq.onerror=function(){reject(rq.error);};
+        });
+
+        // 3. Pre-cache the offline reader page + PDF.js lib via Cache API
+        if('caches' in window){
+            var cache = await caches.open('bnc-v3-2026');
+            var pagesToCache = [
+                '/offline-reader/' + id + '/',
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+            ];
+            await Promise.allSettled(pagesToCache.map(function(u){ return cache.add(u); }));
+        }
+
+        // 4. Show success
+        btns.forEach(function(x){
+            if(x.b){
+                x.b.querySelector('i').className='fas fa-check-circle';
+                if(x.t) x.t.textContent='Sauvegardé ✓';
+                x.b.style.borderColor='#10B981';x.b.style.color='#10B981';
+            }
+        });
+    }catch(x){
+        console.error('Offline save error:', x);
+        btns.forEach(function(el){
+            if(el.b){
+                el.b.querySelector('i').className='fas fa-exclamation-triangle';
+                if(el.t) el.t.textContent='Erreur';
+                el.b.disabled=false;
+                setTimeout(function(){el.b.querySelector('i').className='fas fa-cloud-download-alt';if(el.t) el.t.textContent='Hors-ligne';},3000);
+            }
+        });
+    }
 }
 </script>
 

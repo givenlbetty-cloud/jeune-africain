@@ -5,10 +5,10 @@ Stratégies: cache-first (assets), network-first (API), PDF pour offline
 IndexedDB pour sync background et données locales
 */
 
-const CACHE_NAME = 'bnc-v2-2025';
-const API_CACHE = 'bnc-api-v2-2025';
-const PDF_CACHE = 'bnc-pdf-v2-2025';
-const RUNTIME_CACHE = 'bnc-runtime-v2-2025';
+const CACHE_NAME = 'bnc-v3-2026';
+const API_CACHE = 'bnc-api-v3-2026';
+const PDF_CACHE = 'bnc-pdf-v3-2026';
+const RUNTIME_CACHE = 'bnc-runtime-v3-2026';
 
 // Assets statiques à pré-cacher
 const STATIC_ASSETS = [
@@ -91,6 +91,18 @@ self.addEventListener('fetch', event => {
         return;
     }
     
+    // Book reader: redirect to offline reader when offline
+    if (url.pathname.match(/\/book\/[^/]+\/read\//)) {
+        event.respondWith(handleBookReader(request, url));
+        return;
+    }
+    
+    // Offline reader pages: network-first, serve from cache offline
+    if (url.pathname.startsWith('/offline-reader/')) {
+        event.respondWith(networkFirstHTML(request));
+        return;
+    }
+    
     // HTML: Network-first
     if (request.headers.get('Accept')?.includes('text/html')) {
         event.respondWith(networkFirstHTML(request));
@@ -100,6 +112,36 @@ self.addEventListener('fetch', event => {
     // Autres assets: Cache-first
     event.respondWith(cacheFirstStatic(request));
 });
+
+// Handle book reader: try network, fallback to offline reader
+async function handleBookReader(request, url) {
+    try {
+        const response = await fetch(request);
+        if (response.ok) {
+            // Cache it for later
+            const cache = await caches.open(RUNTIME_CACHE);
+            cache.put(request, response.clone());
+            return response;
+        }
+        throw new Error('Network response not ok');
+    } catch (error) {
+        // Offline: extract book ID and redirect to offline reader
+        const match = url.pathname.match(/\/book\/([^/]+)\/read\//);
+        if (match) {
+            const bookId = match[1];
+            const offlineUrl = '/offline-reader/' + bookId + '/';
+            const cached = await caches.match(offlineUrl);
+            if (cached) return cached;
+        }
+        // Last resort: try cached version of original page
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        
+        return caches.match('/offline/').catch(() =>
+            new Response('Hors-ligne', { status: 503 })
+        );
+    }
+}
 
 // ============================================================================
 // STRATÉGIES

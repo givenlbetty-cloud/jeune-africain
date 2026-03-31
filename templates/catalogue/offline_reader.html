@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>📖 Lecture Hors-ligne — Calures Éditions</title>
+    <meta name="theme-color" content="#1B2A4A">
+    <style>
+        :root {
+            --header-height: 48px;
+            --bg-color: #525659;
+            --primary: #1B2A4A;
+            --secondary: #E63946;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; background: var(--bg-color); overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+        .reader-wrapper { display: flex; flex-direction: column; height: 100vh; }
+
+        .reader-header {
+            height: var(--header-height);
+            background: #2c2c2c;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        .reader-header .back-btn {
+            background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer; padding: 6px;
+        }
+        .reader-header .title {
+            font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;
+        }
+        .reader-header .page-info {
+            font-size: 0.75rem; opacity: 0.8; white-space: nowrap;
+        }
+        .offline-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: var(--secondary); color: white; font-size: 0.65rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 10px; margin-left: 8px;
+        }
+
+        .reader-content {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 0;
+            gap: 10px;
+        }
+
+        .pdf-page canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        /* Loading state */
+        .loading-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; color: white; text-align: center; padding: 2rem;
+        }
+        .loading-screen .spinner {
+            width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: white; border-radius: 50%;
+            animation: spin 0.8s linear infinite; margin-bottom: 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .error-screen {
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; color: white; text-align: center; padding: 2rem;
+        }
+        .error-screen i { font-size: 3rem; color: var(--secondary); margin-bottom: 1rem; }
+        .error-screen h2 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .error-screen p { font-size: 0.85rem; opacity: 0.7; max-width: 300px; }
+        .error-screen .btn-retry {
+            margin-top: 1rem; background: var(--secondary); color: white;
+            border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+        }
+
+        /* Saved books list */
+        .books-list { width: 100%; max-width: 400px; margin-top: 1.5rem; }
+        .books-list h3 { font-size: 0.9rem; margin-bottom: 0.75rem; opacity: 0.8; }
+        .book-item {
+            background: rgba(255,255,255,0.1); border-radius: 8px; padding: 0.75rem;
+            margin-bottom: 0.5rem; cursor: pointer; transition: background 0.2s;
+        }
+        .book-item:hover { background: rgba(255,255,255,0.2); }
+        .book-item .book-title { font-size: 0.85rem; font-weight: 600; }
+        .book-item .book-date { font-size: 0.7rem; opacity: 0.6; margin-top: 2px; }
+    </style>
+</head>
+<body>
+    <!-- Loading -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="spinner"></div>
+        <p style="font-size:0.9rem; font-weight:600;">Chargement hors-ligne...</p>
+        <p style="font-size:0.75rem; opacity:0.6; margin-top:0.5rem;">Récupération du livre depuis votre appareil</p>
+    </div>
+
+    <!-- Error -->
+    <div id="errorScreen" class="error-screen">
+        <div style="font-size:3rem; margin-bottom:1rem;">📴</div>
+        <h2>Livre non trouvé hors-ligne</h2>
+        <p id="errorMsg">Ce livre n'a pas été sauvegardé pour la lecture hors-ligne.</p>
+        <div id="savedBooksList" class="books-list"></div>
+        <button class="btn-retry" onclick="window.history.back()">← Retour</button>
+    </div>
+
+    <!-- Reader -->
+    <div id="readerWrapper" class="reader-wrapper" style="display:none;">
+        <div class="reader-header">
+            <button class="back-btn" onclick="window.history.back()">←</button>
+            <span class="title" id="bookTitle">Livre</span>
+            <div style="display:flex;align-items:center;">
+                <span class="page-info" id="pageInfo">—</span>
+                <span class="offline-badge">HORS-LIGNE</span>
+            </div>
+        </div>
+        <div class="reader-content" id="readerContent"></div>
+    </div>
+
+    <!-- PDF.js from CDN (will be cached by SW) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+    (async function() {
+        const loadingScreen = document.getElementById('loadingScreen');
+        const errorScreen = document.getElementById('errorScreen');
+        const readerWrapper = document.getElementById('readerWrapper');
+        const readerContent = document.getElementById('readerContent');
+
+        // Get book ID from URL: /offline-reader/<bookId>/
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        const bookId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+
+        if (!bookId) {
+            showError('Aucun identifiant de livre trouvé.');
+            showSavedBooks();
+            return;
+        }
+
+        try {
+            // Open IndexedDB
+            const db = await openDB();
+            const bookData = await getBook(db, bookId);
+
+            if (!bookData || !bookData.blob) {
+                showError('Ce livre n\'est pas disponible hors-ligne.');
+                showSavedBooks();
+                return;
+            }
+
+            // Book found! Load it
+            const blobUrl = URL.createObjectURL(bookData.blob);
+
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            const pdf = await pdfjsLib.getDocument({
+                url: blobUrl,
+                cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
+                cMapPacked: true,
+            }).promise;
+
+            // Show reader
+            loadingScreen.style.display = 'none';
+            readerWrapper.style.display = 'flex';
+
+            if (bookData.title) {
+                document.getElementById('bookTitle').textContent = bookData.title;
+                document.title = '📖 ' + bookData.title + ' (hors-ligne)';
+            }
+
+            const totalPages = pdf.numPages;
+            const isMobile = window.innerWidth <= 768;
+
+            // Render all pages
+            for (let i = 1; i <= totalPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: isMobile ? 1.0 : 1.5 });
+
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'pdf-page';
+                pageDiv.dataset.page = i;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                pageDiv.appendChild(canvas);
+                readerContent.appendChild(pageDiv);
+
+                await page.render({
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: viewport
+                }).promise;
+
+                document.getElementById('pageInfo').textContent = i + ' / ' + totalPages;
+            }
+
+            // Scroll tracking
+            readerContent.addEventListener('scroll', function() {
+                const pages = readerContent.querySelectorAll('.pdf-page');
+                const scrollTop = readerContent.scrollTop;
+                const containerHeight = readerContent.clientHeight;
+                let currentPage = 1;
+
+                pages.forEach(function(p) {
+                    const rect = p.getBoundingClientRect();
+                    const readerRect = readerContent.getBoundingClientRect();
+                    if (rect.top - readerRect.top < containerHeight / 2) {
+                        currentPage = parseInt(p.dataset.page);
+                    }
+                });
+
+                document.getElementById('pageInfo').textContent = currentPage + ' / ' + totalPages;
+            });
+
+        } catch (err) {
+            console.error('Erreur lecteur offline:', err);
+            showError('Erreur lors du chargement: ' + err.message);
+            showSavedBooks();
+        }
+
+        function showError(msg) {
+            loadingScreen.style.display = 'none';
+            errorScreen.style.display = 'flex';
+            document.getElementById('errorMsg').textContent = msg;
+        }
+
+        function openDB() {
+            return new Promise(function(resolve, reject) {
+                var req = indexedDB.open('Calures_Offline', 1);
+                req.onupgradeneeded = function(e) {
+                    var d = e.target.result;
+                    if (!d.objectStoreNames.contains('books')) d.createObjectStore('books', { keyPath: 'id' });
+                };
+                req.onsuccess = function() { resolve(req.result); };
+                req.onerror = function() { reject(req.error); };
+            });
+        }
+
+        function getBook(db, id) {
+            return new Promise(function(resolve, reject) {
+                var tx = db.transaction(['books'], 'readonly');
+                var store = tx.objectStore('books');
+                var r = store.get(id);
+                r.onsuccess = function() { resolve(r.result); };
+                r.onerror = function() { reject(r.error); };
+            });
+        }
+
+        async function showSavedBooks() {
+            try {
+                var db = await openDB();
+                var tx = db.transaction(['books'], 'readonly');
+                var store = tx.objectStore('books');
+                var all = store.getAll();
+                all.onsuccess = function() {
+                    var books = all.result;
+                    if (books.length === 0) return;
+                    var container = document.getElementById('savedBooksList');
+                    var html = '<h3>📚 Livres sauvegardés (' + books.length + ')</h3>';
+                    books.forEach(function(b) {
+                        var date = b.ts ? new Date(b.ts).toLocaleDateString('fr-FR') : '';
+                        var title = b.title || 'Livre ' + b.id.substring(0, 8) + '...';
+                        html += '<div class="book-item" onclick="window.location.href=\'/offline-reader/' + b.id + '/\'">';
+                        html += '<div class="book-title">' + title + '</div>';
+                        html += '<div class="book-date">Sauvegardé le ' + date + '</div>';
+                        html += '</div>';
+                    });
+                    container.innerHTML = html;
+                };
+            } catch(e) {
+                console.log('Cannot list saved books:', e);
+            }
+        }
+    })();
+    </script>
+</body>
+</html>

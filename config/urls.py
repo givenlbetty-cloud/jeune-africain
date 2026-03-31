@@ -36,6 +36,9 @@ urlpatterns = [
     # PWA Support (manifest, config, offline sync)
     path("pwa/", include("config.pwa_urls")),
     
+    # Offline reader (no auth required - reads from IndexedDB)
+    path("offline-reader/<str:book_id>/", lambda request, book_id: __import__('django.shortcuts', fromlist=['render']).render(request, 'catalogue/offline_reader.html'), name='offline_reader'),
+    
     # Analytics Dashboard (not translated)
     path("analytics/", include("catalogue.analytics_urls")),
     
