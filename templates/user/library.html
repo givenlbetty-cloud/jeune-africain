@@ -81,10 +81,13 @@
                         </p>
                     </div>
                 </a>
-                <div style="padding: 0.15rem 0.3rem 0.25rem;">
-                    <a href="{% url 'catalogue:book_detail' book.id %}" class="book-action-read">
+                <div style="padding: 0.15rem 0.3rem 0.25rem; display: flex; gap: 0.25rem;">
+                    <a href="{% url 'catalogue:book_detail' book.id %}" class="book-action-read" style="flex:1;">
                         <i class="fas fa-book-open"></i> Lire
                     </a>
+                    <span class="offline-badge" data-book-id="{{ book.id }}" style="display:none; font-size:0.55rem; padding:0.2rem 0.35rem; border-radius:var(--radius-sm); background:#10B981; color:white; font-weight:600; align-self:center; white-space:nowrap;">
+                        <i class="fas fa-wifi-slash" style="font-size:0.5rem;"></i> Offline
+                    </span>
                 </div>
             </div>
         </div>
@@ -117,4 +120,28 @@
     </div>
     {% endif %}
 </div>
+
+{% block extra_js %}
+<script>
+// Mark books available offline
+(function(){
+    var rq = indexedDB.open('Calures_Offline', 1);
+    rq.onupgradeneeded = function(e){ e.target.result.createObjectStore('books',{keyPath:'id'}); };
+    rq.onsuccess = function(e){
+        var db = e.target.result;
+        if(!db.objectStoreNames.contains('books')) return;
+        var tx = db.transaction(['books'],'readonly');
+        var store = tx.objectStore('books');
+        var all = store.getAll();
+        all.onsuccess = function(){
+            var books = all.result || [];
+            books.forEach(function(b){
+                var badge = document.querySelector('.offline-badge[data-book-id="'+b.id+'"]');
+                if(badge) badge.style.display = 'inline-block';
+            });
+        };
+    };
+})();
+</script>
+{% endblock %}
 {% endblock %}

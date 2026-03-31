@@ -1131,7 +1131,26 @@ async function saveForOffline(id, url) {
             rq.onerror=function(){reject(rq.error);};
         });
 
-        // 3. Pre-cache the offline reader page + PDF.js lib via Cache API
+        // 3. Auto-add to library (favorites) if not already
+        {% if user.is_authenticated %}
+        var _isFav = {% if is_favorite %}true{% else %}false{% endif %};
+        if(!_isFav){
+            try{
+                await fetch('{% url "catalogue:toggle_favorite" book_id=book.pk %}', {
+                    method:'POST',
+                    headers:{'X-CSRFToken':document.querySelector('[name=csrfmiddlewaretoken]')?.value||'','Content-Type':'application/json'}
+                }).then(function(r){return r.json();}).then(function(d){
+                    if(d && d.favorited){
+                        var fb=document.getElementById('favBtn'),ft=document.getElementById('favText');
+                        if(fb){fb.style.background='#E63946';fb.style.borderColor='#E63946';fb.style.color='white';fb.querySelector('i').className='fas fa-check';}
+                        if(ft) ft.textContent='Dans ma bibliothèque';
+                    }
+                });
+            }catch(e){console.log('Fav auto-add skipped');}
+        }
+        {% endif %}
+
+        // 4. Pre-cache the offline reader page + PDF.js lib via Cache API
         if('caches' in window){
             var cache = await caches.open('calures-v4');
             var pagesToCache = [
@@ -1142,7 +1161,7 @@ async function saveForOffline(id, url) {
             await Promise.allSettled(pagesToCache.map(function(u){ return cache.add(u); }));
         }
 
-        // 4. Show success
+        // 5. Show success
         btns.forEach(function(x){
             if(x.b){
                 x.b.querySelector('i').className='fas fa-check-circle';
