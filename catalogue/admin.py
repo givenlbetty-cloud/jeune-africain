@@ -197,10 +197,19 @@ class AuthorAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('👤 PROFIL', {
-            'fields': ('first_name', 'last_name', 'email', 'nationality'),
+            'fields': ('first_name', 'last_name', 'email', 'nationality', 'photo'),
         }),
         ('🔗 RÉSEAUX SOCIAUX', {
-            'fields': ('website', 'biography'),
+            'fields': (
+                'website',
+                'facebook_url',
+                'instagram_url',
+                'x_url',
+                'linkedin_url',
+                'youtube_url',
+                'tiktok_url',
+                'biography',
+            ),
             'classes': ('collapse',)
         }),
         ('✓ VÉRIFICATION', {

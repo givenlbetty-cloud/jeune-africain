@@ -684,7 +684,10 @@ def author_detail_view(request, author_id):
     
     # Récupérer les livres de l'auteur
     from catalogue.models import AuthorBook
-    author_books = AuthorBook.objects.filter(author=author).select_related('book')
+    author_books = AuthorBook.objects.filter(
+        author=author,
+        book__is_published=True
+    ).select_related('book').prefetch_related('book__authors')
     books = [ab.book for ab in author_books]
     
     context = {

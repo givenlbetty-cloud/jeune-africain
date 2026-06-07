@@ -115,7 +115,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(cacheFirstStatic(request));
 });
 
-// Handle book reader: try network, fallback to offline reader
+// Handle book reader: try network, never force offline-reader redirect
 async function handleBookReader(request, url) {
     try {
         const response = await fetch(request);
@@ -126,20 +126,7 @@ async function handleBookReader(request, url) {
         }
         throw new Error('Network response not ok');
     } catch (error) {
-        // Offline: extract book ID and redirect to offline reader
-        const match = url.pathname.match(/\/book\/([^/]+)\/read\//);
-        if (match) {
-            const bookId = match[1];
-            const offlineUrl = '/offline-reader/' + bookId + '/';
-            
-            // Try to serve cached offline reader page
-            const cached = await caches.match(offlineUrl);
-            if (cached) return cached;
-            
-            // Redirect to offline reader (browser will handle it)
-            return Response.redirect(offlineUrl, 302);
-        }
-        // Last resort: serve cached page or offline page
+        // Keep authentication flow intact: fallback only to cached reader page.
         const cached = await caches.match(request);
         if (cached) return cached;
         

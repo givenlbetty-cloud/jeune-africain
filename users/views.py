@@ -7,9 +7,9 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from allauth.socialaccount.models import SocialAccount
 from .models import CustomUser, StaffMember, Citation
-from datetime import datetime
 import random
 
 from django.db.models import Avg
@@ -92,7 +92,17 @@ def login_view(request):
 
                 # Vérifier le mot de passe
                 if user.check_password(password):
-                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    if not user.is_active:
+                        form.add_error(None, "Ce compte est désactivé.")
+                        return render(request, 'auth/login.html', {'form': form})
+
+                    # Ré-authentifier via backend Django pour appliquer les vérifications standard.
+                    auth_user = authenticate(request, username=user.email, password=password)
+                    if not auth_user:
+                        form.add_error(None, "Connexion refusée. Réessayez.")
+                        return render(request, 'auth/login.html', {'form': form})
+
+                    login(request, auth_user, backend='django.contrib.auth.backends.ModelBackend')
                     messages.success(request, f"Bienvenue {user.first_name or user.email} !")
                     # Si c'est un admin, le rediriger vers /admin/
                     if user.is_staff:
@@ -138,25 +148,24 @@ def login_phone_view(request):
             # En prod: utiliser une librairie comme phonenumbers
             
             try:
-                # Récupérer ou créer l'utilisateur (Pattern: Passwordless / implicite)
-                # On utilise get_or_create si on veut auto-signup, ou get si on veut restreindre
-                # Ici -> Auto-signup simplifié pour l'UX mobile
-                user, created = CustomUser.objects.get_or_create(
-                    phone=phone,
-                    defaults={'username': phone, 'email': f"{phone}@mobile.user"} # Email fictif pour compatibilité
-                )
-                
-                if created:
-                    user.set_unusable_password()
-                    user.save()
-                    messages.info(request, "Nouveau compte créé pour ce numéro.")
+                # Sécurité: ne pas auto-créer de compte via OTP téléphone.
+                user = CustomUser.objects.filter(phone=phone).first()
+                if not user:
+                    messages.error(request, "Aucun compte trouvé pour ce numéro.")
+                    return render(request, 'auth/login_phone.html')
+
+                # Sécurité: interdire OTP téléphone pour les comptes sensibles.
+                if user.is_staff or user.is_superuser or user.role in [CustomUser.SUPER_ADMIN, CustomUser.LIBRARY_ADMIN]:
+                    messages.error(request, "Connexion OTP indisponible pour ce compte. Utilisez email + mot de passe.")
+                    return render(request, 'auth/login_phone.html')
 
                 # Générer et envoyer l'OTP
                 code = generate_otp()
                 
                 # Sauvegarder l'OTP dans le modèle utilisateur
                 user.otp_code = code
-                user.otp_created_at = datetime.now()
+                user.otp_created_at = timezone.now()
+                user.otp_attempts = 0
                 user.save()
                 
                 # Envoyer (Simulé)
@@ -165,7 +174,7 @@ def login_phone_view(request):
                 # Stocker le numéro en session pour l'étape suivante
                 request.session['auth_phone'] = phone
                 
-                messages.success(request, f"Code envoyé au {phone} (Simulé: {code})")
+                messages.success(request, f"Code envoyé au {phone}.")
                 return redirect('users:verify_otp')
                 
             except Exception as e:

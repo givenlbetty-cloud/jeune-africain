@@ -812,10 +812,16 @@
             <!-- ===== AUTHOR CARD ===== -->
             {% if authors or book.author %}
             <div class="bd-author-card">
-                <div class="bd-author-avatar"><i class="fas fa-user"></i></div>
+                <div class="bd-author-avatar">
+                    {% if authors and authors.0.photo %}
+                        <img src="{{ authors.0.photo.url }}" alt="{{ authors.0.get_full_name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    {% else %}
+                        <i class="fas fa-user"></i>
+                    {% endif %}
+                </div>
                 <div>
                     {% if authors %}
-                        <a href="{% url 'catalogue:author_detail' authors.0.id %}" class="name">{{ authors.0.get_full_name }}</a>
+                        <a href="{% url 'catalogue:author_detail' authors.0.id %}" class="name" style="text-decoration:underline;">{{ authors.0.get_full_name }}</a>
                     {% else %}
                         <span class="name">{{ book.author }}</span>
                     {% endif %}
@@ -878,7 +884,7 @@
             {% if authors %}
             <div class="bd-meta-item">
                 <div class="bd-meta-label">Écrit par</div>
-                {% for a in authors %}<span class="bd-meta-badge">{{ a.get_full_name }}</span> {% endfor %}
+                {% for a in authors %}<a href="{% url 'catalogue:author_detail' a.id %}" class="bd-meta-badge" style="text-decoration:none;">{{ a.get_full_name }}</a> {% endfor %}
             </div>
             {% endif %}
             {% if book.publication_date %}

@@ -19,6 +19,7 @@ class Author(models.Model):
     """Modèle pour les auteurs."""
     
     NATIONALITY_CHOICES = [
+        ("RDC", _("République Démocratique du Congo")),
         ("SN", _("Sénégal")),
         ("ML", _("Mali")),
         ("CI", _("Côte d'Ivoire")),
@@ -55,6 +56,12 @@ class Author(models.Model):
         default="OTHER"
     )
     website = models.URLField(_("Site web"), blank=True)
+    facebook_url = models.URLField(_("Facebook"), blank=True)
+    instagram_url = models.URLField(_("Instagram"), blank=True)
+    x_url = models.URLField(_("X (Twitter)"), blank=True)
+    linkedin_url = models.URLField(_("LinkedIn"), blank=True)
+    youtube_url = models.URLField(_("YouTube"), blank=True)
+    tiktok_url = models.URLField(_("TikTok"), blank=True)
     is_verified = models.BooleanField(_("Vérifié"), default=False)
     verified_date = models.DateTimeField(_("Date de vérification"), null=True, blank=True)
     created_at = models.DateTimeField(_("Créé"), auto_now_add=True)

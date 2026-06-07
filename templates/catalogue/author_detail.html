@@ -59,6 +59,16 @@
                             <i class="fas fa-external-link-alt"></i> Site web
                         </a>
                     {% endif %}
+                    {% if author.facebook_url or author.instagram_url or author.x_url or author.linkedin_url or author.youtube_url or author.tiktok_url %}
+                    <div style="display:flex; align-items:center; gap:0.45rem; margin-top:0.45rem; flex-wrap:wrap;">
+                        {% if author.facebook_url %}<a href="{{ author.facebook_url }}" target="_blank" rel="noopener noreferrer" title="Facebook" style="color:#1877F2;"><i class="fab fa-facebook"></i></a>{% endif %}
+                        {% if author.instagram_url %}<a href="{{ author.instagram_url }}" target="_blank" rel="noopener noreferrer" title="Instagram" style="color:#E4405F;"><i class="fab fa-instagram"></i></a>{% endif %}
+                        {% if author.x_url %}<a href="{{ author.x_url }}" target="_blank" rel="noopener noreferrer" title="X" style="color:#111;"><i class="fab fa-x-twitter"></i></a>{% endif %}
+                        {% if author.linkedin_url %}<a href="{{ author.linkedin_url }}" target="_blank" rel="noopener noreferrer" title="LinkedIn" style="color:#0A66C2;"><i class="fab fa-linkedin"></i></a>{% endif %}
+                        {% if author.youtube_url %}<a href="{{ author.youtube_url }}" target="_blank" rel="noopener noreferrer" title="YouTube" style="color:#FF0000;"><i class="fab fa-youtube"></i></a>{% endif %}
+                        {% if author.tiktok_url %}<a href="{{ author.tiktok_url }}" target="_blank" rel="noopener noreferrer" title="TikTok" style="color:#111;"><i class="fab fa-tiktok"></i></a>{% endif %}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
