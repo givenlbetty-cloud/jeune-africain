@@ -108,7 +108,7 @@ def manifest_view(request):
         'name': 'Calures Éditions — Littérature Congolaise',
         'short_name': 'Calures',
         'description': 'Bibliothèque numérique congolaise — Lisez et téléchargez des livres africains en ligne et hors-ligne',
-        'start_url': '/',
+        'start_url': '/fr/',
         'scope': '/',
         'display': 'standalone',
         'orientation': 'portrait-primary',
@@ -136,26 +136,12 @@ def manifest_view(request):
                 'purpose': 'maskable',
             },
         ],
-        'screenshots': [
-            {
-                'src': '/static/images/screenshot-1.png',
-                'sizes': '540x720',
-                'type': 'image/png',
-                'form_factor': 'narrow',
-            },
-            {
-                'src': '/static/images/screenshot-2.png',
-                'sizes': '1280x720',
-                'type': 'image/png',
-                'form_factor': 'wide',
-            },
-        ],
         'shortcuts': [
             {
-                'name': 'Dashboard',
-                'short_name': 'Dashboard',
-                'description': 'Go to your dashboard',
-                'url': '/dashboard/',
+                'name': 'Catalogue',
+                'short_name': 'Catalogue',
+                'description': 'Parcourir le catalogue',
+                'url': '/fr/books/',
                 'icons': [
                     {
                         'src': '/static/images/icon-192x192.png',
@@ -165,10 +151,10 @@ def manifest_view(request):
                 ],
             },
             {
-                'name': 'Rechercher',
-                'short_name': 'Rechercher',
-                'description': 'Search for books',
-                'url': '/search/',
+                'name': 'Ma Bibliothèque',
+                'short_name': 'Bibliothèque',
+                'description': 'Accéder à ma bibliothèque',
+                'url': '/fr/user/library/',
                 'icons': [
                     {
                         'src': '/static/images/icon-192x192.png',

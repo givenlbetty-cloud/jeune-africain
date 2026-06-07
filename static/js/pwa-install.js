@@ -135,7 +135,8 @@ async function registerServiceWorker() {
     }
 
     try {
-        const registration = await navigator.serviceWorker.register('/static/js/service-worker.js');
+        // Always register from root so scope and script stay consistent.
+        const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
         console.log('[PWA] Service Worker registered:', registration);
 
         // Check for updates periodically

@@ -2,7 +2,7 @@
     "name": "Calures Éditions — Littérature Congolaise",
     "short_name": "Calures",
     "description": "Bibliothèque numérique congolaise — Lisez et téléchargez des livres africains en ligne et hors-ligne",
-    "start_url": "/",
+    "start_url": "/fr/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#1B2A4A",
@@ -28,20 +28,6 @@
             "purpose": "maskable"
         }
     ],
-    "screenshots": [
-        {
-            "src": "/static/images/screenshot-1.png",
-            "sizes": "540x720",
-            "type": "image/png",
-            "form_factor": "narrow"
-        },
-        {
-            "src": "/static/images/screenshot-2.png",
-            "sizes": "1280x720",
-            "type": "image/png",
-            "form_factor": "wide"
-        }
-    ],
     "categories": ["books", "education"],
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
@@ -50,20 +36,7 @@
             "name": "Catalogue",
             "short_name": "Catalogue",
             "description": "Parcourir le catalogue",
-            "url": "/catalogue/",
-            "icons": [
-                {
-                    "src": "/static/images/icon-96x96.png",
-                    "sizes": "96x96",
-                    "type": "image/png"
-                }
-            ]
-        },
-        {
-            "name": "Lecteur PDF",
-            "short_name": "Lecteur",
-            "description": "Ouvrir le lecteur PDF",
-            "url": "/lecteur/",
+            "url": "/fr/books/",
             "icons": [
                 {
                     "src": "/static/images/icon-96x96.png",
@@ -76,7 +49,20 @@
             "name": "Ma Bibliothèque",
             "short_name": "Bibliothèque",
             "description": "Accéder à ma bibliothèque",
-            "url": "/library/",
+            "url": "/fr/user/library/",
+            "icons": [
+                {
+                    "src": "/static/images/icon-96x96.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "À propos",
+            "short_name": "À propos",
+            "description": "Découvrir Calures Éditions",
+            "url": "/fr/apropos/",
             "icons": [
                 {
                     "src": "/static/images/icon-96x96.png",

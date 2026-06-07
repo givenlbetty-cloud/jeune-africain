@@ -8,6 +8,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import FileResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, RedirectView
 from catalogue.dashboard_views import (
@@ -18,6 +19,14 @@ from catalogue.dashboard_views import (
 )
 from catalogue.frontend_views import redirect_old_book_url
 from users.views import home, staff_view
+
+def offline_reader_page(request, book_id):
+    """
+    Serve offline reader without request context processors.
+    This keeps /offline-reader/<id>/ available even when DB is down.
+    """
+    template_path = settings.BASE_DIR / "templates" / "catalogue" / "offline_reader.html"
+    return HttpResponse(template_path.read_text(encoding="utf-8"), content_type="text/html")
 
 # API URLs (not translated - same for all languages)
 urlpatterns = [
@@ -37,17 +46,17 @@ urlpatterns = [
     path("pwa/", include("config.pwa_urls")),
     
     # Service Worker served from root scope (critical for PWA)
-    path("sw.js", lambda request: __import__('django.http', fromlist=['FileResponse']).FileResponse(
+    path("sw.js", lambda request: FileResponse(
         open(__import__('os').path.join(__import__('django.conf', fromlist=['settings']).settings.BASE_DIR, 'static', 'js', 'service-worker.js'), 'rb'),
         content_type='application/javascript',
         headers={'Service-Worker-Allowed': '/', 'Cache-Control': 'no-cache'}
     ), name='service_worker'),
     
     # Offline reader (no auth required - reads from IndexedDB)
-    path("offline-reader/<str:book_id>/", lambda request, book_id: __import__('django.shortcuts', fromlist=['render']).render(request, 'catalogue/offline_reader.html'), name='offline_reader'),
+    path("offline-reader/<str:book_id>/", offline_reader_page, name='offline_reader'),
     
     # Offline page (fallback for service worker - must be outside i18n)
-    path("offline/", lambda request: __import__('django.http', fromlist=['FileResponse']).HttpResponse(
+    path("offline/", lambda request: HttpResponse(
         open(__import__('os').path.join(__import__('django.conf', fromlist=['settings']).settings.BASE_DIR, 'templates', 'offline.html'), 'r').read(),
         content_type='text/html'
     ), name='offline'),

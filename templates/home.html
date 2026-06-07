@@ -468,7 +468,7 @@
         </h2>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem;">
             {% for lien in liens_sociaux %}
-            <a href="{{ lien.url }}" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
+            <a href="{{ lien.resolved_url }}" style="display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); border-radius: 8px; padding: 0.65rem 0.75rem; text-decoration: none; color: var(--text); border: 1px solid var(--border); font-size: 0.75rem;" target="_blank" rel="noopener">
                 <i class="{{ lien.icon_class }}" style="color: {{ lien.color }}; font-size: 1rem;"></i>
                 <div><strong>{{ lien.get_platform_display }}</strong><br><span style="font-size: 0.65rem;">{{ lien.label }}</span></div>
             </a>

@@ -5,12 +5,14 @@ Incluent Library, Book, Author, ReadingSession, Payment, etc.
 
 from django.db import models
 from django.conf import settings
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, URLValidator, EmailValidator
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from decimal import Decimal
 import uuid
 import os
+import re
 
 
 class Author(models.Model):
@@ -329,7 +331,8 @@ class Book(models.Model):
     def get_final_price(self):
         """Calculer le prix après réduction."""
         if self.discount_percentage:
-            return self.price * (1 - self.discount_percentage / 100)
+            discount_ratio = Decimal(self.discount_percentage) / Decimal("100")
+            return self.price * (Decimal("1") - discount_ratio)
         return self.price
     
     @property
@@ -2575,6 +2578,47 @@ class LienSocial(models.Model):
 
     def __str__(self):
         return f"{self.get_platform_display()} — {self.label}"
+
+    def clean(self):
+        super().clean()
+        raw_url = (self.url or "").strip()
+
+        if not raw_url:
+            raise ValidationError({"url": _("Veuillez renseigner une URL ou un email valide.")})
+
+        if self.platform == "email":
+            email = raw_url[7:] if raw_url.lower().startswith("mailto:") else raw_url
+            EmailValidator()(email)
+            self.url = f"mailto:{email}"
+            return
+
+        if self.platform == "whatsapp":
+            if raw_url.startswith("whatsapp://"):
+                self.url = raw_url
+                return
+            if not raw_url.startswith(("http://", "https://")):
+                digits = re.sub(r"\D+", "", raw_url)
+                raw_url = f"https://wa.me/{digits}" if digits else f"https://{raw_url.lstrip('/')}"
+        elif not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", raw_url):
+            raw_url = f"https://{raw_url.lstrip('/')}"
+
+        URLValidator(schemes=["http", "https"])(raw_url)
+        self.url = raw_url
+
+    @property
+    def resolved_url(self):
+        """URL normalized at render time (useful for legacy admin entries)."""
+        raw_url = (self.url or "").strip()
+        if not raw_url:
+            return "#"
+        if self.platform == "email" and not raw_url.lower().startswith("mailto:"):
+            return f"mailto:{raw_url}"
+        if self.platform == "whatsapp" and not raw_url.startswith(("http://", "https://", "whatsapp://")):
+            digits = re.sub(r"\D+", "", raw_url)
+            return f"https://wa.me/{digits}" if digits else raw_url
+        if not re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*://", raw_url):
+            return f"https://{raw_url.lstrip('/')}"
+        return raw_url
 
     @property
     def icon_class(self):

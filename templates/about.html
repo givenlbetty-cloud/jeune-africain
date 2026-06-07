@@ -303,7 +303,7 @@
         <div class="row g-2 mt-2">
             {% for lien in liens_sociaux %}
             <div class="col-6 col-md-3">
-                <a href="{{ lien.url }}" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
+                <a href="{{ lien.resolved_url }}" target="_blank" rel="noopener" class="d-flex flex-column align-items-center text-decoration-none p-2" style="background: var(--bg-soft); border-radius: 8px; color: var(--text);">
                     <i class="{{ lien.icon_class }}" style="color: {{ lien.color }}; font-size: 1.3rem; margin-bottom: 0.3rem;"></i>
                     <strong style="font-size: 0.75rem;">{{ lien.get_platform_display }}</strong>
                     <span style="font-size: 0.6rem;">{{ lien.label }}</span>
