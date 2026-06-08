@@ -175,7 +175,7 @@ class PWAInstallManager {
 
         this.manualGuideType = 'android';
         if (helperText) {
-            helperText.textContent = "Si le bouton d'installation n'apparaît pas, utilisez le menu du navigateur puis 'Installer l'application'.";
+            helperText.textContent = "Sur Android (Chrome recommandé): menu du navigateur puis 'Installer l'application' / 'Ajouter à l'écran d'accueil'.";
         }
         installButton.innerHTML = '<i class="fas fa-download me-2"></i>Guide d’installation';
     }
@@ -190,7 +190,7 @@ class PWAInstallManager {
             return;
         }
         if (this.manualGuideType === 'android') {
-            alert("Android: ouvrez le menu du navigateur puis 'Installer l\\'application' / 'Ajouter à l\\'écran d\\'accueil'.");
+            alert("Android (Chrome recommandé): ouvrez le menu du navigateur puis 'Installer l\\'application' / 'Ajouter à l\\'écran d\\'accueil'.");
             return;
         }
         alert("L'installation n'est pas encore disponible dans ce navigateur. Utilisez de préférence Edge ou Chrome sur Windows.");

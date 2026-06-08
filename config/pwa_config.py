@@ -112,6 +112,7 @@ def manifest_view(request):
         'start_url': '/fr/',
         'scope': '/',
         'display': 'standalone',
+        'display_override': ['standalone', 'minimal-ui', 'browser'],
         'orientation': 'portrait-primary',
         'background_color': '#ffffff',
         'theme_color': '#1B2A4A',

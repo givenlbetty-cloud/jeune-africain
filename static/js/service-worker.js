@@ -5,35 +5,46 @@ Stratégies: cache-first (assets), network-first (API), PDF pour offline
 IndexedDB pour sync background et données locales
 */
 
-const CACHE_NAME = 'calures-v4';
-const API_CACHE = 'calures-api-v4';
-const PDF_CACHE = 'calures-pdf-v4';
-const RUNTIME_CACHE = 'calures-runtime-v4';
+const CACHE_NAME = 'calures-v5';
+const API_CACHE = 'calures-api-v5';
+const PDF_CACHE = 'calures-pdf-v5';
+const RUNTIME_CACHE = 'calures-runtime-v5';
 
 // Assets statiques à pré-cacher
 const STATIC_ASSETS = [
     '/',
+    '/fr/',
+    '/fr/books/',
     '/offline/',
     '/pwa/manifest.json',
+    '/sw.js',
     '/static/css/global.css',
+    '/static/js/pwa-install.js',
     '/static/js/pdf.min.js',
     '/static/js/pdf.worker.min.js',
     '/static/images/icon-192x192.png',
-    '/static/images/icon-512x512.png'
+    '/static/images/icon-512x512.png',
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
 // ============================================================================
 // INSTALLATION - Pré-cacher les assets essentiels
 // ============================================================================
 self.addEventListener('install', event => {
-    console.log('[SW] Installation démarrée v2.0');
+    console.log('[SW] Installation démarrée v2.1');
     
     event.waitUntil(
         (async () => {
             try {
                 const cache = await caches.open(CACHE_NAME);
                 await Promise.allSettled(
-                    STATIC_ASSETS.map(url => cache.add(url))
+                    STATIC_ASSETS.map(url => {
+                        if (url.startsWith('http')) {
+                            return cache.add(new Request(url, { mode: 'no-cors' }));
+                        }
+                        return cache.add(url);
+                    })
                 );
                 
                 console.log('[SW] ✅ Installation réussie');
@@ -203,7 +214,10 @@ async function networkFirstHTML(request) {
     } catch (error) {
         const cached = await caches.match(request);
         if (cached) return cached;
-        
+
+        const frHome = await caches.match('/fr/');
+        if (frHome) return frHome;
+
         return caches.match('/offline/').catch(() =>
             new Response('Hors-ligne', { status: 503 })
         );
@@ -218,7 +232,7 @@ async function cacheFirstStatic(request) {
     try {
         const response = await fetch(request);
         
-        if (response.ok) {
+        if (response.ok || response.type === 'opaque') {
             const cache = await caches.open(RUNTIME_CACHE);
             cache.put(request, response.clone());
         }
@@ -413,5 +427,5 @@ function createPlaceholderImage() {
     );
 }
 
-console.log('[SW] Service Worker v2.0 - Offline mode enabled');
+console.log('[SW] Service Worker v2.1 - Offline mode enabled');
 
