@@ -7,6 +7,7 @@ class PWAInstallManager {
     constructor() {
         this.deferredPrompt = null;
         this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        this.installPromptShown = false;
         this.init();
     }
 
@@ -23,6 +24,15 @@ class PWAInstallManager {
 
         // Check if app is already installed
         this.checkIfInstalled();
+
+        // Fallback helper:
+        // iOS does not fire beforeinstallprompt, and some Android browsers
+        // hide it until engagement criteria are met.
+        setTimeout(() => {
+            if (!this.deferredPrompt && !this.isRunningStandalone()) {
+                this.showManualInstallHelp();
+            }
+        }, 2500);
     }
 
     /**
@@ -44,12 +54,13 @@ class PWAInstallManager {
         const installButton = document.getElementById('pwa-install-button');
         const installCard = document.getElementById('pwa-install-card');
 
-        if (installButton && installCard) {
+        if (installButton && installCard && !this.installPromptShown) {
+            this.installPromptShown = true;
             installCard.style.display = 'block';
 
             installButton.addEventListener('click', () => {
                 this.promptInstall();
-            });
+            }, { once: true });
         }
     }
 
@@ -102,6 +113,39 @@ class PWAInstallManager {
             console.log('[PWA] App is running as PWA');
             document.documentElement.classList.add('pwa-installed');
         }
+    }
+
+    isRunningStandalone() {
+        return window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    }
+
+    showManualInstallHelp() {
+        const installButton = document.getElementById('pwa-install-button');
+        const installCard = document.getElementById('pwa-install-card');
+        const helperText = installCard?.querySelector('.text-secondary');
+        if (!installButton || !installCard) return;
+        if (this.isRunningStandalone()) return;
+
+        installCard.style.display = 'block';
+
+        if (this.isIOS) {
+            if (helperText) {
+                helperText.textContent = "Sur iPhone: touchez Partager puis 'Sur l'écran d'accueil'.";
+            }
+            installButton.innerHTML = '<i class="fas fa-mobile-alt me-2"></i>Guide iPhone';
+            installButton.onclick = () => {
+                alert("iPhone: 1) Ouvrez le menu Partager 2) Choisissez 'Sur l\\'écran d\\'accueil' 3) Validez Ajouter.");
+            };
+            return;
+        }
+
+        if (helperText) {
+            helperText.textContent = "Si le bouton d'installation n'apparaît pas, utilisez le menu du navigateur puis 'Installer l'application'.";
+        }
+        installButton.innerHTML = '<i class="fas fa-download me-2"></i>Guide d’installation';
+        installButton.onclick = () => {
+            alert("Android: ouvrez le menu du navigateur puis 'Installer l\\'application' / 'Ajouter à l\\'écran d\\'accueil'.");
+        };
     }
 
     /**

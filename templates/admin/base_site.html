@@ -47,6 +47,11 @@
   }
   .admin-guide-btn.secondary { background: #eef2fa; color: #1B2A4A; }
   .admin-guide-btn.primary { background: #1B2A4A; color: #fff; }
+  .admin-guide-toast {
+    margin-top: 12px; font-size: .86rem; color: #0f5132;
+    background: #d1e7dd; border: 1px solid #badbcc;
+    border-radius: 10px; padding: 8px 10px; display: none;
+  }
 </style>
 
 <div class="admin-guide-backdrop" id="adminGuideBackdrop"></div>
@@ -76,16 +81,38 @@
     </div>
 
     <div class="admin-guide-actions">
-      <button class="admin-guide-btn secondary" id="adminGuideDecline">Décliner pour maintenant</button>
-      <button class="admin-guide-btn primary" id="adminGuideAccept">Accepter et continuer</button>
+      <button type="button" class="admin-guide-btn secondary" id="adminGuideDecline">Décliner pour maintenant</button>
+      <button type="button" class="admin-guide-btn primary" id="adminGuideAccept">Accepter et continuer</button>
     </div>
+    <div class="admin-guide-toast" id="adminGuideToast">Guide accepté. Configuration enregistrée.</div>
   </div>
 </div>
 
 <script>
   (function () {
     var key = "calures_admin_guide_ack_v1_user_{{ request.user.id }}";
-    var accepted = window.localStorage.getItem(key) === "accepted";
+    function readCookie(name) {
+      var cookieName = name + "=";
+      var parts = document.cookie.split(';');
+      for (var i = 0; i < parts.length; i++) {
+        var c = parts[i].trim();
+        if (c.indexOf(cookieName) === 0) return c.substring(cookieName.length);
+      }
+      return null;
+    }
+    function writeCookie(name, value) {
+      document.cookie = name + "=" + value + "; path=/; max-age=31536000; SameSite=Lax";
+    }
+
+    var accepted = false;
+    try {
+      accepted = window.localStorage.getItem(key) === "accepted";
+    } catch (e) {
+      accepted = false;
+    }
+    if (!accepted) {
+      accepted = readCookie(key) === "accepted";
+    }
     var backdrop = document.getElementById("adminGuideBackdrop");
     var modal = document.getElementById("adminGuideModal");
     if (!accepted && backdrop && modal) {
@@ -98,10 +125,22 @@
     }
     var acceptBtn = document.getElementById("adminGuideAccept");
     var declineBtn = document.getElementById("adminGuideDecline");
+    var toast = document.getElementById("adminGuideToast");
     if (acceptBtn) {
       acceptBtn.addEventListener("click", function () {
-        window.localStorage.setItem(key, "accepted");
-        closeModal();
+        try {
+          window.localStorage.setItem(key, "accepted");
+        } catch (e) {
+          // fallback handled by cookie
+        }
+        writeCookie(key, "accepted");
+        if (toast) {
+          toast.style.display = "block";
+        }
+        setTimeout(function () {
+          closeModal();
+          window.location.reload();
+        }, 450);
       });
     }
     if (declineBtn) {

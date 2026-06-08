@@ -108,6 +108,7 @@ def manifest_view(request):
         'name': 'Calures Éditions — Littérature Congolaise',
         'short_name': 'Calures',
         'description': 'Bibliothèque numérique congolaise — Lisez et téléchargez des livres africains en ligne et hors-ligne',
+        'id': '/fr/',
         'start_url': '/fr/',
         'scope': '/',
         'display': 'standalone',
