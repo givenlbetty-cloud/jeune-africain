@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Calures PWA">
+  <rect width="512" height="512" rx="96" fill="#8b5cf6"/>
+  <g fill="#ffffff">
+    <path d="M142 146c0-13 11-24 24-24h180c13 0 24 11 24 24v220c0 13-11 24-24 24H166c-13 0-24-11-24-24V146zm34 12v196h160V158H176z"/>
+    <rect x="202" y="190" width="108" height="18" rx="9"/>
+    <rect x="202" y="226" width="92" height="14" rx="7" opacity=".9"/>
+    <rect x="202" y="254" width="108" height="14" rx="7" opacity=".85"/>
+  </g>
+</svg>

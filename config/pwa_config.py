@@ -117,7 +117,11 @@ def manifest_view(request):
         elif getattr(site_config, "logo", None):
             pwa_logo_url = site_config.logo.url
     if not pwa_logo_url:
-        pwa_logo_url = '/static/images/icon-512x512.png'
+        pwa_logo_url = '/static/images/pwa-default-logo.svg'
+
+    is_svg_logo = str(pwa_logo_url).lower().endswith('.svg')
+    icon_type = 'image/svg+xml' if is_svg_logo else 'image/png'
+    icon_sizes = 'any' if is_svg_logo else '512x512'
 
     manifest = {
         'name': 'Calures Éditions — Littérature Congolaise',
@@ -130,26 +134,26 @@ def manifest_view(request):
         'display_override': ['standalone', 'minimal-ui', 'browser'],
         'orientation': 'portrait-primary',
         'background_color': '#ffffff',
-        'theme_color': '#1B2A4A',
+        'theme_color': '#8b5cf6',
         'prefer_related_applications': False,
         'categories': ['books', 'education'],
         'icons': [
             {
                 'src': pwa_logo_url,
-                'sizes': '192x192',
-                'type': 'image/png',
+                'sizes': icon_sizes,
+                'type': icon_type,
                 'purpose': 'any',
             },
             {
                 'src': pwa_logo_url,
-                'sizes': '512x512',
-                'type': 'image/png',
+                'sizes': icon_sizes,
+                'type': icon_type,
                 'purpose': 'any',
             },
             {
                 'src': pwa_logo_url,
-                'sizes': '512x512',
-                'type': 'image/png',
+                'sizes': icon_sizes,
+                'type': icon_type,
                 'purpose': 'maskable',
             },
         ],
