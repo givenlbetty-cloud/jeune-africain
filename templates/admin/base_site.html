@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}Administration Calures{% endblock %}
+
+{% block branding %}
+<h1 id="site-name" style="font-weight:700;">
+    <a href="{% url 'admin:index' %}">Administration Calures</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+{% if request.user.is_authenticated and request.user.is_staff %}
+<style>
+  .admin-guide-backdrop {
+    position: fixed; inset: 0; background: rgba(10, 16, 30, .55);
+    z-index: 9998; display: none;
+  }
+  .admin-guide-modal {
+    position: fixed; z-index: 9999; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(760px, 94vw);
+    background: #fff; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,.25);
+    display: none; overflow: hidden;
+  }
+  .admin-guide-head {
+    padding: 18px 20px; color: #fff;
+    background: linear-gradient(135deg, #1B2A4A, #243d6c 65%, #E63946);
+  }
+  .admin-guide-head h3 { margin: 0; font-size: 1.05rem; }
+  .admin-guide-body { padding: 18px 20px; }
+  .admin-guide-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+  }
+  .admin-guide-card {
+    border: 1px solid #e8ecf4; border-radius: 10px; padding: 10px 12px; background: #fafcff;
+  }
+  .admin-guide-card b { display: block; margin-bottom: 4px; color: #1B2A4A; }
+  .admin-guide-actions {
+    display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px;
+  }
+  .admin-guide-btn {
+    border: none; border-radius: 10px; padding: 8px 12px; font-weight: 700; cursor: pointer;
+  }
+  .admin-guide-btn.secondary { background: #eef2fa; color: #1B2A4A; }
+  .admin-guide-btn.primary { background: #1B2A4A; color: #fff; }
+</style>
+
+<div class="admin-guide-backdrop" id="adminGuideBackdrop"></div>
+<div class="admin-guide-modal" id="adminGuideModal" role="dialog" aria-modal="true" aria-label="Guide administrateur">
+  <div class="admin-guide-head">
+    <h3>Guide administrateur Calures</h3>
+    <small>Validation rapide des bonnes pratiques avant utilisation</small>
+  </div>
+  <div class="admin-guide-body">
+    <div class="admin-guide-grid">
+      <div class="admin-guide-card">
+        <b>Catalogue & auteurs</b>
+        Vérifiez que chaque livre est lié à au moins un auteur avant publication.
+      </div>
+      <div class="admin-guide-card">
+        <b>Prix & paiements</b>
+        Contrôlez le prix final et l’état des paiements avant toute communication.
+      </div>
+      <div class="admin-guide-card">
+        <b>Contenu visible</b>
+        N’activez que les livres, événements et liens sociaux validés.
+      </div>
+      <div class="admin-guide-card">
+        <b>Sécurité</b>
+        N’utilisez jamais le login OTP pour les comptes sensibles; gardez des mots de passe forts.
+      </div>
+    </div>
+
+    <div class="admin-guide-actions">
+      <button class="admin-guide-btn secondary" id="adminGuideDecline">Décliner pour maintenant</button>
+      <button class="admin-guide-btn primary" id="adminGuideAccept">Accepter et continuer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var key = "calures_admin_guide_ack_v1_user_{{ request.user.id }}";
+    var accepted = window.localStorage.getItem(key) === "accepted";
+    var backdrop = document.getElementById("adminGuideBackdrop");
+    var modal = document.getElementById("adminGuideModal");
+    if (!accepted && backdrop && modal) {
+      backdrop.style.display = "block";
+      modal.style.display = "block";
+    }
+    function closeModal() {
+      if (backdrop) backdrop.style.display = "none";
+      if (modal) modal.style.display = "none";
+    }
+    var acceptBtn = document.getElementById("adminGuideAccept");
+    var declineBtn = document.getElementById("adminGuideDecline");
+    if (acceptBtn) {
+      acceptBtn.addEventListener("click", function () {
+        window.localStorage.setItem(key, "accepted");
+        closeModal();
+      });
+    }
+    if (declineBtn) {
+      declineBtn.addEventListener("click", function () {
+        closeModal();
+      });
+    }
+  })();
+</script>
+{% endif %}
+{% endblock %}
