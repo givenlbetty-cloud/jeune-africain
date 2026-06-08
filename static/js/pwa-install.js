@@ -7,7 +7,11 @@ class PWAInstallManager {
     constructor() {
         this.deferredPrompt = null;
         this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        this.isAndroid = /Android/i.test(navigator.userAgent);
+        this.isDesktop = !this.isIOS && !this.isAndroid;
         this.installPromptShown = false;
+        this.dismissStorageKey = 'calures_pwa_install_dismissed';
+        this.manualGuideType = 'generic';
         this.init();
     }
 
@@ -22,6 +26,9 @@ class PWAInstallManager {
             this.handleAppInstalled();
         });
 
+        this.bindInstallButton();
+        this.bindDismissButton();
+
         // Check if app is already installed
         this.checkIfInstalled();
 
@@ -29,10 +36,25 @@ class PWAInstallManager {
         // iOS does not fire beforeinstallprompt, and some Android browsers
         // hide it until engagement criteria are met.
         setTimeout(() => {
-            if (!this.deferredPrompt && !this.isRunningStandalone()) {
+            if (!this.deferredPrompt && !this.isRunningStandalone() && !this.wasDismissedRecently()) {
                 this.showManualInstallHelp();
             }
         }, 2500);
+    }
+
+    bindInstallButton() {
+        const installButton = document.getElementById('pwa-install-button');
+        if (!installButton) return;
+        installButton.addEventListener('click', () => this.promptInstall());
+    }
+
+    bindDismissButton() {
+        const dismissButton = document.getElementById('pwa-install-dismiss');
+        if (!dismissButton) return;
+        dismissButton.addEventListener('click', () => {
+            this.markDismissed();
+            this.hideInstallPrompt();
+        });
     }
 
     /**
@@ -53,14 +75,16 @@ class PWAInstallManager {
     showInstallPrompt() {
         const installButton = document.getElementById('pwa-install-button');
         const installCard = document.getElementById('pwa-install-card');
+        const helperText = installCard?.querySelector('.text-secondary');
 
         if (installButton && installCard && !this.installPromptShown) {
             this.installPromptShown = true;
             installCard.style.display = 'block';
-
-            installButton.addEventListener('click', () => {
-                this.promptInstall();
-            }, { once: true });
+            installButton.innerHTML = '<i class="fas fa-arrow-down me-2"></i>Installer maintenant';
+            this.manualGuideType = 'native';
+            if (helperText) {
+                helperText.textContent = "Application prête à l'installation. Cliquez sur Installer maintenant.";
+            }
         }
     }
 
@@ -69,6 +93,8 @@ class PWAInstallManager {
      */
     async promptInstall() {
         if (!this.deferredPrompt) {
+            this.showManualInstallHelp();
+            this.showGuideAlert();
             return;
         }
 
@@ -127,25 +153,65 @@ class PWAInstallManager {
         if (this.isRunningStandalone()) return;
 
         installCard.style.display = 'block';
+        this.installPromptShown = true;
 
         if (this.isIOS) {
+            this.manualGuideType = 'ios';
             if (helperText) {
                 helperText.textContent = "Sur iPhone: touchez Partager puis 'Sur l'écran d'accueil'.";
             }
             installButton.innerHTML = '<i class="fas fa-mobile-alt me-2"></i>Guide iPhone';
-            installButton.onclick = () => {
-                alert("iPhone: 1) Ouvrez le menu Partager 2) Choisissez 'Sur l\\'écran d\\'accueil' 3) Validez Ajouter.");
-            };
             return;
         }
 
+        if (this.isDesktop) {
+            this.manualGuideType = 'desktop';
+            if (helperText) {
+                helperText.textContent = "Sur Windows: ouvrez ce site dans Edge ou Chrome puis utilisez l'icône Installer dans la barre d'adresse.";
+            }
+            installButton.innerHTML = '<i class="fas fa-desktop me-2"></i>Guide Windows';
+            return;
+        }
+
+        this.manualGuideType = 'android';
         if (helperText) {
             helperText.textContent = "Si le bouton d'installation n'apparaît pas, utilisez le menu du navigateur puis 'Installer l'application'.";
         }
         installButton.innerHTML = '<i class="fas fa-download me-2"></i>Guide d’installation';
-        installButton.onclick = () => {
+    }
+
+    showGuideAlert() {
+        if (this.manualGuideType === 'ios') {
+            alert("iPhone: 1) Ouvrez le menu Partager 2) Choisissez 'Sur l\\'écran d\\'accueil' 3) Validez Ajouter.");
+            return;
+        }
+        if (this.manualGuideType === 'desktop') {
+            alert("Windows (Edge/Chrome): 1) Ouvrez le menu navigateur 2) Cliquez 'Installer Calures' / 'Applications > Installer ce site comme application' 3) Validez Installer.");
+            return;
+        }
+        if (this.manualGuideType === 'android') {
             alert("Android: ouvrez le menu du navigateur puis 'Installer l\\'application' / 'Ajouter à l\\'écran d\\'accueil'.");
-        };
+            return;
+        }
+        alert("L'installation n'est pas encore disponible dans ce navigateur. Utilisez de préférence Edge ou Chrome sur Windows.");
+    }
+
+    markDismissed() {
+        try {
+            window.localStorage.setItem(this.dismissStorageKey, String(Date.now()));
+        } catch (error) {
+            // ignore storage restrictions
+        }
+    }
+
+    wasDismissedRecently() {
+        try {
+            const lastDismiss = Number(window.localStorage.getItem(this.dismissStorageKey) || 0);
+            if (!lastDismiss) return false;
+            return (Date.now() - lastDismiss) < (12 * 60 * 60 * 1000);
+        } catch (error) {
+            return false;
+        }
     }
 
     /**

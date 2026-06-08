@@ -9,15 +9,15 @@
                 <div>
                     <strong>Installer Calures</strong>
                     <p class="mb-0 small text-secondary">
-                        Installez la bibliothèque Calures on your home screen. Read offline anytime, anywhere!
+                        Installez Calures comme application sur mobile ou PC pour une ouverture rapide et l'usage hors-ligne.
                     </p>
                 </div>
             </div>
             <div class="ms-3">
-                <button id="pwa-install-button" class="btn btn-sm btn-primary">
-                    <i class="fas fa-arrow-down me-2"></i>Install
+                <button type="button" id="pwa-install-button" class="btn btn-sm btn-primary">
+                    <i class="fas fa-arrow-down me-2"></i>Installer
                 </button>
-                <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close ms-2" id="pwa-install-dismiss" aria-label="Fermer"></button>
             </div>
         </div>
     </div>
@@ -57,11 +57,6 @@
     
     .pwa-install-card .btn-primary:hover {
         background: rgba(255,255,255,0.9);
-    }
-        50% {
-            transform: scale(1.2);
-            opacity: 0.8;
-        }
     }
 
     .pwa-install-card .alert {
