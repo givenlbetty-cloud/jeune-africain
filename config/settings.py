@@ -530,10 +530,8 @@ SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_EMAIL_REQUIRED = True
 SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'  # OAuth providers already verify emails
 
-# Social account custom adapter for profile population
-# SOCIALACCOUNT_ADAPTER = 'users.adapters.CustomSocialAccountAdapter'
-# Use default adapter temporarily to debug recursion
-SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+# Social adapter: auto-link OAuth logins to existing email accounts
+SOCIALACCOUNT_ADAPTER = 'users.social_adapter.AutoLinkSocialAccountAdapter'
 
 # ============================================================================
 # PAYMENT GATEWAYS CONFIGURATION
