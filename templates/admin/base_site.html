@@ -52,6 +52,74 @@
     background: #d1e7dd; border: 1px solid #badbcc;
     border-radius: 10px; padding: 8px 10px; display: none;
   }
+  .admin-pwa-diagnostics {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 9997;
+    width: min(420px, calc(100vw - 24px));
+    font-size: 13px;
+  }
+  .admin-pwa-toggle {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 700;
+    color: #fff;
+    background: #1B2A4A;
+    box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    cursor: pointer;
+  }
+  .admin-pwa-panel {
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #dbe4f1;
+    border-radius: 12px;
+    box-shadow: 0 16px 30px rgba(0,0,0,.18);
+    overflow: hidden;
+    display: none;
+  }
+  .admin-pwa-panel.open { display: block; }
+  .admin-pwa-head {
+    padding: 10px 12px;
+    background: #f5f8ff;
+    border-bottom: 1px solid #dbe4f1;
+    color: #1B2A4A;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .admin-pwa-refresh {
+    border: 1px solid #ccd7ea;
+    background: #fff;
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #1B2A4A;
+  }
+  .admin-pwa-list { list-style: none; margin: 0; padding: 8px 10px; }
+  .admin-pwa-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px dashed #edf2fb;
+    padding: 7px 2px;
+  }
+  .admin-pwa-list li:last-child { border-bottom: none; }
+  .pwa-pill {
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .pwa-ok { background: #d1e7dd; color: #0f5132; }
+  .pwa-warn { background: #fff3cd; color: #664d03; }
+  .pwa-bad { background: #f8d7da; color: #842029; }
 </style>
 
 <div class="admin-guide-backdrop" id="adminGuideBackdrop"></div>
@@ -85,6 +153,19 @@
       <button type="button" class="admin-guide-btn primary" id="adminGuideAccept">Accepter et continuer</button>
     </div>
     <div class="admin-guide-toast" id="adminGuideToast">Guide accepté. Configuration enregistrée.</div>
+  </div>
+</div>
+
+<div class="admin-pwa-diagnostics" id="adminPwaDiagnostics">
+  <button type="button" class="admin-pwa-toggle" id="adminPwaToggle">Diagnostic PWA</button>
+  <div class="admin-pwa-panel" id="adminPwaPanel">
+    <div class="admin-pwa-head">
+      <span>État installation / hors-ligne</span>
+      <button type="button" class="admin-pwa-refresh" id="adminPwaRefresh">Actualiser</button>
+    </div>
+    <ul class="admin-pwa-list" id="adminPwaList">
+      <li><span>Analyse en cours...</span><span class="pwa-pill pwa-warn">...</span></li>
+    </ul>
   </div>
 </div>
 
@@ -146,6 +227,110 @@
     if (declineBtn) {
       declineBtn.addEventListener("click", function () {
         closeModal();
+      });
+    }
+
+    var pwaPanel = document.getElementById("adminPwaPanel");
+    var pwaToggle = document.getElementById("adminPwaToggle");
+    var pwaRefresh = document.getElementById("adminPwaRefresh");
+    var pwaList = document.getElementById("adminPwaList");
+    var installEventSeen = false;
+    window.addEventListener("beforeinstallprompt", function () {
+      installEventSeen = true;
+    });
+
+    function row(label, status, detail) {
+      var statusClass = status === "ok" ? "pwa-ok" : (status === "warn" ? "pwa-warn" : "pwa-bad");
+      var text = status === "ok" ? "OK" : (status === "warn" ? "Attention" : "Erreur");
+      return '<li><span><b>' + label + '</b><br><small>' + detail + '</small></span><span class="pwa-pill ' + statusClass + '">' + text + '</span></li>';
+    }
+
+    function safeContent(value) {
+      return String(value || "").replace(/[<>&"]/g, function (c) {
+        return ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" })[c];
+      });
+    }
+
+    async function runPwaDiagnostics() {
+      if (!pwaList) return;
+      var items = [];
+
+      var secure = window.isSecureContext || location.hostname === "localhost";
+      items.push(row("Contexte sécurisé", secure ? "ok" : "bad", secure ? "HTTPS actif." : "Le PWA nécessite HTTPS."));
+
+      var online = navigator.onLine;
+      items.push(row("Connectivité actuelle", online ? "ok" : "warn", online ? "En ligne." : "Hors-ligne (test utile)."));
+
+      var standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      items.push(row("Mode standalone", standalone ? "ok" : "warn", standalone ? "App ouverte comme application installée." : "Ouverte dans le navigateur."));
+
+      var swSupported = "serviceWorker" in navigator;
+      items.push(row("Support Service Worker", swSupported ? "ok" : "bad", swSupported ? "Supporté par ce navigateur." : "Non supporté."));
+
+      if (swSupported) {
+        try {
+          var reg = await navigator.serviceWorker.getRegistration("/");
+          var hasReg = !!reg;
+          items.push(row("Enregistrement SW", hasReg ? "ok" : "bad", hasReg ? "Service worker enregistré." : "Aucun SW enregistré."));
+
+          var controlled = !!navigator.serviceWorker.controller;
+          items.push(row("Page contrôlée par SW", controlled ? "ok" : "warn", controlled ? "Le cache hors-ligne peut s'appliquer." : "Rechargez la page pour activer le contrôle."));
+        } catch (e) {
+          items.push(row("Enregistrement SW", "bad", "Erreur: " + safeContent(e && e.message ? e.message : "inconnue")));
+        }
+      }
+
+      var manifestLink = document.querySelector('link[rel="manifest"]');
+      if (!manifestLink) {
+        items.push(row("Manifest", "bad", "Aucun lien manifest trouvé."));
+      } else {
+        try {
+          var response = await fetch(manifestLink.href, { cache: "no-store" });
+          if (!response.ok) {
+            items.push(row("Manifest", "bad", "Manifest inaccessible (" + response.status + ")."));
+          } else {
+            var data = await response.json();
+            var okFields = !!(data.name && data.start_url && data.icons && data.icons.length);
+            items.push(row("Manifest", okFields ? "ok" : "warn", okFields ? "Champs principaux présents." : "Champs PWA manquants."));
+          }
+        } catch (e2) {
+          items.push(row("Manifest", "bad", "Erreur de lecture manifest."));
+        }
+      }
+
+      if ("caches" in window) {
+        try {
+          var keys = await caches.keys();
+          var cacheCount = keys.length;
+          items.push(row("Caches offline", cacheCount > 0 ? "ok" : "warn", cacheCount > 0 ? ("Caches actifs: " + cacheCount) : "Aucun cache détecté."));
+        } catch (e3) {
+          items.push(row("Caches offline", "warn", "Impossible de lire les caches."));
+        }
+      } else {
+        items.push(row("Caches offline", "warn", "API Cache Storage indisponible."));
+      }
+
+      var installState = installEventSeen ? "ok" : "warn";
+      var installDetail = installEventSeen
+        ? "Signal d'installation reçu dans cette session."
+        : "Signal d'installation non reçu (normal sur iOS; utiliser le guide manuel).";
+      items.push(row("Prompt d'installation", installState, installDetail));
+
+      pwaList.innerHTML = items.join("");
+    }
+
+    if (pwaToggle && pwaPanel) {
+      pwaToggle.addEventListener("click", function () {
+        pwaPanel.classList.toggle("open");
+        if (pwaPanel.classList.contains("open")) {
+          runPwaDiagnostics();
+        }
+      });
+    }
+
+    if (pwaRefresh) {
+      pwaRefresh.addEventListener("click", function () {
+        runPwaDiagnostics();
       });
     }
   })();
