@@ -551,8 +551,8 @@ class SiteConfigurationAdmin(admin.ModelAdmin):
     list_display = ('site_name', 'home_title')
     fieldsets = (
         ('Identité du site', {
-            'fields': ('site_name', 'logo'),
-            'description': "Gérez le nom et le logo du site visible par les utilisateurs."
+            'fields': ('site_name', 'logo', 'pwa_logo'),
+            'description': "Gérez le nom du site, le logo visible et le logo utilisé pour l'application PWA."
         }),
         ('Page d\'accueil', {
             'fields': ('home_title', 'home_description'),

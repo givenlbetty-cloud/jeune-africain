@@ -104,6 +104,21 @@ class PWAOfflineDataManager:
 @require_http_methods(['GET'])
 def manifest_view(request):
     """Serve manifest.json"""
+    try:
+        from catalogue.models import SiteConfiguration
+        site_config = SiteConfiguration.load()
+    except Exception:
+        site_config = None
+
+    pwa_logo_url = None
+    if site_config:
+        if getattr(site_config, "pwa_logo", None):
+            pwa_logo_url = site_config.pwa_logo.url
+        elif getattr(site_config, "logo", None):
+            pwa_logo_url = site_config.logo.url
+    if not pwa_logo_url:
+        pwa_logo_url = '/static/images/icon-512x512.png'
+
     manifest = {
         'name': 'Calures Éditions — Littérature Congolaise',
         'short_name': 'Calures',
@@ -120,20 +135,20 @@ def manifest_view(request):
         'categories': ['books', 'education'],
         'icons': [
             {
-                'src': '/static/images/icon-192x192.png',
+                'src': pwa_logo_url,
                 'sizes': '192x192',
                 'type': 'image/png',
                 'purpose': 'any',
             },
             {
-                'src': '/static/images/icon-512x512.png',
+                'src': pwa_logo_url,
                 'sizes': '512x512',
                 'type': 'image/png',
                 'purpose': 'any',
             },
             {
-                'src': '/static/images/icon-maskable.png',
-                'sizes': '192x192',
+                'src': pwa_logo_url,
+                'sizes': '512x512',
                 'type': 'image/png',
                 'purpose': 'maskable',
             },

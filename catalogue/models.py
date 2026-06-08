@@ -2379,6 +2379,12 @@ class SiteConfiguration(models.Model):
     """Configuration globale du site (Logo, Nom)."""
     site_name = models.CharField(max_length=255, default="Bibliothèque Numérique Calures")
     logo = models.ImageField(upload_to='site_branding/', blank=True, null=True, help_text="Téléversez le logo du site ici.")
+    pwa_logo = models.ImageField(
+        upload_to='site_branding/',
+        blank=True,
+        null=True,
+        help_text="Logo de l'application installable (PWA). Recommandé: image carrée 512x512.",
+    )
     
     # Textes de la page d'accueil
     home_title = models.CharField(
