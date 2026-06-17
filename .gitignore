@@ -1,5 +1,6 @@
 # Python
 venv/
+venv_win/
 env/
 *.pyc
 __pycache__/
@@ -40,3 +41,8 @@ Thumbs.db
 
 # Backups — garder uniquement le dernier backup dans Git
 # Les backups JSON sont VERSIONNÉS pour ne pas perdre de données
+node_modules
+node_modules
+node_modules
+node_modules
+node_modules

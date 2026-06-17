@@ -39,15 +39,18 @@
     <h2>1. Éditeur du site</h2>
     <div class="info-card">
         <p><strong>Calures Éditions</strong><br>
-        Plateforme de livres numériques<br>
         Douala, Cameroun<br>
-        E-mail : <strong>contact@calures.com</strong></p>
+        E-mail : <strong>{{ contact_email }}</strong><br>
+        Site : <strong>{{ platform_domain }}</strong></p>
     </div>
 
-    <h2>2. Directeur de la publication</h2>
+    <h2>2. La Bibliothèque Numérique Calures</h2>
+    {% include 'legal/_platform_description.html' %}
+
+    <h2>3. Directeur de la publication</h2>
     <p>Le directeur de la publication est le représentant légal de Calures Éditions.</p>
 
-    <h2>3. Hébergement</h2>
+    <h2>4. Hébergement</h2>
     <div class="info-card">
         <p><strong>Render.com</strong><br>
         525 Brannan St, Suite 300<br>
@@ -55,24 +58,25 @@
         Site web : <a href="https://render.com" target="_blank" rel="noopener">render.com</a></p>
     </div>
 
-    <h2>4. Propriété intellectuelle</h2>
-    <p>L'ensemble du contenu de la Plateforme (textes, graphismes, images, logos, icônes, sons, logiciels, livres numériques) est la propriété exclusive de Calures Éditions ou de ses partenaires éditeurs, et est protégé par les lois relatives à la propriété intellectuelle.</p>
+    <h2>5. Propriété intellectuelle</h2>
+    <p>L'ensemble du contenu de la Plateforme (textes, graphismes, images, logos, icônes, sons, logiciels, livres numériques et livres audio) est la propriété exclusive de Calures Éditions ou de ses partenaires éditeurs, et est protégé par les lois relatives à la propriété intellectuelle.</p>
     <p>Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments de la Plateforme est interdite sans autorisation écrite préalable.</p>
 
-    <h2>5. Données personnelles</h2>
+    <h2>6. Données personnelles</h2>
     <p>Les informations relatives au traitement de vos données personnelles sont détaillées dans notre <a href="{% url 'confidentialite' %}">Politique de Confidentialité</a>.</p>
 
-    <h2>6. Cookies</h2>
+    <h2>7. Cookies</h2>
     <p>La Plateforme utilise uniquement des cookies techniques nécessaires au bon fonctionnement du service (authentification, session, préférences linguistiques, protection CSRF). Aucun cookie publicitaire n'est déposé.</p>
 
-    <h2>7. Limitation de responsabilité</h2>
+    <h2>8. Limitation de responsabilité</h2>
     <p>Calures Éditions s'efforce de fournir des informations aussi précises que possible. Toutefois, elle ne pourra être tenue responsable des omissions, inexactitudes ou carences dans la mise à jour des informations.</p>
-    <p>Les liens hypertextes mis en place vers d'autres sites ne sauraient engager la responsabilité de Calures Éditions quant au contenu de ces sites.</p>
+    <p>Les liens hypertextes mis en place vers d'autres sites (y compris l'ancien domaine calures.org, remplacé par {{ platform_domain }}) ne sauraient engager la responsabilité de Calures Éditions quant au contenu de ces sites.</p>
 
-    <h2>8. Droit applicable</h2>
+    <h2>9. Droit applicable</h2>
     <p>Les présentes mentions légales sont soumises au droit camerounais. En cas de litige, les tribunaux de Douala seront seuls compétents.</p>
 
-    <h2>9. Contact</h2>
-    <p>Pour toute question ou réclamation : <strong>contact@calures.com</strong></p>
+    <h2>10. Contact</h2>
+    <p>Pour toute question ou réclamation : <strong>{{ contact_email }}</strong></p>
+    <p>Voir aussi : <a href="{% url 'cgu' %}">Conditions d'utilisation</a></p>
 </div>
 {% endblock %}

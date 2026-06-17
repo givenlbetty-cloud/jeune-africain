@@ -144,5 +144,18 @@
     </div>
     {% endif %}
 
+    <!-- Newsletter -->
+    <div style="max-width: 800px; margin: 0 auto; padding: 0 1rem 2rem;">
+        <section style="padding: 1.25rem; border-radius: 14px; background: linear-gradient(135deg, #1B2A4A, #2D4470); color: #fff; text-align: center;">
+            <h2 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.35rem;"><i class="fas fa-envelope-open-text"></i> Newsletter Calures</h2>
+            <p style="font-size: 0.82rem; opacity: 0.92; margin-bottom: 1rem;">Recevez nos nouveaux articles et actualités littéraires par e-mail.</p>
+            <form method="post" action="{% url 'catalogue:newsletter_subscribe' %}" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 420px; margin: 0 auto;">
+                {% csrf_token %}
+                <input type="email" name="email" required placeholder="Votre e-mail" style="flex: 1; min-width: 180px; padding: 0.45rem 0.65rem; border-radius: 8px; border: none;">
+                <button type="submit" style="background: #E63946; color: #fff; font-weight: 700; border: none; border-radius: 8px; padding: 0.45rem 0.9rem; cursor: pointer;">S'abonner</button>
+            </form>
+        </section>
+    </div>
+
 </div>
 {% endblock %}

@@ -14,7 +14,7 @@ import uuid
 
 from catalogue.models import (
     Book, ReadingSession, Payment, Author, Favorite, Review,
-    Highlight, Note, Event, PrintOrder, Article
+    Highlight, Note, Event, PrintOrder, Article, NewsletterSubscription
 )
 from .forms import ReviewForm
 
@@ -1074,3 +1074,27 @@ def article_detail_view(request, slug):
         'related_articles': related_articles,
     }
     return render(request, 'catalogue/article_detail.html', context)
+
+
+@require_http_methods(["POST"])
+def newsletter_subscribe_view(request):
+    """Inscription à la newsletter (articles et actualités)."""
+    email = (request.POST.get('email') or '').strip().lower()
+    if not email or '@' not in email:
+        messages.error(request, "Veuillez saisir une adresse e-mail valide.")
+        return redirect(request.META.get('HTTP_REFERER') or '/')
+
+    sub, created = NewsletterSubscription.objects.get_or_create(
+        email=email,
+        defaults={'is_active': True},
+    )
+    if not created and not sub.is_active:
+        sub.is_active = True
+        sub.unsubscribed_at = None
+        sub.save(update_fields=['is_active', 'unsubscribed_at'])
+
+    if created or sub.is_active:
+        messages.success(request, "Merci ! Vous êtes inscrit(e) à la newsletter Calures.")
+    else:
+        messages.info(request, "Cette adresse est déjà inscrite à la newsletter.")
+    return redirect(request.META.get('HTTP_REFERER', 'catalogue:articles_list'))

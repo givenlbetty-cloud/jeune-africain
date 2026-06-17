@@ -6,7 +6,6 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.files.base import ContentFile
 from catalogue.models import Book
-import fitz  # PyMuPDF
 import os
 
 
@@ -30,6 +29,7 @@ def extract_pdf_cover_on_save(sender, instance, created, **kwargs):
         return
     
     try:
+        import fitz  # PyMuPDF — import différé (compatibilité Windows)
         # MODIFICATION : Compatible avec le stockage distant (Cloudinary, S3)
         # Au lieu d'utiliser .path qui plante avec Cloudinary, on lit le stream
         if hasattr(instance.pdf_file, 'open'):

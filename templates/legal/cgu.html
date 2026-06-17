@@ -24,25 +24,28 @@
 <section class="legal-hero">
     <div class="container">
         <h1>Conditions Générales d'Utilisation</h1>
-        <p>Dernière mise à jour : janvier 2025</p>
+        <p>Dernière mise à jour : juin 2026</p>
     </div>
 </section>
 
 <div class="legal-content">
     <h2>1. Objet</h2>
-    <p>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme Calures Éditions, accessible à l'adresse <strong>bnc-0w9i.onrender.com</strong> (ci-après « la Plateforme »).</p>
+    <p>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme ci-après « la Plateforme ».</p>
+    {% include 'legal/_platform_description.html' %}
 
     <h2>2. Acceptation des CGU</h2>
     <p>L'utilisation de la Plateforme implique l'acceptation pleine et entière des présentes CGU. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser la Plateforme.</p>
 
     <h2>3. Description des services</h2>
-    <p>Calures Éditions propose :</p>
+    <p>La Bibliothèque Numérique Calures propose notamment :</p>
     <ul>
-        <li>Un catalogue de livres numériques (ebooks) consultables et téléchargeables</li>
-        <li>Un lecteur PDF intégré pour la lecture en ligne</li>
+        <li>Un catalogue de livres numériques consultables en ligne via lecteur intégré</li>
+        <li>Des livres audio (audiobooks) avec tarification alignée sur le livre numérique associé</li>
+        <li>Des articles, actualités et événements culturels</li>
         <li>Un système d'achat sécurisé via Moneroo (Mobile Money, cartes bancaires)</li>
-        <li>Un espace personnel pour gérer sa bibliothèque</li>
+        <li>Un espace personnel pour gérer sa bibliothèque de lecture</li>
     </ul>
+    <p>Les fichiers numériques ne sont pas téléchargeables librement : seule la consultation autorisée est permise, conformément aux droits acquis.</p>
 
     <h2>4. Inscription et compte utilisateur</h2>
     <p>L'accès à certains services nécessite la création d'un compte. L'utilisateur s'engage à fournir des informations exactes et à maintenir la confidentialité de ses identifiants. Toute activité réalisée depuis son compte est sous sa responsabilité.</p>
@@ -51,10 +54,10 @@
     <p>L'ensemble des contenus présents sur la Plateforme (textes, images, livres numériques, logos, design) sont protégés par le droit de la propriété intellectuelle. Toute reproduction, distribution ou utilisation non autorisée est strictement interdite.</p>
 
     <h2>6. Achats et paiements</h2>
-    <p>Les prix sont affichés en francs CFA (XAF). Le paiement est traité de manière sécurisée via Moneroo. Après validation du paiement, l'utilisateur accède immédiatement au contenu acheté dans sa bibliothèque.</p>
+    <p>Les prix sont affichés en francs congolais (CDF) ou francs CFA (XAF) selon le contexte d'achat. Le paiement est traité de manière sécurisée via Moneroo. Le prix d'un livre audio correspond au prix du livre numérique associé, sauf indication contraire affichée sur la fiche produit. Après validation du paiement, l'utilisateur accède immédiatement au contenu acheté dans sa bibliothèque.</p>
 
     <h2>7. Droit de rétractation</h2>
-    <p>Conformément à la nature numérique des produits, le droit de rétractation ne s'applique pas aux ebooks une fois le téléchargement ou la lecture en ligne commencé, conformément aux dispositions légales en vigueur.</p>
+    <p>Conformément à la nature numérique des produits, le droit de rétractation ne s'applique pas aux contenus numériques une fois la lecture ou l'écoute en ligne commencée, conformément aux dispositions légales en vigueur.</p>
 
     <h2>8. Responsabilité</h2>
     <p>Calures Éditions s'efforce d'assurer la disponibilité de la Plateforme mais ne garantit pas un accès ininterrompu. Calures Éditions ne saurait être tenu responsable des dommages résultant de l'utilisation ou de l'impossibilité d'utilisation de la Plateforme.</p>
@@ -66,6 +69,7 @@
     <p>Les présentes CGU sont soumises au droit camerounais. Tout litige relatif à leur interprétation ou exécution relève de la compétence des tribunaux de Douala, Cameroun.</p>
 
     <h2>11. Contact</h2>
-    <p>Pour toute question relative aux présentes CGU, contactez-nous à : <strong>contact@calures.com</strong></p>
+    <p>Pour toute question relative aux présentes CGU : <strong>{{ contact_email }}</strong></p>
+    <p>Voir aussi : <a href="{% url 'mentions_legales' %}">Mentions légales</a> · <a href="{% url 'confidentialite' %}">Politique de confidentialité</a></p>
 </div>
 {% endblock %}

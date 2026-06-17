@@ -20,12 +20,17 @@ class Author(models.Model):
     
     NATIONALITY_CHOICES = [
         ("RDC", _("République Démocratique du Congo")),
+        ("CG", _("Congo-Brazzaville")),
+        ("CM", _("Cameroun")),
+        ("GA", _("Gabon")),
+        ("CF", _("République Centrafricaine")),
+        ("TD", _("Tchad")),
+        ("AO", _("Angola")),
         ("SN", _("Sénégal")),
         ("ML", _("Mali")),
         ("CI", _("Côte d'Ivoire")),
         ("BJ", _("Bénin")),
         ("BF", _("Burkina Faso")),
-        ("CM", _("Cameroun")),
         ("GH", _("Ghana")),
         ("KE", _("Kenya")),
         ("ZA", _("Afrique du Sud")),
@@ -53,7 +58,7 @@ class Author(models.Model):
         _("Nationalité"),
         max_length=50,
         choices=NATIONALITY_CHOICES,
-        default="OTHER"
+        default="RDC"
     )
     website = models.URLField(_("Site web"), blank=True)
     facebook_url = models.URLField(_("Facebook"), blank=True)
@@ -202,10 +207,22 @@ class Book(models.Model):
     
     GENRE_CHOICES = [
         ("articles", _("Articles")),
-        ("magasin", _("Magasin")),
+        ("magazine", _("Magazine")),
         ("revues_scientifiques", _("Revues Scientifiques")),
         ("geographie_histoires", _("Géographie et Histoires")),
         ("theories_litteraires", _("Théories Littéraires")),
+        ("roman", _("Roman")),
+        ("nouvelle", _("Nouvelle")),
+        ("essai", _("Essai")),
+        ("jeunesse", _("Littérature jeunesse")),
+        ("theatre", _("Théâtre")),
+        ("conte", _("Conte")),
+        ("memoires", _("Mémoires")),
+        ("bande_dessinee", _("Bande dessinée")),
+        ("documentaire", _("Documentaire")),
+        ("philosophie", _("Philosophie")),
+        ("religion", _("Religion")),
+        ("pedagogie", _("Pédagogie")),
         ("tourisme", _("Tourisme")),
         ("hotellerie", _("Hôtellerie")),
         ("sport", _("Sport")),
@@ -341,6 +358,15 @@ class Book(models.Model):
             discount_ratio = Decimal(self.discount_percentage) / Decimal("100")
             return self.price * (Decimal("1") - discount_ratio)
         return self.price
+
+    def get_audiobook_price(self):
+        """
+        Prix du livre audio : même base que le livre numérique,
+        avec coefficient configurable (AUDIOBOOK_PRICE_PERCENT, défaut 100 %).
+        """
+        from django.conf import settings
+        percent = Decimal(str(getattr(settings, "AUDIOBOOK_PRICE_PERCENT", 100)))
+        return (self.get_final_price() * percent / Decimal("100")).quantize(Decimal("0.01"))
     
     @property
     def is_free(self):
@@ -1831,6 +1857,15 @@ class AudiobookMetadata(models.Model):
         null=True,
         blank=True
     )
+    price = models.DecimalField(
+        _("Prix audio (FCFA)"),
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text=_("Laisser vide pour appliquer la règle automatique (prix du livre × coefficient)."),
+    )
     is_published = models.BooleanField(_("Publié"), default=False)
     created_at = models.DateTimeField(_("Créé le"), auto_now_add=True)
     updated_at = models.DateTimeField(_("Mis à jour le"), auto_now=True)
@@ -1841,6 +1876,12 @@ class AudiobookMetadata(models.Model):
     
     def __str__(self):
         return f"Audiobook - {self.book.title}"
+
+    def get_display_price(self):
+        """Prix affiché : champ dédié ou règle automatique liée au livre."""
+        if self.price is not None:
+            return self.price
+        return self.book.get_audiobook_price()
     
     @property
     def total_duration_seconds(self):
@@ -2640,6 +2681,24 @@ class LienSocial(models.Model):
     @property
     def color(self):
         return self.COLOR_MAP.get(self.platform, '#1B2A4A')
+
+
+class NewsletterSubscription(models.Model):
+    """Abonnement à la newsletter (articles et actualités)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(_("E-mail"), unique=True)
+    is_active = models.BooleanField(_("Actif"), default=True)
+    subscribed_at = models.DateTimeField(_("Inscrit le"), auto_now_add=True)
+    unsubscribed_at = models.DateTimeField(_("Désinscrit le"), null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Abonnement newsletter")
+        verbose_name_plural = _("Abonnements newsletter")
+        ordering = ["-subscribed_at"]
+
+    def __str__(self):
+        return self.email
 
 
 class Article(models.Model):

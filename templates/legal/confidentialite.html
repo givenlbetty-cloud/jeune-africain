@@ -24,13 +24,14 @@
 <section class="legal-hero">
     <div class="container">
         <h1>Politique de Confidentialité</h1>
-        <p>Dernière mise à jour : janvier 2025</p>
+        <p>Dernière mise à jour : juin 2026</p>
     </div>
 </section>
 
 <div class="legal-content">
     <h2>1. Introduction</h2>
     <p>Calures Éditions s'engage à protéger la vie privée de ses utilisateurs. La présente politique décrit les données personnelles collectées, leur utilisation et les droits dont vous disposez.</p>
+    {% include 'legal/_platform_description.html' %}
 
     <h2>2. Données collectées</h2>
     <p>Nous collectons les données suivantes :</p>
@@ -39,6 +40,7 @@
         <li><strong>Données de profil :</strong> photo de profil, préférences de lecture</li>
         <li><strong>Données de transaction :</strong> historique d'achats, méthode de paiement (traitée par Moneroo)</li>
         <li><strong>Données de navigation :</strong> pages visitées, livres consultés, durée de lecture</li>
+        <li><strong>Newsletter :</strong> adresse e-mail si vous vous abonnez aux actualités et articles</li>
         <li><strong>Données techniques :</strong> adresse IP, type de navigateur, appareil utilisé</li>
     </ul>
 
@@ -48,6 +50,7 @@
         <li>Gérer votre compte et votre bibliothèque personnelle</li>
         <li>Traiter vos achats et paiements</li>
         <li>Personnaliser votre expérience (recommandations de lecture)</li>
+        <li>Vous envoyer la newsletter (articles et actualités), si vous y avez consenti</li>
         <li>Améliorer nos services et la Plateforme</li>
         <li>Vous envoyer des communications relatives à votre compte</li>
         <li>Assurer la sécurité de la Plateforme</li>
@@ -74,9 +77,9 @@
         <li><strong>Droit de rectification :</strong> corriger des données inexactes</li>
         <li><strong>Droit de suppression :</strong> demander l'effacement de vos données</li>
         <li><strong>Droit de portabilité :</strong> recevoir vos données dans un format structuré</li>
-        <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
+        <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données, y compris la newsletter</li>
     </ul>
-    <p>Pour exercer ces droits, contactez-nous à : <strong>contact@calures.com</strong></p>
+    <p>Pour exercer ces droits, contactez-nous à : <strong>{{ contact_email }}</strong></p>
 
     <h2>8. Cookies</h2>
     <p>La Plateforme utilise des cookies essentiels au fonctionnement (session, CSRF, préférences de langue). Aucun cookie publicitaire ou de tracking tiers n'est utilisé.</p>
@@ -85,6 +88,7 @@
     <p>Cette politique peut être mise à jour. Les modifications seront publiées sur cette page avec la date de mise à jour.</p>
 
     <h2>10. Contact</h2>
-    <p>Pour toute question concernant cette politique de confidentialité : <strong>contact@calures.com</strong></p>
+    <p>Pour toute question concernant cette politique de confidentialité : <strong>{{ contact_email }}</strong></p>
+    <p>Voir aussi : <a href="{% url 'cgu' %}">Conditions d'utilisation</a> · <a href="{% url 'mentions_legales' %}">Mentions légales</a></p>
 </div>
 {% endblock %}

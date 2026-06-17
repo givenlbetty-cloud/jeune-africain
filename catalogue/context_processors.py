@@ -45,3 +45,16 @@ def social_links(request):
     except Exception:
         links = []
     return {'liens_sociaux': links}
+
+
+def legal_platform(request):
+    """Informations légales communes (domaine, contact, description BNC)."""
+    from django.conf import settings
+    domain = getattr(settings, "PLATFORM_DOMAIN", "calures.com")
+    site_url = getattr(settings, "SITE_URL", "http://localhost:8000").rstrip("/")
+    return {
+        "platform_domain": domain,
+        "platform_url": site_url,
+        "contact_email": getattr(settings, "CONTACT_EMAIL", f"contact@{domain}"),
+        "platform_legal_name": "Calures Éditions — Bibliothèque Numérique Calures (BNC)",
+    }

@@ -179,6 +179,7 @@ TEMPLATES = [
                 "catalogue.context_processors.featured_books",  # CORRECTION #4
                 "catalogue.context_processors.site_categories",  # Navigation
                 "catalogue.context_processors.social_links",  # Liens sociaux
+                "catalogue.context_processors.legal_platform",
             ],
         },
     },
@@ -571,6 +572,10 @@ ORANGE_MONEY_API_SECRET = os.getenv('ORANGE_MONEY_API_SECRET', '')
 
 # Payment Configuration
 SITE_URL = os.getenv('SITE_URL', 'http://localhost:8000')
+PLATFORM_DOMAIN = os.getenv('PLATFORM_DOMAIN', 'calures.com')
+CONTACT_EMAIL = os.getenv('CONTACT_EMAIL', 'contact@calures.com')
+# Prix livre audio = prix du livre numérique × ce pourcentage (100 = même prix)
+AUDIOBOOK_PRICE_PERCENT = int(os.getenv('AUDIOBOOK_PRICE_PERCENT', '100'))
 DEFAULT_CURRENCY = 'CDF'  # Francs Congolais
 PAYMENT_TIMEOUT_MINUTES = 30  # Délai avant annulation paiement
 

@@ -38,6 +38,7 @@ urlpatterns = [
     
     # Articles / Actualités
     path('actualites/', frontend_views.articles_list_view, name='articles_list'),
+    path('newsletter/inscription/', frontend_views.newsletter_subscribe_view, name='newsletter_subscribe'),
     path('actualites/<slug:slug>/', frontend_views.article_detail_view, name='article_detail'),
     
     # Recommandations

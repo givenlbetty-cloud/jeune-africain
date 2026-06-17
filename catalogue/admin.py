@@ -15,7 +15,7 @@ from .models import (
     BookSimilarity, UserPreference, UserRecommendation, RecommendationStatistic,
     SyncQueue, UserRecommendationFeedback,
     AudiobookMetadata, VideoMaterial, Podcast,
-    SiteConfiguration, Donateur, LienSocial, Article
+    SiteConfiguration, Donateur, LienSocial, Article, NewsletterSubscription
 )
 from .proxy_models import (
     AudiobookProxy, VideoProxy, PodcastProxy, 
@@ -283,7 +283,7 @@ class AudiobookMetadataAdmin(admin.ModelAdmin):
             'fields': ('book',)
         }),
         ('FICHIER & INFO', {
-            'fields': ('audio_file', 'duration_hours', 'narrator', 'cover_image')
+            'fields': ('audio_file', 'duration_hours', 'narrator', 'cover_image', 'price')
         }),
         ('PUBLICATION', {
             'fields': ('is_published',)
@@ -616,3 +616,11 @@ class ArticleAdmin(admin.ModelAdmin):
             'fields': ('is_published', 'is_featured'),
         }),
     )
+
+
+@admin.register(NewsletterSubscription)
+class NewsletterSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('email', 'is_active', 'subscribed_at', 'unsubscribed_at')
+    list_filter = ('is_active',)
+    search_fields = ('email',)
+    ordering = ('-subscribed_at',)

@@ -25,12 +25,13 @@
 
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <p><strong>Durée:</strong> {{ audiobook.duration_minutes|default:"--" }} minutes</p>
-                    <p><strong>Narrateur:</strong> {{ audiobook.narrator|default:"--" }}</p>
+                    <p><strong>Durée:</strong> {{ audiobook.duration_hours|floatformat:1 }} h</p>
+                    <p><strong>Narrateur:</strong> {{ audiobook.narrator|default:"—" }}</p>
+                    <p><strong>Prix:</strong> {% if book.is_paid %}{{ audiobook.get_display_price|floatformat:0 }} FC{% else %}Gratuit{% endif %}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Format:</strong> {{ audiobook.format|default:"--" }}</p>
-                    <p><strong>Bitrate:</strong> {{ audiobook.bitrate|default:"--" }}</p>
+                    <p><strong>Format:</strong> {{ audiobook.file_format|default:"—" }}</p>
+                    <p><strong>Bitrate:</strong> {{ audiobook.bitrate|default:"—" }}</p>
                 </div>
             </div>
 

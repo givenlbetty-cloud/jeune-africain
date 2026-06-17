@@ -35,22 +35,9 @@
                     <div class="col-6">
                         <select class="form-select form-select-sm" name="category" onchange="document.getElementById('catalogueForm').submit()" style="font-size: 0.7rem; padding: 0.25rem 0.4rem;">
                             <option value="">Toutes catégories</option>
-                            <option value="articles" {% if request.GET.category == 'articles' %}selected{% endif %}>Articles</option>
-                            <option value="magasin" {% if request.GET.category == 'magasin' %}selected{% endif %}>Magasin</option>
-                            <option value="revues_scientifiques" {% if request.GET.category == 'revues_scientifiques' %}selected{% endif %}>Revues Scientifiques</option>
-                            <option value="geographie_histoires" {% if request.GET.category == 'geographie_histoires' %}selected{% endif %}>Géographie & Histoires</option>
-                            <option value="theories_litteraires" {% if request.GET.category == 'theories_litteraires' %}selected{% endif %}>Théories Littéraires</option>
-                            <option value="tourisme" {% if request.GET.category == 'tourisme' %}selected{% endif %}>Tourisme</option>
-                            <option value="hotellerie" {% if request.GET.category == 'hotellerie' %}selected{% endif %}>Hôtellerie</option>
-                            <option value="sport" {% if request.GET.category == 'sport' %}selected{% endif %}>Sport</option>
-                            <option value="loisir" {% if request.GET.category == 'loisir' %}selected{% endif %}>Loisir</option>
-                            <option value="dev_personnel" {% if request.GET.category == 'dev_personnel' %}selected{% endif %}>Dév. Personnel</option>
-                            <option value="fiction" {% if request.GET.category == 'fiction' %}selected{% endif %}>Fiction</option>
-                            <option value="non_fiction" {% if request.GET.category == 'non_fiction' %}selected{% endif %}>Non-Fiction</option>
-                            <option value="science" {% if request.GET.category == 'science' %}selected{% endif %}>Science</option>
-                            <option value="biography" {% if request.GET.category == 'biography' %}selected{% endif %}>Biographie</option>
-                            <option value="poetry" {% if request.GET.category == 'poetry' %}selected{% endif %}>Poésie</option>
-                            <option value="other" {% if request.GET.category == 'other' %}selected{% endif %}>Autre</option>
+                            {% for value, label in genres %}
+                            <option value="{{ value }}" {% if request.GET.category == value or selected_genre == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div class="col-6">
