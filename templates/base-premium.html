@@ -324,9 +324,32 @@
         .footer-links a:hover { color: #fff; }
         .footer-desktop hr { border-color: rgba(255,255,255,0.15); margin: 1.5rem 0 1rem; }
         .footer-copy { font-size: 0.8rem; opacity: 0.6; margin: 0; }
+        .footer-newsletter h6 { color: #fff; font-weight: 700; margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .footer-newsletter-desc { font-size: 0.82rem; opacity: 0.8; margin-bottom: 0.65rem; line-height: 1.5; }
+        .footer-newsletter-form { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .footer-newsletter-input { flex: 1 1 160px; min-width: 0; border-radius: 8px; border: none; }
+        .footer-newsletter-btn { background: #E63946; color: #fff; font-weight: 700; border-radius: 8px; white-space: nowrap; border: none; }
+        .footer-newsletter-btn:hover { background: #cf2f3b; color: #fff; }
+        .footer-newsletter-mobile {
+            display: none;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 42px;
+            z-index: 1019;
+            background: var(--dark, #1b2a4a);
+            color: rgba(255,255,255,0.85);
+            padding: 0.65rem 1rem;
+            border-top: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.12);
+        }
         [data-bs-theme="dark"] .footer-desktop { background: #0d1117; }
+        [data-bs-theme="dark"] .footer-newsletter-mobile { background: #0d1117; }
         @media (max-width: 767.98px) {
             .footer-desktop { display: none; }
+            .footer-newsletter-mobile { display: block; }
+            .footer-newsletter-mobile .footer-newsletter-desc { display: none; }
+            .footer-newsletter-mobile .footer-newsletter h6 { margin-bottom: 0.35rem; font-size: 0.85rem; }
         }
 
         /* ============================================
@@ -409,7 +432,7 @@
            RESPONSIVE — MOBILE (< 768px)
            ============================================ */
         @media (max-width: 767.98px) {
-            body { padding-bottom: 42px; }
+            body { padding-bottom: 118px; }
             
             .hero-premium { padding: 1rem 0.75rem; margin-bottom: 0.75rem; border-radius: var(--radius-md); }
             .hero-premium h1 { font-size: 1.15rem; margin-bottom: 0.3rem; }
@@ -428,7 +451,8 @@
            MODE LECTURE IMMERSIF
            ============================================ */
         body.reading-mode .navbar-premium,
-        body.reading-mode .footer-app {
+        body.reading-mode .footer-app,
+        body.reading-mode .footer-newsletter-mobile {
             display: none !important;
         }
         body.reading-mode { padding-bottom: 0 !important; }
@@ -583,6 +607,8 @@
                     <ul class="list-unstyled footer-links">
                         <li><a href="{% url 'home' %}">Accueil</a></li>
                         <li><a href="{% url 'catalogue:catalogue' %}">Catalogue</a></li>
+                        <li><a href="{% url 'catalogue:articles_list' %}">Actualités</a></li>
+                        <li><a href="{% url 'catalogue:articles_list' %}#newsletter">Newsletter</a></li>
                         <li><a href="{% url 'about' %}">À propos</a></li>
                     </ul>
                 </div>
@@ -595,10 +621,20 @@
                     </ul>
                 </div>
             </div>
+            <div class="row mt-3">
+                <div class="col-12 col-lg-6">
+                    {% include 'components/newsletter_form_footer.html' %}
+                </div>
+            </div>
             <hr>
             <p class="text-center footer-copy">&copy; 2025 Calures Éditions. Tous droits réservés.</p>
         </div>
     </footer>
+
+    <!-- Newsletter mobile — au-dessus de la barre d'onglets -->
+    <div class="footer-newsletter-mobile">
+        {% include 'components/newsletter_form_footer.html' %}
+    </div>
 
     <!-- Footer Tab Bar — Mobile uniquement (masqué sur desktop via CSS) -->
     <div class="footer-app">
