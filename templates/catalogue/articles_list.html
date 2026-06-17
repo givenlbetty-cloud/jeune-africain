@@ -79,6 +79,11 @@
         {% endif %}
     </div>
 
+    <!-- Newsletter — visible en haut de page -->
+    <div style="padding: 0 1rem;">
+    {% include 'components/newsletter_form.html' %}
+    </div>
+
     <!-- ═══════════════ GRILLE CONTENU ═══════════════ -->
     <div class="actu-grid-section">
 
@@ -160,17 +165,6 @@
         </div>
         {% endif %}
     </div>
-
-    <!-- Newsletter -->
-    <section class="actu-newsletter" style="margin: 2rem 1rem; padding: 1.25rem; border-radius: 14px; background: linear-gradient(135deg, #1B2A4A, #2D4470); color: #fff; text-align: center;">
-        <h2 style="font-size: 1rem; font-weight: 800; margin-bottom: 0.35rem;"><i class="fas fa-envelope-open-text"></i> Newsletter Calures</h2>
-        <p style="font-size: 0.82rem; opacity: 0.92; margin-bottom: 1rem;">Recevez nos nouveaux articles, actualités littéraires et annonces d'événements.</p>
-        <form method="post" action="{% url 'catalogue:newsletter_subscribe' %}" class="d-flex flex-column flex-sm-row gap-2 justify-content-center align-items-stretch" style="max-width: 420px; margin: 0 auto;">
-            {% csrf_token %}
-            <input type="email" name="email" required placeholder="Votre e-mail" class="form-control form-control-sm" style="border-radius: 8px;">
-            <button type="submit" class="btn btn-sm" style="background: #E63946; color: #fff; font-weight: 700; border-radius: 8px; white-space: nowrap;">S'abonner</button>
-        </form>
-    </section>
 
 </div>
 
