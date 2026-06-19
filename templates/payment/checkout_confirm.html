@@ -75,7 +75,7 @@
                     <!-- Price -->
                     <div class="text-center mb-4">
                         <span class="fs-3 fw-bold" style="color: #E63946;">{{ final_price|floatformat:0 }} FC</span>
-                        {% if book.discount_percentage %}
+                        {% if book.has_active_discount %}
                         <br><small class="text-muted text-decoration-line-through">{{ book.price|floatformat:0 }} FC</small>
                         <span class="badge bg-danger ms-1">-{{ book.discount_percentage }}%</span>
                         {% endif %}

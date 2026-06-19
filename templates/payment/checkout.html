@@ -42,7 +42,7 @@
                         </div>
                     </div>
                     
-                    {% if payment.book.discount_percentage > 0 %}
+                    {% if payment.book.has_active_discount %}
                     <div class="row">
                         <div class="col-6">
                             <strong>Réduction :</strong>

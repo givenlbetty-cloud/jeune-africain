@@ -77,7 +77,7 @@
                         {% endif %}
                         {% if book.is_paid %}
                         <div class="book-price-overlay">
-                            {% if book.discount_percentage > 0 and book.get_final_price < book.price %}
+                            {% if book.has_active_discount %}
                                 <span class="price-original-sm">{{ book.price|floatformat:0 }} FC</span>
                             {% endif %}
                             {% if book.price > 0 %}

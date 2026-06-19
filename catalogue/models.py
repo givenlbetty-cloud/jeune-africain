@@ -399,6 +399,15 @@ class Book(models.Model):
             return self.price * (Decimal("1") - discount_ratio)
         return self.price
 
+    @property
+    def has_active_discount(self):
+        """True seulement si une réduction réelle s'applique au prix."""
+        return (
+            bool(self.discount_percentage)
+            and self.discount_percentage > 0
+            and self.get_final_price() < self.price
+        )
+
     def get_audiobook_price(self):
         """
         Prix du livre audio : même base que le livre numérique,
