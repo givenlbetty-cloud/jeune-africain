@@ -28,9 +28,20 @@ services:
         sync: false
       - key: EMAIL_HOST_PASSWORD
         sync: false
-      # Domaine personnalisé (ex: calures-editions.com)
+      # Domaine personnalisé (ex: calures.org)
       - key: CUSTOM_DOMAIN
         sync: false
+      - key: ALLOWED_HOSTS
+        value: "bnc.calures.org,www.calures.org,calures.org"
+      - key: SITE_URL
+        sync: false
+      # Moneroo — https://app.moneroo.io/ > Developers
+      - key: MONEROO_API_KEY
+        sync: false
+      - key: MONEROO_SECRET_KEY
+        sync: false
+      - key: USE_MONEROO_FOR_ALL
+        value: "True"
 
 databases:
   - name: bnc-db

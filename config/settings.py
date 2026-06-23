@@ -17,14 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-change-in-production")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
-
-# Custom domain support
 CUSTOM_DOMAIN = os.environ.get("CUSTOM_DOMAIN")
-if CUSTOM_DOMAIN:
-    ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
-    ALLOWED_HOSTS.append(f"www.{CUSTOM_DOMAIN}")
-if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
-    ALLOWED_HOSTS.append(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
 
 # CSRF & Security Configuration
 CSRF_TRUSTED_ORIGINS = [
@@ -55,12 +48,30 @@ CSRF_TRUSTED_ORIGINS = [
     "https://bug-free-space-palm-tree-gxxwxj7v554h6vr-8000.app.github.dev",
 ]
 
-if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
-    CSRF_TRUSTED_ORIGINS.append(f"https://{os.environ.get('RENDER_EXTERNAL_HOSTNAME')}")
+
+def _register_host(host: str) -> None:
+    """Ajoute un hôte à ALLOWED_HOSTS et son origine HTTPS à CSRF_TRUSTED_ORIGINS."""
+    host = (host or "").strip()
+    if not host or host in ALLOWED_HOSTS:
+        return
+    ALLOWED_HOSTS.append(host)
+    if not host.startswith("."):
+        origin = f"https://{host}"
+        if origin not in CSRF_TRUSTED_ORIGINS:
+            CSRF_TRUSTED_ORIGINS.append(origin)
+
 
 if CUSTOM_DOMAIN:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{CUSTOM_DOMAIN}")
-    CSRF_TRUSTED_ORIGINS.append(f"https://www.{CUSTOM_DOMAIN}")
+    _register_host(CUSTOM_DOMAIN)
+    _register_host(f"www.{CUSTOM_DOMAIN}")
+if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+    _register_host(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
+
+for _host in os.environ.get("ALLOWED_HOSTS", "").split(","):
+    _register_host(_host)
+
+for _host in ("calures.org", "www.calures.org", "bnc.calures.org"):
+    _register_host(_host)
 
 
 CSRF_COOKIE_SECURE = not DEBUG
