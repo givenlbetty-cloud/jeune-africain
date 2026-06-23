@@ -216,7 +216,13 @@ def book_detail_view(request, book_id):
         )
     
     # Récupérer les auteurs (liés ou déduits des métadonnées)
-    book.ensure_authors_linked()
+    try:
+        book.ensure_authors_linked()
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception(
+            "Impossible de lier l'auteur pour le livre %s", book.id
+        )
     authors = book.authors.all()
     reviews = book.reviews.all().order_by('-created_at')
     average_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0

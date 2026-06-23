@@ -45,7 +45,7 @@ class Author(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     first_name = models.CharField(_("Prénom"), max_length=100)
     last_name = models.CharField(_("Nom"), max_length=100)
-    email = models.EmailField(_("Email"), blank=True, unique=True)
+    email = models.EmailField(_("Email"), blank=True, null=True, unique=True)
     biography = models.TextField(_("Biographie"), blank=True)
     birth_date = models.DateField(_("Date de naissance"), null=True, blank=True)
     photo = models.ImageField(
@@ -208,7 +208,7 @@ class Book(models.Model):
     GENRE_CHOICES = [
         ("articles", _("Articles")),
         ("magazine", _("Magazine")),
-        ("revues_scientifiques", _("Revues Scientifiques")),
+        ("revues_scientifiques", _("Revues scientifiques")),
         ("geographie_histoires", _("Géographie et histoire")),
         ("theories_litteraires", _("Théories littéraires")),
         ("roman", _("Roman")),
@@ -227,7 +227,7 @@ class Book(models.Model):
         ("hotellerie", _("Hôtellerie")),
         ("sport", _("Sport")),
         ("loisir", _("Loisir")),
-        ("dev_personnel", _("Développement Personnel")),
+        ("dev_personnel", _("Développement personnel")),
         ("fiction", _("Fiction")),
         ("non_fiction", _("Non-fiction")),
         ("science", _("Science")),
@@ -359,14 +359,10 @@ class Book(models.Model):
         if not author_name:
             return False
 
-        from catalogue.author_utils import split_full_name
+        from catalogue.author_utils import get_or_create_author_by_name, split_full_name
 
         first_name, last_name = split_full_name(author_name)
-        author, _ = Author.objects.get_or_create(
-            first_name=first_name,
-            last_name=last_name,
-            defaults={"email": "", "is_verified": False},
-        )
+        author, _ = get_or_create_author_by_name(first_name, last_name)
         AuthorBook.objects.get_or_create(
             author=author,
             book=self,

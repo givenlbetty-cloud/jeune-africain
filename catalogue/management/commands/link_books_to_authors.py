@@ -16,6 +16,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from catalogue.models import Author, Book
+from catalogue.author_utils import get_or_create_author_by_name
 
 
 class Command(BaseCommand):
@@ -67,11 +68,7 @@ class Command(BaseCommand):
 
     def _get_or_create_author(self, full_name: str) -> Author:
         first_name, last_name = self._split_name(full_name)
-        author, _ = Author.objects.get_or_create(
-            first_name=first_name,
-            last_name=last_name,
-            defaults={"email": "", "is_verified": False},
-        )
+        author, _ = get_or_create_author_by_name(first_name, last_name)
         return author
 
     def _link_default_author(self, full_name: str, dry_run: bool = False):
@@ -131,10 +128,9 @@ class Command(BaseCommand):
                         if not first_name:
                             skipped += 1
                             continue
-                        author, _ = Author.objects.get_or_create(
-                            first_name=first_name,
-                            last_name=last_name or "-",
-                            defaults={"email": "", "is_verified": False},
+                        author, _ = get_or_create_author_by_name(
+                            first_name,
+                            last_name or "-",
                         )
 
                     if not dry_run:

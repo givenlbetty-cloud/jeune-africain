@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 import re
 
+from django.db import IntegrityError
+
 IGNORED_AUTHOR_NAMES = frozenset(
     {
         "",
@@ -100,3 +102,29 @@ def extract_author_from_book_metadata(*, title: str | None = None, pdf_file_name
             return from_file
 
     return extract_author_from_title(title)
+
+
+def get_or_create_author_by_name(first_name: str, last_name: str):
+    """
+    Retourne ou crée un Author sans email (NULL) pour éviter les conflits
+    d'unicité PostgreSQL sur email=''.
+    """
+    from catalogue.models import Author
+
+    author = Author.objects.filter(first_name=first_name, last_name=last_name).first()
+    if author:
+        return author, False
+
+    try:
+        author = Author.objects.create(
+            first_name=first_name,
+            last_name=last_name,
+            email=None,
+            is_verified=False,
+        )
+        return author, True
+    except IntegrityError:
+        author = Author.objects.filter(first_name=first_name, last_name=last_name).first()
+        if author:
+            return author, False
+        raise
