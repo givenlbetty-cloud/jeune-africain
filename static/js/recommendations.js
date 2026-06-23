@@ -246,7 +246,7 @@ const RecommendationsModule = {
      */
     getAuthorsString: function(authorBooks) {
         if (!authorBooks || authorBooks.length === 0) {
-            return 'Auteur inconnu';
+            return 'Auteur non renseigné';
         }
         return authorBooks.map(ab => {
             const author = ab.author;

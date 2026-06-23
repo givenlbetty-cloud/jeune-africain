@@ -209,8 +209,8 @@ class Book(models.Model):
         ("articles", _("Articles")),
         ("magazine", _("Magazine")),
         ("revues_scientifiques", _("Revues Scientifiques")),
-        ("geographie_histoires", _("Géographie et Histoires")),
-        ("theories_litteraires", _("Théories Littéraires")),
+        ("geographie_histoires", _("Géographie et histoire")),
+        ("theories_litteraires", _("Théories littéraires")),
         ("roman", _("Roman")),
         ("nouvelle", _("Nouvelle")),
         ("essai", _("Essai")),
@@ -343,14 +343,58 @@ class Book(models.Model):
     def __str__(self):
         return self.title
 
+    def infer_author_name(self):
+        """Déduit le nom d'auteur depuis le fichier PDF ou le titre."""
+        from catalogue.author_utils import extract_author_from_book_metadata
+
+        pdf_name = self.pdf_file.name if self.pdf_file else None
+        return extract_author_from_book_metadata(title=self.title, pdf_file_name=pdf_name)
+
+    def ensure_authors_linked(self):
+        """Crée et lie un auteur si absent, à partir des métadonnées du livre."""
+        if self.authors.exists():
+            return True
+
+        author_name = self.infer_author_name()
+        if not author_name:
+            return False
+
+        from catalogue.author_utils import split_full_name
+
+        first_name, last_name = split_full_name(author_name)
+        author, _ = Author.objects.get_or_create(
+            first_name=first_name,
+            last_name=last_name,
+            defaults={"email": "", "is_verified": False},
+        )
+        AuthorBook.objects.get_or_create(
+            author=author,
+            book=self,
+            role="primary",
+            defaults={"order": 0},
+        )
+        return True
+
+    @property
+    def author_names(self):
+        """Liste des noms d'auteurs pour l'affichage."""
+        linked = [a.get_full_name() for a in self.authors.all()]
+        if linked:
+            return linked
+        inferred = self.infer_author_name()
+        return [inferred] if inferred else []
+
     @property
     def author(self):
-        """Retourne le premier auteur ou 'Inconnu' pour l'affichage template."""
-        # Use .all() to leverage prefetch_related cache if available
-        authors = self.authors.all()
-        if authors:
-            return f"{authors[0].first_name} {authors[0].last_name}"
-        return "Auteur inconnu"
+        """Nom(s) d'auteur pour l'affichage template."""
+        names = self.author_names
+        if names:
+            return ", ".join(names)
+        return "Auteur non renseigné"
+
+    @property
+    def author_display(self):
+        return self.author
     
     def get_final_price(self):
         """Calculer le prix après réduction."""
@@ -439,6 +483,9 @@ class Book(models.Model):
                     pass
         
         super().save(*args, **kwargs)
+
+        if self.pdf_file and not self.authors.exists():
+            self.ensure_authors_linked()
     
     def clean(self):
         """Valider la longueur des noms de fichiers."""

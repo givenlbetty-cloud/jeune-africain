@@ -34,7 +34,7 @@
                 <div class="row g-2">
                     <div class="col-6">
                         <select class="form-select form-select-sm" name="category" onchange="document.getElementById('catalogueForm').submit()" style="font-size: 0.7rem; padding: 0.25rem 0.4rem;">
-                            <option value="">Toutes catégories</option>
+                            <option value="">Toutes les catégories</option>
                             {% for value, label in genres %}
                             <option value="{{ value }}" {% if request.GET.category == value or selected_genre == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
@@ -91,7 +91,7 @@
                     <div class="book-info">
                         <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
                         <h6 class="book-title">{{ book.title }}</h6>
-                        <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                        <p class="book-author">{{ book.author }}</p>
                     </div>
                 </div>
             </div>
@@ -101,7 +101,7 @@
                 <div style="text-align: center; padding: 3rem 1rem; border-radius: var(--radius-lg); background: var(--light); border: 2px dashed var(--border);">
                     <i class="fas fa-search" style="font-size: 3rem; color: var(--text-light); opacity: 0.5; margin-bottom: 1rem; display: block;"></i>
                     <h3>Aucun livre trouvé</h3>
-                    <p class="text-muted">Essayez avec d'autres termes de recherche ou filtres</p>
+                    <p class="text-muted">Essayez avec d'autres termes de recherche ou d'autres filtres</p>
                     <a href="{% url 'catalogue:catalogue' %}" class="btn btn-premium mt-2">
                         <i class="fas fa-redo"></i> Voir tous les livres
                     </a>

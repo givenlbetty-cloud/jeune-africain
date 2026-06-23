@@ -22,6 +22,8 @@ Utilisé dans les listes de recommandations
                     {{ author }}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </p>
+            {% else %}
+            <p class="card-text small text-muted">{{ book.author }}</p>
             {% endif %}
             
             {% comment %} Score de recommandation {% endcomment %}

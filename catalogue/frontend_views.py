@@ -215,7 +215,8 @@ def book_detail_view(request, book_id):
             defaults={'current_page': 1, 'start_time': timezone.now()}
         )
     
-    # Récupérer les auteurs, les critiques et le formulaire
+    # Récupérer les auteurs (liés ou déduits des métadonnées)
+    book.ensure_authors_linked()
     authors = book.authors.all()
     reviews = book.reviews.all().order_by('-created_at')
     average_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0

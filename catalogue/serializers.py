@@ -70,7 +70,7 @@ class BookListSerializer(serializers.ModelSerializer):
     """Serializer pour la liste des livres (données allégées)
     🔐 IMPORTANT: N'inclut PAS pdf_file ni epub_file (DRM Protection)
     """
-    authors = AuthorSerializer(many=True, read_only=True, source='get_authors')
+    authors = AuthorSerializer(many=True, read_only=True)
     library = LibrarySerializer(read_only=True, source='library_set.first')
     final_price = serializers.SerializerMethodField()
     
@@ -98,7 +98,7 @@ class BookDetailSerializer(serializers.ModelSerializer):
     🔐 IMPORTANT: N'inclut PAS pdf_file ni epub_file (DRM Protection)
     Inclut métadonnées complètes et relations
     """
-    authors = AuthorSerializer(many=True, read_only=True, source='get_authors')
+    authors = AuthorSerializer(many=True, read_only=True)
     author_books = AuthorBookSerializer(source='authorbook_set', many=True, read_only=True)
     library = LibrarySerializer(read_only=True, source='library_set.first')
     final_price = serializers.SerializerMethodField()

@@ -51,11 +51,7 @@
                 </div>
                 <div class="book-info">
                     <h6 class="book-title">{{ favorite.book.title }}</h6>
-                    <p class="book-author">
-                        {% for author in favorite.book.authors.all|slice:":1" %}
-                            {{ author.first_name }} {{ author.last_name }}
-                        {% endfor %}
-                    </p>
+                    <p class="book-author">{{ favorite.book.author }}</p>
                 </div>
                 <div class="fav-date">
                     <i class="fas fa-clock"></i> {{ favorite.created_at|date:"d/m/Y" }}

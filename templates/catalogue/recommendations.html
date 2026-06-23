@@ -44,11 +44,7 @@
                         
                         <div class="card-body">
                             <h5 class="card-title book-title fs-6">{{ book.title }}</h5>
-                            <p class="card-text book-author small text-muted">
-                                {% for author in book.authors.all %}
-                                    {{ author.get_full_name }}{% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            </p>
+                            <p class="card-text book-author small text-muted">{{ book.author }}</p>
                         </div>
                         <div class="card-footer bg-transparent border-0 pb-3">
                             <a href="{% url 'catalogue:book_detail' book.id %}" class="btn btn-outline-primary btn-sm w-100 rounded-pill">
@@ -67,7 +63,7 @@
     <!-- Toutes les recommandations -->
     {% if recommendations %}
     <div class="mb-5">
-        <h2 class="mb-4 h4 border-bottom pb-2">✨ Spécialement Pour Vous</h2>
+        <h2 class="mb-4 h4 border-bottom pb-2">✨ Spécialement pour vous</h2>
         <div class="row">
             {% for book in recommendations %}
             <div class="col-md-6 col-lg-4 mb-4">
@@ -82,12 +78,7 @@
                     
                     <div class="card-body">
                         <h5 class="card-title book-title">{{ book.title }}</h5>
-                        <p class="card-text book-author">
-                            {% for author in book.authors.all %}
-                                <small>{{ author.get_full_name }}</small>
-                                {% if not forloop.last %}<br>{% endif %}
-                            {% endfor %}
-                        </p>
+                        <p class="card-text book-author"><small>{{ book.author }}</small></p>
                         
                         <div class="mb-2">
                             <span class="badge bg-success">{{ book.get_genre_display }}</span>
@@ -131,11 +122,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h6 class="mb-1">{{ book.title }}</h6>
-                            <small class="text-muted">
-                                {% for author in book.authors.all %}
-                                    {{ author.first_name }}
-                                {% endfor %}
-                            </small>
+                            <small class="text-muted">{{ book.author }}</small>
                         </div>
                         <span class="badge bg-success">{{ book.get_genre_display }}</span>
                     </div>
@@ -155,11 +142,7 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <h6 class="mb-1">{{ book.title }}</h6>
-                            <small class="text-muted">
-                                {% for author in book.authors.all %}
-                                    {{ author.get_full_name }}
-                                {% endfor %}
-                            </small>
+                            <small class="text-muted">{{ book.author }}</small>
                         </div>
                         <span class="badge bg-success">
                             <i class="fas fa-star"></i> {{ book.rating|floatformat:1 }}
@@ -182,11 +165,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">{{ book.title|truncatewords:5 }}</h5>
-                        <p class="text-muted small">
-                            {% for author in book.authors.all %}
-                                {{ author.first_name }}
-                            {% endfor %}
-                        </p>
+                        <p class="text-muted small">{{ book.author }}</p>
                         <div class="rating">
                             <i class="fas fa-star" style="color: #f39c12;"></i>
                             <strong>{{ book.rating|floatformat:1 }}/5</strong>

@@ -250,7 +250,7 @@
                         <div class="book-info">
                             <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
                             <h6 class="book-title">{{ book.title }}</h6>
-                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                            <p class="book-author">{{ book.author }}</p>
                         </div>
                     </div>
                 </div>
@@ -280,7 +280,7 @@
                         <div class="book-info">
                             <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
                             <h6 class="book-title">{{ book.title }}</h6>
-                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                            <p class="book-author">{{ book.author }}</p>
                         </div>
                     </div>
                 </div>
@@ -309,7 +309,7 @@
                         <div class="book-info">
                             <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
                             <h6 class="book-title">{{ book.title }}</h6>
-                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                            <p class="book-author">{{ book.author }}</p>
                         </div>
                     </div>
                 </div>
@@ -339,7 +339,7 @@
                         <div class="book-info">
                             <span class="book-cat-tag"><i class="fas fa-book"></i> {{ book.get_genre_display|default:"Ebook" }}</span>
                             <h6 class="book-title">{{ book.title }}</h6>
-                            <p class="book-author">{% for a in book.authors.all %}{{ a.get_full_name }}{% if not forloop.last %}, {% endif %}{% empty %}{{ book.author|default:"Auteur inconnu" }}{% endfor %}</p>
+                            <p class="book-author">{{ book.author }}</p>
                         </div>
                     </div>
                 </div>
@@ -396,7 +396,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
             <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #1B2A4A, #E63946); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-mobile-alt"></i></div>
-                <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Lecteur optimisé</h6><p style="color: var(--text); margin: 0; font-size: 0.65rem;">Fluide sur tous appareils</p></div>
+                <div><h6 style="font-weight: 700; margin: 0; font-size: 0.78rem;">Lecteur optimisé</h6><p style="color: var(--text); margin: 0; font-size: 0.65rem;">Fluide sur tous les appareils</p></div>
             </div>
             <div style="background: var(--bg-soft); border-radius: 10px; padding: 0.75rem; display: flex; gap: 0.6rem; align-items: center;">
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #E63946, #1B2A4A); display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; font-size: 1rem;"><i class="fas fa-moon"></i></div>
