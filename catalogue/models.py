@@ -2474,12 +2474,12 @@ class SiteConfiguration(models.Model):
     home_title = models.CharField(
         _("Titre de l'accueil"), 
         max_length=255, 
-        default="Apprenez sans limites avec la Bibliothèque Numérique Calures",
+        default="Votre bibliothèque numérique. Découvrez, lisez et partagez des livres d'auteurs des quatre coins du globe, en partant du cœur de l'Afrique !",
         help_text="Le grand titre affiché sur la page d'accueil."
     )
     home_description = models.TextField(
         _("Description de l'accueil"),
-        default="Découvrez les publications exclusives de Calures Éditions. Une bibliothèque numérique souveraine offrant des milliers de livres, formations vidéo et podcasts pour l'excellence africaine.",
+        default="Découvrez la littérature congolaise et celle de partout : romans, nouvelles, poésie, théâtre, essais, contes, etc",
         help_text="Le texte court sous le titre."
     )
     text_of_the_week = models.TextField(
