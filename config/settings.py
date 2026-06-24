@@ -563,6 +563,8 @@ PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox')  # 'sandbox' or 'live'
 MONEROO_API_KEY = os.getenv('MONEROO_API_KEY', '')
 MONEROO_SECRET_KEY = os.getenv('MONEROO_SECRET_KEY', '')
 USE_MONEROO_FOR_ALL = os.getenv('USE_MONEROO_FOR_ALL', 'True') == 'True'
+# Devise envoyée à Moneroo : CDF en production (RDC), USD pour Test Payment Gateway (Sandbox)
+MONEROO_CURRENCY = os.getenv('MONEROO_CURRENCY', os.getenv('DEFAULT_CURRENCY', 'CDF'))
 
 # Flutterwave Configuration (fallback mobile money)
 FLUTTERWAVE_SECRET_KEY = os.getenv('FLUTTERWAVE_SECRET_KEY', '')

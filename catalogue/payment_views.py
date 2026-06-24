@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
+from django.conf import settings
 import json
 
 from catalogue.models import Payment, Book
@@ -59,11 +60,12 @@ def initiate_payment_view(request, book_id):
     transaction_id = f"BNC_{uuid.uuid4().hex[:16].upper()}"
     final_price = book.get_final_price() if hasattr(book, 'get_final_price') else book.price
     
+    moneroo_currency = getattr(settings, 'MONEROO_CURRENCY', 'CDF')
     payment = Payment.objects.create(
         user=request.user,
         book=book,
         amount=final_price,
-        currency='CDF',
+        currency=moneroo_currency,
         transaction_id=transaction_id,
         payment_method=payment_method,
         status='pending',

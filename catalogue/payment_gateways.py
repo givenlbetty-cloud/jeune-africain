@@ -300,7 +300,7 @@ class MonerooPaymentGateway(PaymentGateway):
             
             payload = {
                 'amount': float(self.payment.amount),
-                'currency': self.payment.currency,
+                'currency': getattr(settings, 'MONEROO_CURRENCY', self.payment.currency),
                 'customer': {
                     'email': self.payment.user.email,
                     'first_name': first_name,
