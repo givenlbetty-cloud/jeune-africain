@@ -321,6 +321,11 @@
                 ✓ Paiement sécurisé avec Moneroo
             </div>
         </form>
+
+        <!-- Monetbil payment button: placed OUTSIDE the main Moneroo <form> -->
+        <form action="" method="get" data-monetbil="form" style="margin-top:16px;">
+            <button class="monetbil-btn" type="submit">Pay by Mobile Money</button>
+        </form>
     </div>
     
     <script>
@@ -346,5 +351,6 @@
         // Mise à jour de la référence au chargement
         updateReference();
     </script>
+    <script type="text/javascript" src="https://fr.monetbil.com/widget/v2/monetbil.min.js"></script>
 </body>
 </html>
