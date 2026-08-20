@@ -19,8 +19,13 @@ from catalogue.models import Donateur, MerchantPaymentAccount
 
 logger = logging.getLogger(__name__)
 
-MONEROO_API_KEY = getattr(settings, 'MONEROO_API_KEY', '')
-MONEROO_API_URL = 'https://api.moneroo.io/v1'
+MONEROO_API_KEY = (
+    getattr(settings, 'MONEROO_API_KEY', '')
+    or getattr(settings, 'MONEROO_PUBLIC_KEY', '')
+    or os.getenv('MONEROO_PUBLIC_KEY', '')
+    or os.getenv('MONEROO_API_KEY', '')
+)
+MONEROO_API_URL = getattr(settings, 'MONEROO_API_URL', '') or os.getenv('MONEROO_API_URL', 'https://api.moneroo.io/v1')
 
 
 @require_http_methods(["GET", "POST"])

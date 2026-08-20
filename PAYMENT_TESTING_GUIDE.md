@@ -58,7 +58,7 @@ print("✅ Stripe configuré")
 
 # Vérifier PayPal
 print("PAYPAL_CLIENT_ID:", settings.PAYPAL_CLIENT_ID[:20] + "***")
-print("✅ PayPal configuré")
+print("✅j PayPal configuré")
 
 # Vérifier M-Pesa
 print("MPESA_CONSUMER_KEY:", settings.MPESA_CONSUMER_KEY[:20] + "***")

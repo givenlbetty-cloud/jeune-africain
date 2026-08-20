@@ -560,8 +560,12 @@ PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET', '')
 PAYPAL_MODE = os.getenv('PAYPAL_MODE', 'sandbox')  # 'sandbox' or 'live'
 
 # Moneroo Configuration (unified payment gateway for RDC)
-MONEROO_API_KEY = os.getenv('MONEROO_API_KEY', '')
-MONEROO_SECRET_KEY = os.getenv('MONEROO_SECRET_KEY', '')
+MONEROO_MODE = os.getenv('MONEROO_MODE', 'sandbox').lower()
+MONEROO_API_KEY = os.getenv('MONEROO_API_KEY', '') or os.getenv('MONEROO_PUBLIC_KEY', '')
+MONEROO_PUBLIC_KEY = MONEROO_API_KEY
+MONEROO_SECRET_KEY = os.getenv('MONEROO_SECRET_KEY', '') or os.getenv('MONEROO_WEBHOOK_SECRET', '')
+MONEROO_WEBHOOK_SECRET = MONEROO_SECRET_KEY
+MONEROO_API_URL = os.getenv('MONEROO_API_URL', 'https://api.moneroo.io/v1')
 USE_MONEROO_FOR_ALL = os.getenv('USE_MONEROO_FOR_ALL', 'True') == 'True'
 # Devise envoyée à Moneroo : CDF en production (RDC), USD pour Test Payment Gateway (Sandbox)
 MONEROO_CURRENCY = os.getenv('MONEROO_CURRENCY', os.getenv('DEFAULT_CURRENCY', 'CDF'))

@@ -259,8 +259,13 @@ class MonerooPaymentGateway(PaymentGateway):
     
     def __init__(self, payment):
         super().__init__(payment)
-        self.api_key = getattr(settings, 'MONEROO_API_KEY', '') or os.getenv('MONEROO_API_KEY', '')
-        self.api_url = 'https://api.moneroo.io/v1'
+        self.api_key = (
+            getattr(settings, 'MONEROO_API_KEY', '')
+            or os.getenv('MONEROO_API_KEY', '')
+            or getattr(settings, 'MONEROO_PUBLIC_KEY', '')
+            or os.getenv('MONEROO_PUBLIC_KEY', '')
+        )
+        self.api_url = getattr(settings, 'MONEROO_API_URL', '') or os.getenv('MONEROO_API_URL', 'https://api.moneroo.io/v1')
         
     def initiate_payment(self):
         if not self.api_key:
