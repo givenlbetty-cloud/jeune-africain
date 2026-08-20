@@ -99,6 +99,15 @@
                                 style="background: #1B2A4A; border: none; padding: 14px;">
                             <i class="fas fa-lock me-2"></i> Payer {{ final_price|floatformat:0 }} FC
                         </button>
+
+                        <!-- Monetbil / Mobile Money quick button -->
+                        <div class="text-center mt-3">
+                            <form action="" method="get" data-monetbil="form" data-monetbil-key="5OQT8cEoPKULqMAkmvvAokg5Iw2u3xxY">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-mobile-alt me-2"></i> Payer avec Mobile Money (Monetbil)
+                                </button>
+                            </form>
+                        </div>
                     </form>
 
                     <!-- Cancel -->
