@@ -437,14 +437,45 @@ BNC Library Team
 
 @login_required
 def payment_callback(request):
-    """User callback after payment (success or failure)"""
-    order_id = request.GET.get('order_id')
-    status = request.GET.get('status', 'unknown')
-    
+    """User callback after payment (success or failure).
+
+    Accept multiple query parameter names used by different providers
+    (e.g. `order_id` or `paymentId`) and normalize status values.
+    """
+    # Support several common param names that providers may use
+    order_id = (
+        request.GET.get('order_id')
+        or request.GET.get('paymentId')
+        or request.GET.get('payment_id')
+        or request.GET.get('order_reference')
+    )
+
+    raw_status = (
+        request.GET.get('status')
+        or request.GET.get('paymentStatus')
+        or request.GET.get('payment_status')
+        or ''
+    )
+
+    status = raw_status.lower()
+
+    # Normalize various provider status values to a small set
+    if status in ['success', 'completed', 'paid', 'ok', 'true']:
+        normalized = 'success'
+    elif status in ['failed', 'error', 'cancelled', 'canceled']:
+        normalized = 'failed'
+    elif status in ['pending', 'processing']:
+        normalized = 'pending'
+    else:
+        normalized = 'unknown'
+
     context = {
         'order_id': order_id,
-        'status': status,
-        'message': 'Payment processed. Thank you!' if status == 'success' else 'Payment processing...'
+        'status': normalized,
+        'message': (
+            'Payment processed. Thank you!' if normalized == 'success'
+            else ('Payment failed.' if normalized == 'failed' else 'Payment processing...')
+        )
     }
-    
+
     return JsonResponse(context)
