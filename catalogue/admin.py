@@ -9,6 +9,8 @@ from django.urls import reverse, path
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db.models import Count
+from django.forms import ValidationError
+from django.forms.models import BaseInlineFormSet
 from .models import (
     Book, Author, Library, Payment, Event, 
     ReadingSession, BookRating, Category, AuthorBook, MerchantPaymentAccount,
@@ -45,9 +47,36 @@ class PodcastInline(admin.TabularInline):
     extra = 0
     fields = ('title', 'episode_count', 'is_active')
 
+class AuthorBookInlineFormSet(BaseInlineFormSet):
+    """Empêche de soumettre deux fois le même auteur avec le même rôle."""
+
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+
+        seen = set()
+        for form in self.forms:
+            if not form.cleaned_data or form.cleaned_data.get('DELETE'):
+                continue
+
+            author = form.cleaned_data.get('author')
+            role = form.cleaned_data.get('role')
+            if not author or not role:
+                continue
+
+            identity = (author.pk, role)
+            if identity in seen:
+                raise ValidationError(
+                    "Cet auteur est déjà associé à ce livre avec ce rôle. "
+                    "Supprimez la ligne en double ou choisissez un autre rôle."
+                )
+            seen.add(identity)
+
 class AuthorBookInline(admin.TabularInline):
     """Inline pour gérer les auteurs depuis le livre."""
     model = AuthorBook
+    formset = AuthorBookInlineFormSet
     extra = 1
     autocomplete_fields = ['author'] # To allow searching authors
     verbose_name = "Associer un auteur"
