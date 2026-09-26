@@ -116,6 +116,20 @@ class BookAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at')
     
     ordering = ('-created_at',)
+
+    def save_model(self, request, obj, form, change):
+        # Inline authors are saved after the book. Do not infer an author
+        # in between form validation and saving those explicit associations.
+        obj._defer_author_linking = True
+        try:
+            super().save_model(request, obj, form, change)
+        finally:
+            del obj._defer_author_linking
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        if form.instance.pdf_file:
+            form.instance.ensure_authors_linked()
     
     def get_authors(self, obj):
         """Affiche les auteurs formatés."""

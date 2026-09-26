@@ -489,7 +489,7 @@ class Book(models.Model):
         
         super().save(*args, **kwargs)
 
-        if self.pdf_file and not self.authors.exists():
+        if self.pdf_file and not getattr(self, '_defer_author_linking', False) and not self.authors.exists():
             self.ensure_authors_linked()
     
     def clean(self):
