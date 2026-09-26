@@ -8,6 +8,7 @@ from django.utils.html import format_html, mark_safe
 from django.urls import reverse, path
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
+from django.db import IntegrityError, connections, router, transaction
 from django.db.models import Count
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
@@ -47,10 +48,25 @@ class PodcastInline(admin.TabularInline):
     extra = 0
     fields = ('title', 'episode_count', 'is_active')
 
+class AuthorBookConflict(Exception):
+    """An author association changed after the inline was validated."""
+
+
 class AuthorBookInlineFormSet(BaseInlineFormSet):
     """Empêche de soumettre deux fois le même auteur avec le même rôle."""
 
+    def __init__(self, *args, author_link_conflict=False, **kwargs):
+        self.author_link_conflict = author_link_conflict
+        super().__init__(*args, **kwargs)
+
     def clean(self):
+        if self.author_link_conflict:
+            raise ValidationError(
+                "Cet auteur vient d'être associé à ce livre avec ce rôle. "
+                "Aucune modification de cet enregistrement n'a été sauvegardée. "
+                "Vos champs saisis sont affichés ci-dessous. Rechargez la fiche "
+                "pour vérifier les auteurs avant de réessayer."
+            )
         super().clean()
         if any(self.errors):
             return
@@ -72,6 +88,42 @@ class AuthorBookInlineFormSet(BaseInlineFormSet):
                     "Supprimez la ligne en double ou choisissez un autre rôle."
                 )
             seen.add(identity)
+
+    def _save_author_link(self, form, save, *args, commit=True):
+        using = router.db_for_write(self.model, instance=form.instance)
+        try:
+            # A savepoint is needed before querying after an IntegrityError.
+            with transaction.atomic(using=using):
+                return save(form, *args, commit=commit)
+        except IntegrityError as error:
+            cause = error.__cause__
+            sqlstate = getattr(cause, 'sqlstate', None) or getattr(cause, 'pgcode', None)
+            table = self.model._meta.db_table
+            columns = {'author_id', 'book_id', 'role'}
+            # Identify the constraint itself: the conflicting row might already
+            # have been removed by another transaction by the time we get here.
+            if sqlstate == '23505':  # PostgreSQL, psycopg 2 or 3.
+                diag = cause.diag
+                if diag.table_name == table:
+                    connection = connections[using]
+                    with connection.cursor() as cursor:
+                        constraints = connection.introspection.get_constraints(cursor, table)
+                    constraint = constraints.get(diag.constraint_name, {})
+                    if constraint.get('unique') and set(constraint.get('columns', [])) == columns:
+                        raise AuthorBookConflict from error
+            elif getattr(cause, 'sqlite_errorname', None) == 'SQLITE_CONSTRAINT_UNIQUE':
+                violated_columns = set(str(cause).removeprefix('UNIQUE constraint failed: ').split(', '))
+                if violated_columns == {f'{table}.{column}' for column in columns}:
+                    raise AuthorBookConflict from error
+            raise
+
+    def save_new(self, form, commit=True):
+        return self._save_author_link(form, super().save_new, commit=commit)
+
+    def save_existing(self, form, instance, commit=True):
+        return self._save_author_link(
+            form, super().save_existing, instance, commit=commit,
+        )
 
 class AuthorBookInline(admin.TabularInline):
     """Inline pour gérer les auteurs depuis le livre."""
@@ -117,6 +169,24 @@ class BookAdmin(admin.ModelAdmin):
     
     ordering = ('-created_at',)
 
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+        try:
+            return super().changeform_view(request, object_id, form_url, extra_context)
+        except AuthorBookConflict:
+            # The admin's transaction has rolled back the entire submission.
+            # Bind the same POST again, forcing a validation error, never a retry.
+            request._author_link_conflict = True
+            try:
+                return super().changeform_view(request, object_id, form_url, extra_context)
+            finally:
+                del request._author_link_conflict
+
+    def get_formset_kwargs(self, request, obj, inline, prefix):
+        kwargs = super().get_formset_kwargs(request, obj, inline, prefix)
+        if isinstance(inline, AuthorBookInline):
+            kwargs['author_link_conflict'] = getattr(request, '_author_link_conflict', False)
+        return kwargs
+
     def save_model(self, request, obj, form, change):
         # Inline authors are saved after the book. Do not infer an author
         # in between form validation and saving those explicit associations.
@@ -128,7 +198,11 @@ class BookAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
-        if form.instance.pdf_file:
+        authors_deleted = any(
+            formset.model is AuthorBook and formset.deleted_objects
+            for formset in formsets
+        )
+        if form.instance.pdf_file and not authors_deleted:
             form.instance.ensure_authors_linked()
     
     def get_authors(self, obj):
