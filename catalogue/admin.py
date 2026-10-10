@@ -12,6 +12,7 @@ from django.db import IntegrityError, connections, router, transaction
 from django.db.models import Count
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
+from .calures_bridge import CaluresBridgeError, send_article_to_calures
 from .models import (
     Book, Author, Library, Payment, Event, 
     ReadingSession, BookRating, Category, AuthorBook, MerchantPaymentAccount,
@@ -717,6 +718,24 @@ class ArticleAdmin(admin.ModelAdmin):
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
     ordering = ('-created_at',)
+    actions = ('send_to_calures',)
+
+    @admin.action(permissions=['change'], description='Envoyer sur CALURES comme brouillon')
+    def send_to_calures(self, request, queryset):
+        sent = 0
+        for article in queryset:
+            try:
+                send_article_to_calures(article)
+            except CaluresBridgeError as exc:
+                self.message_user(request, f"{article.title} : {exc}", level=messages.ERROR)
+            else:
+                sent += 1
+        if sent:
+            self.message_user(
+                request,
+                f"{sent} article(s) envoyé(s) dans les brouillons CALURES.",
+                level=messages.SUCCESS,
+            )
     
     fieldsets = (
         ('📰 ARTICLE', {

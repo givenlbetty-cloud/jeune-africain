@@ -16,6 +16,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security & Environment
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-change-in-production")
 DEBUG = os.environ.get("DEBUG", "False") == "True"
+CALURES_BRIDGE_URL = os.environ.get(
+    "CALURES_BRIDGE_URL",
+    "https://calures-editions.vercel.app/integrations/bnc/articles/",
+).strip()
+CALURES_BRIDGE_TOKEN = os.environ.get("CALURES_BRIDGE_TOKEN", "").strip()
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 CUSTOM_DOMAIN = os.environ.get("CUSTOM_DOMAIN")
 

@@ -35,6 +35,11 @@ services:
         value: "bnc.calures.org,www.calures.org,calures.org"
       - key: SITE_URL
         sync: false
+      # Pont editorial CALURES : le jeton est renseigne uniquement dans Render.
+      - key: CALURES_BRIDGE_URL
+        value: "https://calures-editions.vercel.app/integrations/bnc/articles/"
+      - key: CALURES_BRIDGE_TOKEN
+        sync: false
       # Moneroo — https://app.moneroo.io/ > Developers
       - key: MONEROO_API_KEY
         sync: false
