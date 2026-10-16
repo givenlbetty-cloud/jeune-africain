@@ -14,6 +14,7 @@ from django.db import IntegrityError, connections, router, transaction
 from django.db.models import Count
 from django.forms import ValidationError
 from django.forms.models import BaseInlineFormSet
+from .article_content import content_for_editor
 from .calures_bridge import CaluresBridgeError, send_article_to_calures
 from .models import (
     Book, Author, Library, Payment, Event, 
@@ -714,13 +715,18 @@ class LienSocialAdmin(admin.ModelAdmin):
 class ArticleAdminForm(forms.ModelForm):
     content = forms.CharField(
         label="Contenu",
-        help_text="Gras, titre, soulignement, couleur et lien cliquable.",
+        help_text="Gras, titre, soulignement, couleur et lien. Le même outil s'applique aux articles déjà publiés.",
         widget=CKEditor5Widget(config_name="article"),
     )
 
     class Meta:
         model = Article
         fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if getattr(self.instance, "pk", None) and "content" not in self.data:
+            self.initial["content"] = content_for_editor(self.instance.content)
 
 
 @admin.register(Article)

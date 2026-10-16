@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from catalogue.article_content import render_article_content
+from catalogue.article_content import content_for_editor, render_article_content
 
 
 class ArticleContentTests(SimpleTestCase):
@@ -39,3 +39,15 @@ class ArticleContentTests(SimpleTestCase):
         self.assertNotIn("evil", html)
         self.assertIn("text-huge", html)
         self.assertIn("Texte", html)
+
+    def test_already_published_plain_text_gets_clickable_links(self):
+        html = render_article_content("Article déjà publié.\n\nLire https://calures.org/livres.")
+        self.assertIn("<p>Article déjà publié.</p>", html)
+        self.assertIn('href="https://calures.org/livres"', html)
+        self.assertIn(">https://calures.org/livres</a>", html)
+
+    def test_editor_can_format_an_already_published_article(self):
+        prepared = content_for_editor("Texte publié\n\nSuite sur https://calures.org")
+        self.assertIn("<p>Texte publié</p>", prepared)
+        self.assertIn('href="https://calures.org"', prepared)
+        self.assertEqual(content_for_editor("<p><strong>Déjà en HTML</strong></p>"), "<p><strong>Déjà en HTML</strong></p>")

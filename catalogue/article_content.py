@@ -16,26 +16,44 @@ _CSS = CSSSanitizer(allowed_css_properties=["color", "font-size"])
 
 
 def render_article_content(content):
-    """Retourne du HTML sûr. Le texte sans balises garde ses retours à la ligne."""
+    """Retourne du HTML sûr, y compris pour un article déjà publié en texte brut."""
     if not content:
         return ""
     if not _EDITOR_HTML.search(content):
-        return mark_safe(linebreaks(content, autoescape=True))
-    cleaned = bleach.clean(
-        content,
-        tags=[
-            "p", "br", "h2", "h3", "strong", "b", "em", "i", "u",
-            "a", "ul", "ol", "li", "span", "blockquote",
-        ],
-        attributes={
-            "a": ["href", "title", "target", "rel"],
-            "span": ["style", "class"],
-        },
-        css_sanitizer=_CSS,
-        protocols=["http", "https", "mailto"],
-        strip=True,
-    )
-    return mark_safe(_CLASS_ATTR.sub(_keep_size_class, cleaned))
+        html = linebreaks(content, autoescape=True)
+    else:
+        cleaned = bleach.clean(
+            content,
+            tags=[
+                "p", "br", "h2", "h3", "strong", "b", "em", "i", "u",
+                "a", "ul", "ol", "li", "span", "blockquote",
+            ],
+            attributes={
+                "a": ["href", "title", "target", "rel"],
+                "span": ["style", "class"],
+            },
+            css_sanitizer=_CSS,
+            protocols=["http", "https", "mailto"],
+            strip=True,
+        )
+        html = _CLASS_ATTR.sub(_keep_size_class, cleaned)
+    return mark_safe(bleach.linkify(html, callbacks=[_open_in_new_tab], parse_email=False))
+
+
+def content_for_editor(content):
+    """Prépare un article existant pour que le gras, la couleur et les liens s'y appliquent."""
+    if not content or _EDITOR_HTML.search(content):
+        return content or ""
+    return str(render_article_content(content))
+
+
+def _open_in_new_tab(attrs, new=False):
+    href = attrs.get((None, "href"), "")
+    if href.startswith(("javascript:", "data:")):
+        return None
+    attrs[(None, "target")] = "_blank"
+    attrs[(None, "rel")] = "noopener noreferrer"
+    return attrs
 
 
 def _keep_size_class(match):
