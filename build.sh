@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # exit on error
 set -o errexit
+set -o pipefail
 
+echo "==> Installing Python dependencies..."
 pip install -r requirements.txt
 
 # Créer le dossier media sur le disque persistant si on est sur Render
@@ -10,8 +12,21 @@ if [ -n "$RENDER_MEDIA_ROOT" ]; then
     echo "✅ Media directory ready: $RENDER_MEDIA_ROOT"
 fi
 
+echo "==> Collecting static files..."
 python manage.py collectstatic --no-input
-python manage.py migrate
+
+echo "==> Running database migrations..."
+for attempt in 1 2 3; do
+    if python manage.py migrate --no-input; then
+        break
+    fi
+    if [ "$attempt" -eq 3 ]; then
+        echo "❌ migrate failed after 3 attempts"
+        exit 1
+    fi
+    echo "⚠️ migrate attempt ${attempt} failed (often a transient DB lock); retrying in 15s..."
+    sleep 15
+done
 
 # Backup automatique après migration (sauvegardé sur le disque persistant si disponible)
 if [ -n "$RENDER_MEDIA_ROOT" ]; then
