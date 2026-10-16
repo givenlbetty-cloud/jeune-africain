@@ -153,6 +153,7 @@ INSTALLED_APPS = [
     "django_filters",
     "import_export",
     "mathfilters",
+    "django_ckeditor_5",
     
     # Local apps
     "users.apps.UsersConfig",
@@ -603,3 +604,44 @@ PAYMENT_TIMEOUT_MINUTES = 30  # Délai avant annulation paiement
 
 # Free preview pages (livres payants)
 FREE_PREVIEW_PAGES = int(os.getenv('FREE_PREVIEW_PAGES', '30'))
+
+# Éditeur du champ Contenu des articles. Pas d'envoi d'image : la couverture a son propre champ.
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"
+CKEDITOR_5_CUSTOM_CSS = "css/article-editor.css"
+CKEDITOR_5_CONFIGS = {
+    "article": {
+        "language": "fr",
+        "toolbar": [
+            "heading", "|",
+            "bold", "italic", "underline", "|",
+            "fontSize", "fontColor", "|",
+            "link", "|",
+            "bulletedList", "numberedList", "|",
+            "undo", "redo", "removeFormat",
+        ],
+        "heading": {
+            "options": [
+                {"model": "paragraph", "title": "Paragraphe", "class": "ck-heading_paragraph"},
+                {"model": "heading2", "title": "Grand titre", "class": "ck-heading_heading2"},
+                {"model": "heading3", "title": "Sous-titre", "class": "ck-heading_heading3"},
+            ]
+        },
+        "fontSize": {
+            "options": ["small", "default", "big", "huge"],
+        },
+        "fontColor": {
+            "colors": [
+                {"color": "#1B2A4A", "label": "Bleu Calures"},
+                {"color": "#E63946", "label": "Rouge"},
+                {"color": "#1B7F4E", "label": "Vert"},
+                {"color": "#C2410C", "label": "Orange"},
+                {"color": "#111111", "label": "Noir"},
+            ],
+            "colorPicker": True,
+        },
+        "link": {
+            "addTargetToExternalLinks": True,
+            "defaultProtocol": "https://",
+        },
+    },
+}

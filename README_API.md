@@ -5,7 +5,7 @@
 
 ## 🎯 Vue d'Ensemble
 
-**BNC** (Bibliothèque Numérique Continentale) est un système complet de gestion de bibliothèques numériques avec une API REST professionnelle.
+**BNC** (Bibliothèque Numérique Calures) est un système complet de gestion de bibliothèques numériques avec une API REST professionnelle.
 
 **Status**: ✅ API REST 100% COMPLÈTE & FONCTIONNELLE
 

@@ -1,5 +1,5 @@
 {% extends 'base-premium.html' %}
-{% load static %}
+{% load static article_extras %}
 
 {% block title %}{{ article.title }} — Calures Éditions{% endblock %}
 
@@ -23,6 +23,19 @@
 {% if article.image %}
 <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ article.image.url }}">
 {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.article-content h2 { font-size: 1.7rem; line-height: 1.3; margin: 1.4rem 0 0.7rem; font-weight: 700; }
+.article-content h3 { font-size: 1.3rem; line-height: 1.35; margin: 1.2rem 0 0.6rem; font-weight: 600; }
+.article-content p { margin: 0 0 1rem; }
+.article-content a { color: var(--secondary); text-decoration: underline; }
+.article-content ul, .article-content ol { margin: 0 0 1rem 1.2rem; }
+.article-content .text-small { font-size: 0.85em; }
+.article-content .text-big { font-size: 1.35em; }
+.article-content .text-huge { font-size: 1.7em; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -85,7 +98,7 @@
 
         <!-- Corps de l'article -->
         <div class="article-content" style="font-size: 0.92rem; line-height: 1.85; color: var(--text);">
-            {{ article.content|linebreaks }}
+            {{ article.content|article_html }}
         </div>
 
         <!-- Partager -->

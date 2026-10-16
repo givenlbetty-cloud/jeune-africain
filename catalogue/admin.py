@@ -3,8 +3,10 @@ Configuration Django Admin SIMPLIFIÉE pour utilisateurs non-techniques.
 Focus sur les actions essentielles uniquement.
 """
 
+from django import forms
 from django.contrib import admin, messages
 from django.utils.html import format_html, mark_safe
+from django_ckeditor_5.widgets import CKEditor5Widget
 from django.urls import reverse, path
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -660,7 +662,7 @@ class EventAdmin(admin.ModelAdmin):
 # CONFIG SITE ADMIN
 # =============================================================
 
-admin.site.site_header = "📚 Bibliothèque Numérique Continentale"
+admin.site.site_header = "📚 Bibliothèque Numérique Calures"
 admin.site.site_title = "Admin BNC"
 admin.site.index_title = "Gestion de la bibliothèque"
 
@@ -709,9 +711,22 @@ class LienSocialAdmin(admin.ModelAdmin):
     ordering = ('order',)
 
 
+class ArticleAdminForm(forms.ModelForm):
+    content = forms.CharField(
+        label="Contenu",
+        help_text="Gras, titre, soulignement, couleur et lien cliquable.",
+        widget=CKEditor5Widget(config_name="article"),
+    )
+
+    class Meta:
+        model = Article
+        fields = "__all__"
+
+
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
     """Admin pour les articles d'actualité."""
+    form = ArticleAdminForm
     list_display = ('title', 'category', 'author_name', 'is_published', 'is_featured', 'views_count', 'created_at')
     list_filter = ('is_published', 'is_featured', 'category')
     list_editable = ('is_published', 'is_featured')

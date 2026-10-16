@@ -1,4 +1,4 @@
-# 🌍 BNC - Bibliothèque Numérique Continentale
+# 🌍 BNC - Bibliothèque Numérique Calures
 ## Django Senior - Gestion Complète Multi-Rôles avec Monétisation
 
 ---

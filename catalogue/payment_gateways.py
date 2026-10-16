@@ -241,7 +241,7 @@ class BankTransferGateway(PaymentGateway):
             'success': True,
             'method': 'BANK_TRANSFER',
             'bank_details': {
-                'beneficiary': 'Bibliothèque Numérique Continentale',
+                'beneficiary': 'Bibliothèque Numérique Calures',
                 'iban': 'SN14 BMCD 0000 0000 0000 0000 000',  # Exemple
                 'bic': 'BMCDSN',
                 'amount': self.payment.amount,

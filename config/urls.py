@@ -30,6 +30,9 @@ def offline_reader_page(request, book_id):
 
 # API URLs (not translated - same for all languages)
 urlpatterns = [
+    # Requis par l'éditeur d'article, même sans bouton d'image.
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
+
     # REST API - Tous les endpoints de l'API
     path("api/", include("api.urls")),
     
